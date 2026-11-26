@@ -42,6 +42,7 @@
         }
 
         .topbar-inner {
+            position: relative;
             max-width: 1140px;
             margin: 0 auto;
             padding: 14px 20px;
@@ -103,47 +104,45 @@
             white-space: nowrap;
         }
 
-        /* Panel desplegable con los botones en VERTICAL */
+        /* Menú flotante compacto debajo del botón (no ocupa todo el ancho) */
         .menu-desplegable {
             display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 20px;
+            width: 220px;
             background-color: var(--bg-surface);
-            border-bottom: 1px solid var(--border-subtle);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.55);
+            z-index: 120;
         }
 
         .menu-desplegable.activo {
             display: block;
         }
 
-        .menu-contenedor {
-            max-width: 1140px;
-            margin: 0 auto;
-            padding: 14px 20px 20px;
-        }
-
         .menu-lista {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            max-width: 260px;
+            gap: 4px;
         }
 
         .menu-lista a {
             display: block;
             width: 100%;
-            padding: 11px 16px;
+            padding: 10px 14px;
             border-radius: 8px;
-            background-color: var(--bg-main);
-            border: 1px solid var(--border-subtle);
             color: var(--text-main);
             text-decoration: none;
-            font-size: 0.94rem;
-            transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.15s ease;
+            font-size: 0.92rem;
+            transition: background-color 0.2s ease, transform 0.15s ease;
         }
 
         .menu-lista a:hover {
-            border-color: var(--accent);
-            background-color: #19191f;
-            transform: translateX(4px);
+            background-color: #1c1c24;
+            transform: translateX(3px);
         }
 
         /* Segmentos de referencia para probar la navegación */
@@ -152,7 +151,7 @@
             margin: 0 auto;
             padding: 90px 20px;
             border-bottom: 1px solid var(--border-subtle);
-            scroll-margin-top: 72px;
+            scroll-margin-top: 76px;
         }
 
         .segmento h2 {
@@ -175,18 +174,16 @@
                 <span></span>
             </button>
             <a href="#inicio" class="marca">B Ξ N Λ V · FPV</a>
-        </div>
 
-        <nav class="menu-desplegable" id="menuDesplegable" aria-label="Navegación principal">
-            <div class="menu-contenedor">
+            <nav class="menu-desplegable" id="menuDesplegable" aria-label="Navegación principal">
                 <div class="menu-lista">
                     <a href="#inicio">Inicio</a>
                     <a href="#servicios">Servicios</a>
                     <a href="#portafolio">Portafolio</a>
                     <a href="#contacto">Contacto</a>
                 </div>
-            </div>
-        </nav>
+            </nav>
+        </div>
     </header>
 
     <main>
@@ -217,19 +214,29 @@
             const menuDesplegable = document.querySelector("#menuDesplegable");
             const enlacesMenu = menuDesplegable.querySelectorAll("a");
 
-            btnMenu.addEventListener("click", () => {
+            function cerrarMenu() {
+                menuDesplegable.classList.remove("activo");
+                btnMenu.classList.remove("abierto");
+                btnMenu.setAttribute("aria-expanded", "false");
+            }
+
+            btnMenu.addEventListener("click", (e) => {
+                e.stopPropagation();
                 const estaAbierto = menuDesplegable.classList.toggle("activo");
                 btnMenu.classList.toggle("abierto", estaAbierto);
                 btnMenu.setAttribute("aria-expanded", estaAbierto);
             });
 
-            // Cierra el menú automáticamente al elegir un segmento
+            // Cierra el menú al elegir un segmento
             enlacesMenu.forEach(enlace => {
-                enlace.addEventListener("click", () => {
-                    menuDesplegable.classList.remove("activo");
-                    btnMenu.classList.remove("abierto");
-                    btnMenu.setAttribute("aria-expanded", "false");
-                });
+                enlace.addEventListener("click", cerrarMenu);
+            });
+
+            // Cierra el menú si haces clic fuera de él
+            document.addEventListener("click", (e) => {
+                if (!menuDesplegable.contains(e.target) && !btnMenu.contains(e.target)) {
+                    cerrarMenu();
+                }
             });
         });
     </script>
