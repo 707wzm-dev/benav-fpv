@@ -55,6 +55,7 @@
         .menu-btn {
             width: 42px;
             height: 42px;
+            flex-shrink: 0;
             background: transparent;
             border: 1px solid var(--border-subtle);
             border-radius: 8px;
@@ -93,7 +94,7 @@
             transform: translateY(-7px) rotate(-45deg);
         }
 
-        /* Nombre al lado del botón */
+        /* Nombre animado letra por letra al lado del botón */
         .marca {
             color: var(--accent);
             text-decoration: none;
@@ -101,6 +102,23 @@
             font-size: 1rem;
             letter-spacing: 0.14em;
             white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            overflow: hidden; /* Máscara para que las letras salgan y entren limpias */
+            padding: 4px 2px;
+        }
+
+        .marca .letra {
+            display: inline-block;
+            opacity: 0;
+            transform: translateX(32px);
+            transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                        opacity 0.35s ease;
+        }
+
+        .marca .letra.visible {
+            opacity: 1;
+            transform: translateX(0);
         }
 
         /* Menú flotante compacto debajo del botón */
@@ -216,7 +234,8 @@
                 <span></span>
                 <span></span>
             </button>
-            <a href="#inicio" class="marca">B Ξ N Λ V · FPV</a>
+
+            <a href="#inicio" class="marca" id="marcaAnimada" aria-label="B Ξ N Λ V · FPV"></a>
 
             <nav class="menu-desplegable" id="menuDesplegable" aria-label="Navegación principal">
                 <div class="menu-lista">
@@ -232,7 +251,6 @@
     <main>
         <section class="hero-gif" id="inicio">
             <div class="gif-marco" id="marcoGif">
-                <!-- Cambia "dron-360.gif" por el nombre exacto de tu archivo GIF subido a GitHub -->
                 <img
                     src="dron-360.gif"
                     alt="Dron girando 360 grados"
@@ -262,6 +280,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
+            /* 1. Lógica del menú hamburguesa */
             const btnMenu = document.querySelector("#btnMenu");
             const menuDesplegable = document.querySelector("#menuDesplegable");
             const enlacesMenu = menuDesplegable.querySelectorAll("a");
@@ -288,6 +307,50 @@
                     cerrarMenu();
                 }
             });
+
+            /* 2. Animación letra por letra de B Ξ N Λ V · FPV */
+            const marca = document.querySelector("#marcaAnimada");
+            const textoMarca = "B Ξ N Λ V · FPV";
+
+            // Dividimos cada carácter en su propio <span>
+            const letras = textoMarca.split("").map(caracter => {
+                const span = document.createElement("span");
+                span.className = "letra";
+                span.textContent = caracter === " " ? "\u00A0" : caracter;
+                marca.appendChild(span);
+                return span;
+            });
+
+            const pasoLetraMs = 65;     // Velocidad entre letra y letra
+            const pausaVisibleMs = 3500; // Segundos que permanece completo
+            const pausaOcultoMs = 900;   // Pausa antes de volver a entrar
+
+            function cicloMarca() {
+                // Paso 1: Entran de derecha a izquierda una por una (B -> Ξ -> N ... -> V)
+                letras.forEach((letra, index) => {
+                    setTimeout(() => {
+                        letra.classList.add("visible");
+                    }, index * pasoLetraMs);
+                });
+
+                const tiempoEntradaTotal = letras.length * pasoLetraMs;
+
+                // Paso 2: Después de posar visible, salen hacia la derecha en orden inverso (V -> P -> F ... -> B)
+                setTimeout(() => {
+                    [...letras].reverse().forEach((letra, index) => {
+                        setTimeout(() => {
+                            letra.classList.remove("visible");
+                        }, index * pasoLetraMs);
+                    });
+
+                    // Paso 3: Reinicia el ciclo tras ocultarse por completo
+                    setTimeout(cicloMarca, tiempoEntradaTotal + pausaOcultoMs);
+
+                }, tiempoEntradaTotal + pausaVisibleMs);
+            }
+
+            // Inicia la secuencia al abrir la página
+            setTimeout(cicloMarca, 300);
         });
     </script>
 
