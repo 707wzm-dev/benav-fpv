@@ -103,7 +103,7 @@
             white-space: nowrap;
         }
 
-        /* Panel desplegable con los botones de cada segmento */
+        /* Panel desplegable con los botones en VERTICAL */
         .menu-desplegable {
             display: none;
             background-color: var(--bg-surface);
@@ -114,30 +114,36 @@
             display: block;
         }
 
-        .menu-lista {
+        .menu-contenedor {
             max-width: 1140px;
             margin: 0 auto;
             padding: 14px 20px 20px;
+        }
+
+        .menu-lista {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+            flex-direction: column;
+            gap: 8px;
+            max-width: 260px;
         }
 
         .menu-lista a {
-            display: inline-block;
-            padding: 9px 16px;
+            display: block;
+            width: 100%;
+            padding: 11px 16px;
             border-radius: 8px;
             background-color: var(--bg-main);
             border: 1px solid var(--border-subtle);
             color: var(--text-main);
             text-decoration: none;
-            font-size: 0.92rem;
-            transition: border-color 0.2s ease, background-color 0.2s ease;
+            font-size: 0.94rem;
+            transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.15s ease;
         }
 
         .menu-lista a:hover {
             border-color: var(--accent);
             background-color: #19191f;
+            transform: translateX(4px);
         }
 
         /* Segmentos de referencia para probar la navegación */
@@ -146,7 +152,7 @@
             margin: 0 auto;
             padding: 90px 20px;
             border-bottom: 1px solid var(--border-subtle);
-            scroll-margin-top: 72px; /* Evita que la barra tape el título al saltar */
+            scroll-margin-top: 72px;
         }
 
         .segmento h2 {
@@ -172,11 +178,13 @@
         </div>
 
         <nav class="menu-desplegable" id="menuDesplegable" aria-label="Navegación principal">
-            <div class="menu-lista">
-                <a href="#inicio">Inicio</a>
-                <a href="#servicios">Servicios</a>
-                <a href="#portafolio">Portafolio</a>
-                <a href="#contacto">Contacto</a>
+            <div class="menu-contenedor">
+                <div class="menu-lista">
+                    <a href="#inicio">Inicio</a>
+                    <a href="#servicios">Servicios</a>
+                    <a href="#portafolio">Portafolio</a>
+                    <a href="#contacto">Contacto</a>
+                </div>
             </div>
         </nav>
     </header>
