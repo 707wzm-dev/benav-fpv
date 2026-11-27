@@ -491,6 +491,53 @@
             transform: translateY(-1px);
         }
 
+        .btn-subir {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 95;
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            background: linear-gradient(180deg, rgba(20, 25, 22, 0.96) 0%, rgba(13, 13, 17, 0.98) 100%);
+            border: 1px solid rgba(74, 222, 128, 0.45);
+            color: var(--accent-green);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.72), 0 0 18px rgba(74, 222, 128, 0.14);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateY(14px);
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease, border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .btn-subir.visible {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .btn-subir:hover {
+            border-color: var(--accent-green);
+            background: linear-gradient(180deg, rgba(26, 36, 30, 0.98) 0%, rgba(16, 18, 17, 0.99) 100%);
+            transform: translateY(-2px);
+        }
+
+        .btn-subir svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
         .pie-pagina {
             position: relative;
             z-index: 2;
@@ -561,6 +608,7 @@
             .servicio-card { flex: 0 0 320px; min-height: 245px; padding: 28px 24px 22px; }
             .servicio-card h3 { font-size: 1.24rem; }
             .servicio-card p { font-size: 1rem; }
+            .btn-subir { right: 16px; bottom: 18px; width: 42px; height: 42px; }
             .pie-redes { gap: 20px; }
             .pie-base { flex-direction: column; align-items: center; text-align: center; gap: 8px; }
         }
@@ -571,6 +619,7 @@
             .servicios-pista { flex-wrap: wrap; width: 100%; transform: none !important; }
             .servicio-card { flex: 1 1 300px; filter: none !important; opacity: 1 !important; transform: none !important; }
             .servicio-barra-wrap { display: none; }
+            .btn-subir { transition: none; }
         }
     </style>
 </head>
@@ -676,7 +725,7 @@
                 <article class="video-card">
                     <div class="video-marco">
                         <iframe
-                            src="https://www.youtube.com/embed/mGYtEqrtCKE"
+                            src="https://www.youtube.com/embed/TU_ID_DE_VIDEO_1"
                             title="Vuelo FPV en interiores - Muestra 01"
                             loading="lazy"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -690,7 +739,7 @@
                 <article class="video-card">
                     <div class="video-marco">
                         <iframe
-                            src="https://www.youtube.com/embed/J7cOcs6Jum8"
+                            src="https://www.youtube.com/embed/TU_ID_DE_VIDEO_2"
                             title="Vuelo FPV en interiores - Muestra 02"
                             loading="lazy"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -750,6 +799,13 @@
         </div>
     </footer>
 
+    <button type="button" class="btn-subir" id="btnSubir" aria-label="Volver al inicio" aria-hidden="true" tabindex="-1">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 19V5" />
+            <path d="M5 12l7-7 7 7" />
+        </svg>
+    </button>
+
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const btnMenu = document.querySelector("#btnMenu");
@@ -782,6 +838,29 @@
                 document.addEventListener("keydown", (e) => {
                     if (e.key === "Escape") cerrarMenu();
                 });
+            }
+
+            const btnSubir = document.querySelector("#btnSubir");
+            if (btnSubir) {
+                const margenInferiorPx = 260;
+
+                function actualizarVisibilidadSubir() {
+                    const alturaDocumento = document.documentElement.scrollHeight;
+                    const parteInferiorVisible = window.scrollY + window.innerHeight;
+                    const cercaDelFinal = parteInferiorVisible >= alturaDocumento - margenInferiorPx;
+
+                    btnSubir.classList.toggle("visible", cercaDelFinal);
+                    btnSubir.setAttribute("aria-hidden", String(!cercaDelFinal));
+                    btnSubir.tabIndex = cercaDelFinal ? 0 : -1;
+                }
+
+                btnSubir.addEventListener("click", () => {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                });
+
+                window.addEventListener("scroll", actualizarVisibilidadSubir, { passive: true });
+                window.addEventListener("resize", actualizarVisibilidadSubir, { passive: true });
+                actualizarVisibilidadSubir();
             }
 
             const marca = document.querySelector("#marcaAnimada");
