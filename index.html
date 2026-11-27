@@ -15,9 +15,10 @@
             --text-main: #f4f4f5;
             --text-muted: #a1a1aa;
             --accent: #ffffff;
-            --neon-green: #39ff14;
-            --neon-green-top-glow: rgba(57, 255, 20, 0.26);
-            --neon-green-top-soft: rgba(57, 255, 20, 0.11);
+            --accent-green: #4ade80;
+            --accent-green-soft: rgba(74, 222, 128, 0.14);
+            --accent-green-glow: rgba(74, 222, 128, 0.12);
+            --accent-green-line: rgba(74, 222, 128, 0.45);
         }
 
         *,
@@ -296,10 +297,10 @@
             height: 1px;
             flex: 1;
             max-width: 160px;
-            background: linear-gradient(90deg, rgba(57, 255, 20, 0.55), transparent);
+            background: linear-gradient(90deg, var(--accent-green-line), transparent);
         }
 
-        /* 3 cuadros de Servicios con iluminación verde neón solo en la parte superior */
+        /* 3 cuadros de Servicios con acento verde suave en la parte superior */
         .servicios-grid {
             position: relative;
             z-index: 2;
@@ -310,9 +311,9 @@
 
         .servicio-card {
             position: relative;
-            background: linear-gradient(180deg, rgba(22, 27, 23, 0.95) 0%, rgba(13, 13, 17, 0.98) 58%);
+            background: linear-gradient(180deg, rgba(20, 25, 22, 0.96) 0%, rgba(13, 13, 17, 0.98) 62%);
             border: 1px solid var(--border-subtle);
-            border-top: 1px solid rgba(57, 255, 20, 0.55);
+            border-top: 1px solid var(--accent-green-line);
             border-radius: 16px;
             padding: 28px 24px 26px;
             display: flex;
@@ -320,8 +321,8 @@
             gap: 14px;
             overflow: hidden;
             box-shadow:
-                0 22px 46px rgba(0, 0, 0, 0.78),
-                0 -8px 24px -4px var(--neon-green-top-glow);
+                0 22px 46px rgba(0, 0, 0, 0.75),
+                0 -5px 16px -4px var(--accent-green-glow);
             opacity: 0;
             transform: translateY(36px) scale(0.985);
             transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
@@ -330,33 +331,29 @@
                         box-shadow 0.28s ease;
         }
 
-        /* Barra y haz verde concentrados únicamente en la zona superior */
         .servicio-card::before {
             content: "";
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 68px;
+            height: 54px;
             background: linear-gradient(
                 180deg,
-                var(--neon-green-top-soft) 0%,
-                rgba(57, 255, 20, 0.02) 65%,
+                var(--accent-green-soft) 0%,
                 transparent 100%
             );
             pointer-events: none;
-            transition: opacity 0.25s ease;
         }
 
         .servicio-card::after {
             content: "";
             position: absolute;
             top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--neon-green) 25%, var(--neon-green) 75%, transparent);
-            box-shadow: 0 0 14px rgba(57, 255, 20, 0.85);
+            left: 16%;
+            right: 16%;
+            height: 1.5px;
+            background: linear-gradient(90deg, transparent, rgba(74, 222, 128, 0.65) 50%, transparent);
             pointer-events: none;
         }
 
@@ -366,12 +363,12 @@
         }
 
         .servicio-card.visible:hover {
-            border-color: var(--border-subtle);
-            border-top-color: var(--neon-green);
-            transform: translateY(-7px);
+            border-color: var(--border-hover);
+            border-top-color: rgba(74, 222, 128, 0.75);
+            transform: translateY(-6px);
             box-shadow:
-                0 28px 56px rgba(0, 0, 0, 0.86),
-                0 -10px 30px -2px rgba(57, 255, 20, 0.36);
+                0 26px 52px rgba(0, 0, 0, 0.84),
+                0 -6px 20px -4px rgba(74, 222, 128, 0.18);
         }
 
         .servicio-top {
@@ -386,20 +383,19 @@
             width: 36px;
             height: 36px;
             border-radius: 10px;
-            background-color: rgba(57, 255, 20, 0.06);
-            border: 1px solid rgba(57, 255, 20, 0.35);
-            box-shadow: 0 0 12px rgba(57, 255, 20, 0.18);
+            background-color: rgba(74, 222, 128, 0.08);
+            border: 1px solid rgba(74, 222, 128, 0.26);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--neon-green);
-            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+            color: var(--accent-green);
+            transition: transform 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
         }
 
         .servicio-card:hover .servicio-icono {
-            transform: scale(1.06);
-            border-color: rgba(57, 255, 20, 0.72);
-            box-shadow: 0 0 18px rgba(57, 255, 20, 0.34);
+            transform: scale(1.05);
+            border-color: rgba(74, 222, 128, 0.5);
+            background-color: rgba(74, 222, 128, 0.12);
         }
 
         .servicio-icono svg {
@@ -415,9 +411,8 @@
         .servicio-num {
             font-size: 0.78rem;
             letter-spacing: 0.18em;
-            color: rgba(57, 255, 20, 0.78);
+            color: rgba(74, 222, 128, 0.75);
             font-weight: 700;
-            text-shadow: 0 0 10px rgba(57, 255, 20, 0.25);
         }
 
         .servicio-card h3 {
@@ -437,50 +432,21 @@
             line-height: 1.65;
         }
 
-        /* Cuadros de texto / bloques de sección con iluminación verde neón solo arriba */
-        .caja-neon {
+        /* Bloques secundarios con un acabado sobrio y discreto */
+        .caja-sobria {
             position: relative;
             z-index: 2;
-            background: linear-gradient(180deg, rgba(21, 26, 22, 0.95) 0%, rgba(13, 13, 17, 0.98) 60%);
+            background: linear-gradient(180deg, rgba(20, 20, 25, 0.95) 0%, rgba(13, 13, 17, 0.98) 70%);
             border: 1px solid var(--border-subtle);
-            border-top: 1px solid rgba(57, 255, 20, 0.5);
+            border-top: 1px solid rgba(255, 255, 255, 0.16);
             border-radius: 16px;
             padding: 24px;
             color: var(--text-muted);
             overflow: hidden;
-            box-shadow:
-                0 20px 44px rgba(0, 0, 0, 0.76),
-                0 -8px 22px -4px var(--neon-green-top-glow);
+            box-shadow: 0 20px 44px rgba(0, 0, 0, 0.72);
         }
 
-        .caja-neon::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 54px;
-            background: linear-gradient(
-                180deg,
-                var(--neon-green-top-soft) 0%,
-                transparent 100%
-            );
-            pointer-events: none;
-        }
-
-        .caja-neon::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(57, 255, 20, 0.85) 20%, rgba(57, 255, 20, 0.85) 80%, transparent);
-            box-shadow: 0 0 12px rgba(57, 255, 20, 0.75);
-            pointer-events: none;
-        }
-
-        .caja-neon p {
+        .caja-sobria p {
             position: relative;
             z-index: 1;
         }
@@ -610,7 +576,7 @@
                     <span class="linea-acento" aria-hidden="true"></span>
                 </div>
             </div>
-            <div class="caja-neon">
+            <div class="caja-sobria">
                 <p>Espacio reservado para tus videos y vuelos de prueba.</p>
             </div>
         </section>
@@ -623,7 +589,7 @@
                     <span class="linea-acento" aria-hidden="true"></span>
                 </div>
             </div>
-            <div class="caja-neon">
+            <div class="caja-sobria">
                 <p>Espacio para cotizaciones y canales directos.</p>
             </div>
         </section>
