@@ -659,94 +659,163 @@
                 }, tiempoEntradaTotal + pausaVisibleMs);
             }
             setTimeout(cicloMarca, 300);
-            /* 3. Anillo curvo horizontal: bucle infinito 1-2-3, pausa solo en central y arrastre clic/touch */
+            /* 3. Anillo curvo horizontal: bucle infinito 1-2-3 sin acumulación ni trabas al arrastrar */
             const wrapServicios = document.querySelector("#anilloServicios");
             const pistaServicios = document.querySelector("#pistaServicios");
             const prefiereMenosMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
             if (wrapServicios && pistaServicios && !prefiereMenosMovimiento) {
                 const tarjetas = Array.from(pistaServicios.querySelectorAll(".servicio-card"));
-                const totalUnicos = 3, bloqueCentralInicio = totalUnicos, bloqueCentralFin = totalUnicos * 2 - 1;
+                const totalUnicos = 3;
+                const bloqueCentralInicio = totalUnicos;
+                const bloqueCentralFin = totalUnicos * 2 - 1;
                 const duracionPausaMs = 4200;
-                let indiceObjetivo = 4, posicionX = 0, posicionDeseadaX = 0, anchoBloqueUnico = 0;
-                let ultimoTiempo = null, tiempoEnCentroMs = 0, enPosicionCentral = false;
-                let punteroEnCentral = false, arrastrando = false, inicioPunteroX = 0, inicioPosicionX = 0;
-                let distanciaArrastrePx = 0, tarjetaTocadaEnInicio = null, tipoPunteroActivo = null;
+
+                let indiceObjetivo = 4;
+                let posicionX = 0;
+                let posicionDeseadaX = 0;
+                let anchoBloqueUnico = 1;
+                let ultimoTiempo = null;
+                let tiempoEnCentroMs = 0;
+                let enPosicionCentral = false;
+
+                let punteroEnCentral = false;
+                let arrastrando = false;
+                let inicioPunteroX = 0;
+                let inicioPosicionX = 0;
+                let distanciaArrastrePx = 0;
+                let tarjetaTocadaEnInicio = null;
+                let tipoPunteroActivo = null;
+
                 const barrasRelleno = tarjetas.map(card => card.querySelector(".servicio-barra-relleno"));
+
+                function modPositivo(valor, divisor) {
+                    if (!divisor) return 0;
+                    return ((valor % divisor) + divisor) % divisor;
+                }
+
                 function calcularAnchoBloqueUnico() {
                     if (tarjetas.length >= totalUnicos * 2) {
                         const dx = tarjetas[totalUnicos].offsetLeft - tarjetas[0].offsetLeft;
-                        anchoBloqueUnico = dx > 0 ? dx : (pistaServicios.scrollWidth / 3);
+                        anchoBloqueUnico = dx > 1 ? dx : Math.max(1, pistaServicios.scrollWidth / 3);
                     } else {
-                        anchoBloqueUnico = pistaServicios.scrollWidth / 3 || 1;
+                        anchoBloqueUnico = Math.max(1, pistaServicios.scrollWidth / 3);
                     }
                 }
+
                 function calcularPosicionParaIndice(idx) {
                     const tarjetaRef = tarjetas[idx];
                     if (!tarjetaRef) return posicionX;
-                    return (wrapServicios.clientWidth / 2) - (tarjetaRef.offsetLeft + tarjetaRef.offsetWidth / 2);
+                    const wrapCentroLocal = wrapServicios.clientWidth / 2;
+                    const cardCentroLocal = tarjetaRef.offsetLeft + tarjetaRef.offsetWidth / 2;
+                    return wrapCentroLocal - cardCentroLocal;
                 }
-                function centrarEnBloquePrincipalSinSalto() {
+
+                function llevarIndiceABloqueCentral(idx) {
+                    let normalizado = idx;
+                    while (normalizado < bloqueCentralInicio) normalizado += totalUnicos;
+                    while (normalizado > bloqueCentralFin) normalizado -= totalUnicos;
+                    return normalizado;
+                }
+
+                function sincronizarAlBloqueCentralSinSalto() {
                     calcularAnchoBloqueUnico();
-                    while (indiceObjetivo < bloqueCentralInicio) {
-                        indiceObjetivo += totalUnicos;
-                        posicionX -= anchoBloqueUnico;
-                        posicionDeseadaX -= anchoBloqueUnico;
+                    const idxCentral = llevarIndiceABloqueCentral(indiceObjetivo);
+                    if (idxCentral !== indiceObjetivo) {
+                        const deltaXActual = posicionX - posicionDeseadaX;
+                        indiceObjetivo = idxCentral;
+                        posicionDeseadaX = calcularPosicionParaIndice(indiceObjetivo);
+                        posicionX = posicionDeseadaX + deltaXActual;
+                        pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
                     }
-                    while (indiceObjetivo > bloqueCentralFin) {
-                        indiceObjetivo -= totalUnicos;
-                        posicionX += anchoBloqueUnico;
-                        posicionDeseadaX += anchoBloqueUnico;
-                    }
-                    pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
                 }
+
                 function recalcularMedidas(inmediato = false) {
                     calcularAnchoBloqueUnico();
+                    indiceObjetivo = llevarIndiceABloqueCentral(indiceObjetivo);
                     posicionDeseadaX = calcularPosicionParaIndice(indiceObjetivo);
                     if (inmediato) {
                         posicionX = posicionDeseadaX;
                         pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
                     }
                 }
+
                 function seleccionarIndice(nuevoIdx, reiniciarTiempo = true) {
-                    indiceObjetivo = nuevoIdx;
+                    calcularAnchoBloqueUnico();
+                    // Elegimos la copia de nuevoIdx más cercana a posicionX para evitar giros largos
+                    const candidatos = [nuevoIdx - totalUnicos, nuevoIdx, nuevoIdx + totalUnicos]
+                        .filter(c => c >= 0 && c < tarjetas.length);
+
+                    let mejorCandidato = nuevoIdx;
+                    let menorDiff = Infinity;
+                    for (const c of candidatos) {
+                        const posC = calcularPosicionParaIndice(c);
+                        const diff = Math.abs(posC - posicionX);
+                        if (diff < menorDiff) {
+                            menorDiff = diff;
+                            mejorCandidato = c;
+                        }
+                    }
+
+                    indiceObjetivo = mejorCandidato;
                     posicionDeseadaX = calcularPosicionParaIndice(indiceObjetivo);
-                    if (reiniciarTiempo) tiempoEnCentroMs = 0;
+                    if (reiniciarTiempo) {
+                        tiempoEnCentroMs = 0;
+                    }
                     enPosicionCentral = false;
                 }
-                function irASiguienteTarjeta() { seleccionarIndice(indiceObjetivo + 1, true); }
+
+                function irASiguienteTarjeta() {
+                    sincronizarAlBloqueCentralSinSalto();
+                    seleccionarIndice(indiceObjetivo + 1, true);
+                }
+
                 function encontrarTarjetaMasCercanaAlCentro() {
                     const rectWrap = wrapServicios.getBoundingClientRect();
                     const centroWrap = rectWrap.left + rectWrap.width / 2;
-                    let mejorIdx = indiceObjetivo, menorDistancia = Infinity;
+                    let mejorIdx = llevarIndiceABloqueCentral(indiceObjetivo);
+                    let menorDistancia = Infinity;
+
                     tarjetas.forEach((tarjeta, idx) => {
                         const rectCard = tarjeta.getBoundingClientRect();
-                        const dist = Math.abs((rectCard.left + rectCard.width / 2) - centroWrap);
-                        if (dist < menorDistancia) { menorDistancia = dist; mejorIdx = idx; }
+                        const centroCard = rectCard.left + rectCard.width / 2;
+                        const dist = Math.abs(centroCard - centroWrap);
+                        if (dist < menorDistancia) {
+                            menorDistancia = dist;
+                            mejorIdx = idx;
+                        }
                     });
+
                     return mejorIdx;
                 }
+
                 function actualizarAnilloYEnfoque(progresoActual) {
                     const rectWrap = wrapServicios.getBoundingClientRect();
                     const centroWrap = rectWrap.left + rectWrap.width / 2;
                     const radioArco = Math.max(rectWrap.width * 0.48, 260);
+
                     tarjetas.forEach((tarjeta, idx) => {
                         const rectCard = tarjeta.getBoundingClientRect();
                         const centroCard = rectCard.left + rectCard.width / 2;
                         const deltaNorm = Math.max(-1.35, Math.min(1.35, (centroCard - centroWrap) / radioArco));
                         const absDelta = Math.min(1, Math.abs(deltaNorm));
                         const nitidez = 1 - absDelta;
+
                         const anguloY = (-deltaNorm * 34).toFixed(2);
                         const profundidadZ = (-Math.pow(absDelta, 1.35) * 140).toFixed(1);
                         const arcoY = (Math.pow(absDelta, 1.5) * 12).toFixed(1);
                         const escala = (0.9 + nitidez * 0.1).toFixed(3);
                         const desenfoquePx = (Math.pow(absDelta, 1.15) * 4.5).toFixed(2);
                         const opacidad = (0.24 + nitidez * 0.76).toFixed(3);
+
                         tarjeta.style.transform =
                             `translate3d(0, ${arcoY}px, ${profundidadZ}px) rotateY(${anguloY}deg) scale(${escala})`;
                         tarjeta.style.filter = `blur(${desenfoquePx}px)`;
                         tarjeta.style.opacity = opacidad;
+
                         const estaEnFoco = absDelta < 0.22 || (idx === indiceObjetivo && enPosicionCentral);
                         tarjeta.classList.toggle("en-foco", estaEnFoco);
+
                         const barra = barrasRelleno[idx];
                         if (barra) {
                             barra.style.transform = (idx === indiceObjetivo && enPosicionCentral)
@@ -755,84 +824,117 @@
                         }
                     });
                 }
+
                 tarjetas.forEach(tarjeta => {
                     tarjeta.addEventListener("pointerenter", (e) => {
-                        if (e.pointerType !== "touch" && tarjeta.classList.contains("en-foco")) punteroEnCentral = true;
+                        if (e.pointerType !== "touch" && tarjeta.classList.contains("en-foco")) {
+                            punteroEnCentral = true;
+                        }
                     });
                     tarjeta.addEventListener("pointermove", (e) => {
-                        if (e.pointerType !== "touch" && !arrastrando) punteroEnCentral = tarjeta.classList.contains("en-foco");
+                        if (e.pointerType !== "touch" && !arrastrando) {
+                            punteroEnCentral = tarjeta.classList.contains("en-foco");
+                        }
                     });
                     tarjeta.addEventListener("pointerleave", (e) => {
-                        if (e.pointerType !== "touch") punteroEnCentral = false;
+                        if (e.pointerType !== "touch") {
+                            punteroEnCentral = false;
+                        }
                     });
                 });
+
                 wrapServicios.addEventListener("pointerdown", (e) => {
                     if (e.pointerType === "mouse" && e.button !== 0) return;
+
+                    sincronizarAlBloqueCentralSinSalto();
                     arrastrando = true;
                     tipoPunteroActivo = e.pointerType;
                     inicioPunteroX = e.clientX;
                     inicioPosicionX = posicionX;
                     distanciaArrastrePx = 0;
+
                     const cardClick = e.target.closest(".servicio-card");
                     tarjetaTocadaEnInicio = cardClick ? tarjetas.indexOf(cardClick) : null;
+
                     wrapServicios.classList.add("arrastrando");
                     wrapServicios.setPointerCapture(e.pointerId);
                 });
+
                 wrapServicios.addEventListener("pointermove", (e) => {
                     if (!arrastrando) return;
+
                     const deltaX = e.clientX - inicioPunteroX;
                     distanciaArrastrePx = Math.max(distanciaArrastrePx, Math.abs(deltaX));
-                    posicionX = inicioPosicionX + deltaX;
-                    if (anchoBloqueUnico > 0) {
-                        const posBloqueCentral = calcularPosicionParaIndice(4);
-                        if (posicionX > posBloqueCentral + anchoBloqueUnico * 0.9) {
-                            posicionX -= anchoBloqueUnico;
-                            inicioPosicionX -= anchoBloqueUnico;
-                        } else if (posicionX < posBloqueCentral - anchoBloqueUnico * 0.9) {
-                            posicionX += anchoBloqueUnico;
-                            inicioPosicionX += anchoBloqueUnico;
-                        }
-                    }
+
+                    // Mantiene el arrastre dentro de un rango acotado alrededor del bloque central
+                    const posBase = calcularPosicionParaIndice(4);
+                    const offsetRelativo = modPositivo(inicioPosicionX + deltaX - posBase, anchoBloqueUnico);
+                    // Centramos el módulo alrededor de 0 para poder ir tanto a izquierda como a derecha
+                    const offsetCentrado = offsetRelativo > anchoBloqueUnico * 0.5
+                        ? offsetRelativo - anchoBloqueUnico
+                        : offsetRelativo;
+
+                    posicionX = posBase + offsetCentrado;
                     pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
                     enPosicionCentral = false;
                 });
+
                 function finalizarArrastre(e) {
                     if (!arrastrando) return;
                     arrastrando = false;
                     wrapServicios.classList.remove("arrastrando");
-                    if (wrapServicios.hasPointerCapture(e.pointerId)) wrapServicios.releasePointerCapture(e.pointerId);
-                    const deltaFinalX = e.clientX - inicioPunteroX;
-                    if (distanciaArrastrePx < 8 && tarjetaTocadaEnInicio !== null) {
-                        if (tarjetaTocadaEnInicio !== indiceObjetivo) seleccionarIndice(tarjetaTocadaEnInicio, true);
-                    } else if (Math.abs(deltaFinalX) > 35) {
-                        seleccionarIndice(indiceObjetivo + (deltaFinalX > 0 ? -1 : 1), true);
-                    } else {
-                        seleccionarIndice(encontrarTarjetaMasCercanaAlCentro(), true);
+
+                    if (wrapServicios.hasPointerCapture(e.pointerId)) {
+                        wrapServicios.releasePointerCapture(e.pointerId);
                     }
+
+                    const deltaFinalX = e.clientX - inicioPunteroX;
+                    const idxCercano = encontrarTarjetaMasCercanaAlCentro();
+
+                    if (distanciaArrastrePx < 8 && tarjetaTocadaEnInicio !== null) {
+                        if (tarjetaTocadaEnInicio !== indiceObjetivo) {
+                            seleccionarIndice(tarjetaTocadaEnInicio, true);
+                        } else {
+                            seleccionarIndice(idxCercano, true);
+                        }
+                    } else if (Math.abs(deltaFinalX) > 45) {
+                        const paso = deltaFinalX > 0 ? -1 : 1;
+                        seleccionarIndice(idxCercano + paso, true);
+                    } else {
+                        seleccionarIndice(idxCercano, true);
+                    }
+
                     if (tipoPunteroActivo === "touch") {
                         const cardActual = e.target.closest(".servicio-card");
                         punteroEnCentral = Boolean(cardActual && cardActual.classList.contains("en-foco"));
                     }
+
                     tarjetaTocadaEnInicio = null;
                     tipoPunteroActivo = null;
                 }
+
                 wrapServicios.addEventListener("pointerup", finalizarArrastre);
                 wrapServicios.addEventListener("pointercancel", (e) => {
                     if (tipoPunteroActivo === "touch") punteroEnCentral = false;
                     finalizarArrastre(e);
                 });
+
                 recalcularMedidas(true);
                 actualizarAnilloYEnfoque(0);
+
                 window.addEventListener("resize", () => {
                     recalcularMedidas(true);
                     actualizarAnilloYEnfoque(tiempoEnCentroMs / duracionPausaMs);
                 }, { passive: true });
+
                 function pasoAnillo(ahora) {
                     if (ultimoTiempo === null) ultimoTiempo = ahora;
                     const dtMs = Math.min(ahora - ultimoTiempo, 50);
                     ultimoTiempo = ahora;
+
                     if (!arrastrando && !document.hidden) {
                         const distanciaRestante = posicionDeseadaX - posicionX;
+
                         if (Math.abs(distanciaRestante) > 0.6) {
                             posicionX += distanciaRestante * (1 - Math.exp(-dtMs * 0.0095));
                             pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
@@ -841,18 +943,22 @@
                             posicionX = posicionDeseadaX;
                             pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
                             enPosicionCentral = true;
-                            if (indiceObjetivo < bloqueCentralInicio || indiceObjetivo > bloqueCentralFin) {
-                                centrarEnBloquePrincipalSinSalto();
-                            }
+
+                            sincronizarAlBloqueCentralSinSalto();
+
                             if (!punteroEnCentral) {
                                 tiempoEnCentroMs += dtMs;
-                                if (tiempoEnCentroMs >= duracionPausaMs) irASiguienteTarjeta();
+                                if (tiempoEnCentroMs >= duracionPausaMs) {
+                                    irASiguienteTarjeta();
+                                }
                             }
                         }
                     }
+
                     actualizarAnilloYEnfoque(enPosicionCentral ? (tiempoEnCentroMs / duracionPausaMs) : 0);
                     requestAnimationFrame(pasoAnillo);
                 }
+
                 requestAnimationFrame(pasoAnillo);
             }
             /* 4. Partículas ambientales flotando en el fondo */
