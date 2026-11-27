@@ -104,7 +104,7 @@
             white-space: nowrap;
             display: inline-flex;
             align-items: center;
-            overflow: hidden; /* Máscara para que las letras salgan y entren limpias */
+            overflow: hidden;
             padding: 4px 2px;
         }
 
@@ -162,11 +162,11 @@
             transform: translateX(3px);
         }
 
-        /* Sección Inicio: GIF del dron girando 360° */
+        /* Sección Inicio: GIF del dron girando 360° + lema debajo */
         .hero-gif {
             max-width: 1140px;
             margin: 0 auto;
-            padding: 28px 20px 60px;
+            padding: 28px 20px 64px;
             border-bottom: 1px solid var(--border-subtle);
             scroll-margin-top: 76px;
         }
@@ -206,6 +206,22 @@
             border-radius: 4px;
         }
 
+        /* Palabras debajo del GIF */
+        .lema-gif {
+            margin-top: 24px;
+            text-align: center;
+            font-size: clamp(0.85rem, 2vw, 1.05rem);
+            font-weight: 600;
+            letter-spacing: 0.22em;
+            color: var(--text-main);
+            text-transform: uppercase;
+        }
+
+        .lema-gif .separador {
+            color: var(--text-muted);
+            margin: 0 6px;
+        }
+
         /* Segmentos siguientes */
         .segmento {
             max-width: 1140px;
@@ -222,6 +238,13 @@
 
         .segmento p {
             color: var(--text-muted);
+        }
+
+        @media (max-width: 600px) {
+            .lema-gif {
+                letter-spacing: 0.12em;
+                line-height: 1.8;
+            }
         }
     </style>
 </head>
@@ -260,6 +283,10 @@
                     Sube tu archivo <code>dron-360.gif</code> a la raíz del repositorio (o cambia el nombre en <code>src="dron-360.gif"</code>).
                 </div>
             </div>
+
+            <p class="lema-gif" aria-label="Movimiento, precisión y experiencia">
+                MOVIMIENTO <span class="separador">·</span> PRECISIÓN <span class="separador">·</span> EXPERIENCIA
+            </p>
         </section>
 
         <section class="segmento" id="servicios">
@@ -312,7 +339,6 @@
             const marca = document.querySelector("#marcaAnimada");
             const textoMarca = "B Ξ N Λ V · FPV";
 
-            // Dividimos cada carácter en su propio <span>
             const letras = textoMarca.split("").map(caracter => {
                 const span = document.createElement("span");
                 span.className = "letra";
@@ -321,12 +347,11 @@
                 return span;
             });
 
-            const pasoLetraMs = 77;     // Velocidad entre letra y letra
-            const pausaVisibleMs = 10000; // Segundos que permanece completo
-            const pausaOcultoMs = 3000;   // Pausa antes de volver a entrar
+            const pasoLetraMs = 77;
+            const pausaVisibleMs = 10000;
+            const pausaOcultoMs = 3500;
 
             function cicloMarca() {
-                // Paso 1: Entran de derecha a izquierda una por una (B -> Ξ -> N ... -> V)
                 letras.forEach((letra, index) => {
                     setTimeout(() => {
                         letra.classList.add("visible");
@@ -335,7 +360,6 @@
 
                 const tiempoEntradaTotal = letras.length * pasoLetraMs;
 
-                // Paso 2: Después de posar visible, salen hacia la derecha en orden inverso (V -> P -> F ... -> B)
                 setTimeout(() => {
                     [...letras].reverse().forEach((letra, index) => {
                         setTimeout(() => {
@@ -343,13 +367,10 @@
                         }, index * pasoLetraMs);
                     });
 
-                    // Paso 3: Reinicia el ciclo tras ocultarse por completo
                     setTimeout(cicloMarca, tiempoEntradaTotal + pausaOcultoMs);
-
                 }, tiempoEntradaTotal + pausaVisibleMs);
             }
 
-            // Inicia la secuencia al abrir la página
             setTimeout(cicloMarca, 300);
         });
     </script>
