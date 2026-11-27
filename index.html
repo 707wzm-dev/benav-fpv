@@ -393,6 +393,53 @@
         }
 
         .caja-sobria p { position: relative; z-index: 1; }
+        .caja-sobria p + p { margin-top: 12px; }
+        .caja-sobria strong { color: var(--text-main); font-weight: 600; }
+
+        .contacto-acciones {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .btn-contacto {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 0.94rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .btn-contacto.principal {
+            background-color: rgba(74, 222, 128, 0.14);
+            color: var(--accent-green);
+            border: 1px solid rgba(74, 222, 128, 0.45);
+        }
+
+        .btn-contacto.principal:hover {
+            background-color: rgba(74, 222, 128, 0.22);
+            border-color: var(--accent-green);
+            transform: translateY(-1px);
+        }
+
+        .btn-contacto.secundario {
+            background-color: rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .btn-contacto.secundario:hover {
+            border-color: var(--border-hover);
+            background-color: rgba(255, 255, 255, 0.08);
+            transform: translateY(-1px);
+        }
 
         .pie-pagina {
             position: relative;
@@ -659,7 +706,13 @@
                 </div>
             </div>
             <div class="caja-sobria">
-                <p>Espacio para cotizaciones y canales directos.</p>
+                <p>Escríbeme directamente para revisar tu espacio, resolver dudas y armar una propuesta a medida.</p>
+                <p><strong>Para cotizar más rápido:</strong> indica el tipo de lugar, comuna o ciudad, qué buscas mostrar y una fecha aproximada.</p>
+                <p><strong>Cobertura y coordinación:</strong> vuelos indoor planificados según el espacio y la disponibilidad del recinto.</p>
+                <div class="contacto-acciones">
+                    <a href="https://wa.me/56900000000?text=Hola%2C%20quiero%20cotizar%20un%20recorrido%20FPV%20indoor." target="_blank" rel="noopener noreferrer" class="btn-contacto principal">Escribir por WhatsApp</a>
+                    <a href="mailto:contacto@benavfpv.com?subject=Cotizaci%C3%B3n%20FPV%20indoor" class="btn-contacto secundario">Enviar correo</a>
+                </div>
             </div>
         </section>
     </main>
