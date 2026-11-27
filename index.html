@@ -8,12 +8,15 @@
         :root {
             --bg-main: #09090b;
             --bg-surface: #121216;
-            --bg-card-top: #16161c;
+            --bg-card-top: #16161d;
             --border-subtle: #24242d;
-            --border-hover: #464656;
+            --border-hover: #525266;
             --text-main: #f4f4f5;
             --text-muted: #a1a1aa;
             --accent: #ffffff;
+            /* Intensidad base del neón lateral (ajústala fácil aquí) */
+            --neon-core: rgba(255, 255, 255, 0.20);
+            --neon-mid: rgba(210, 214, 240, 0.09);
         }
 
         * {
@@ -27,6 +30,7 @@
         }
 
         body {
+            position: relative;
             background-color: var(--bg-main);
             color: var(--text-main);
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -34,14 +38,58 @@
             overflow-x: hidden;
         }
 
+        /* Iluminación lateral estilo neón proyectada hacia el centro en toda la página */
+        .neon-ambiente {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .neon-ambiente::before,
+        .neon-ambiente::after {
+            content: "";
+            position: absolute;
+            top: -10%;
+            width: 52vw;
+            height: 120vh;
+            filter: blur(72px);
+            opacity: 0.95;
+        }
+
+        /* Luz neón lateral izquierda hacia el centro */
+        .neon-ambiente::before {
+            left: -14vw;
+            background:
+                radial-gradient(ellipse 75% 45% at 0% 25%, var(--neon-core), var(--neon-mid) 50%, transparent 78%),
+                radial-gradient(ellipse 80% 50% at 0% 72%, var(--neon-core), var(--neon-mid) 52%, transparent 80%);
+        }
+
+        /* Luz neón lateral derecha hacia el centro */
+        .neon-ambiente::after {
+            right: -14vw;
+            background:
+                radial-gradient(ellipse 75% 45% at 100% 25%, var(--neon-core), var(--neon-mid) 50%, transparent 78%),
+                radial-gradient(ellipse 80% 50% at 100% 72%, var(--neon-core), var(--neon-mid) 52%, transparent 80%);
+        }
+
+        /* Capa principal por encima del neón para que todo flote sobre la luz */
+        .contenido-principal,
+        .topbar {
+            position: relative;
+            z-index: 2;
+        }
+
         /* Barra superior fija */
         .topbar {
             position: sticky;
             top: 0;
             z-index: 100;
-            background-color: rgba(9, 9, 11, 0.88);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border-subtle);
+            background-color: rgba(9, 9, 11, 0.84);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+            box-shadow: 0 6px 28px rgba(0, 0, 0, 0.45);
         }
 
         .topbar-inner {
@@ -59,7 +107,7 @@
             width: 42px;
             height: 42px;
             flex-shrink: 0;
-            background: transparent;
+            background: rgba(18, 18, 22, 0.7);
             border: 1px solid var(--border-subtle);
             border-radius: 8px;
             cursor: pointer;
@@ -68,12 +116,13 @@
             justify-content: center;
             align-items: center;
             gap: 5px;
-            transition: border-color 0.2s ease, background-color 0.2s ease;
+            transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         .menu-btn:hover {
             border-color: var(--accent);
             background-color: var(--bg-surface);
+            box-shadow: 0 0 16px rgba(255, 255, 255, 0.14);
         }
 
         .menu-btn span {
@@ -109,6 +158,7 @@
             align-items: center;
             overflow: hidden;
             padding: 4px 2px;
+            text-shadow: 0 0 18px rgba(255, 255, 255, 0.22);
         }
 
         .marca .letra {
@@ -131,11 +181,12 @@
             top: calc(100% + 8px);
             left: 20px;
             width: 220px;
-            background-color: var(--bg-surface);
-            border: 1px solid var(--border-subtle);
+            background-color: rgba(18, 18, 24, 0.96);
+            border: 1px solid rgba(255, 255, 255, 0.14);
             border-radius: 12px;
             padding: 8px;
-            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.65);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.75), 0 0 24px rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(12px);
             z-index: 120;
         }
 
@@ -161,7 +212,7 @@
         }
 
         .menu-lista a:hover {
-            background-color: #1c1c24;
+            background-color: rgba(255, 255, 255, 0.08);
             transform: translateX(3px);
         }
 
@@ -179,9 +230,9 @@
             max-height: 75vh;
             border-radius: 16px;
             overflow: hidden;
-            background-color: var(--bg-surface);
-            border: 1px solid var(--border-subtle);
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+            background-color: rgba(18, 18, 22, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: 0 26px 65px rgba(0, 0, 0, 0.75), 0 0 42px rgba(255, 255, 255, 0.07);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -218,6 +269,7 @@
             letter-spacing: 0.22em;
             color: var(--text-main);
             text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.16);
         }
 
         .lema-gif .separador {
@@ -231,7 +283,7 @@
             max-width: 1140px;
             margin: 0 auto;
             padding: 80px 20px;
-            border-top: 1px solid var(--border-subtle);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
             scroll-margin-top: 76px;
         }
 
@@ -266,52 +318,11 @@
         .linea-acento {
             height: 1px;
             flex: 1;
-            max-width: 140px;
-            background: linear-gradient(90deg, var(--border-hover), transparent);
+            max-width: 160px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.38), transparent);
         }
 
-        /* Contenedor con iluminación lateral proyectada hacia el centro detrás de los cuadros */
-        .servicios-escenario {
-            position: relative;
-            padding: 14px 0;
-        }
-
-        .servicios-escenario::before,
-        .servicios-escenario::after {
-            content: "";
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 56%;
-            height: 135%;
-            pointer-events: none;
-            filter: blur(56px);
-            z-index: 0;
-        }
-
-        /* Luz suave desde el borde izquierdo hacia el centro */
-        .servicios-escenario::before {
-            left: -8%;
-            background: radial-gradient(
-                ellipse at left center,
-                rgba(255, 255, 255, 0.14) 0%,
-                rgba(180, 184, 210, 0.06) 45%,
-                transparent 75%
-            );
-        }
-
-        /* Luz suave desde el borde derecho hacia el centro */
-        .servicios-escenario::after {
-            right: -8%;
-            background: radial-gradient(
-                ellipse at right center,
-                rgba(255, 255, 255, 0.14) 0%,
-                rgba(180, 184, 210, 0.06) 45%,
-                transparent 75%
-            );
-        }
-
-        /* 3 cuadros de Servicios flotando sobre la iluminación */
+        /* 3 cuadros de Servicios flotando sobre la iluminación neón */
         .servicios-grid {
             position: relative;
             z-index: 2;
@@ -322,15 +333,15 @@
 
         .servicio-card {
             position: relative;
-            background: linear-gradient(180deg, rgba(24, 24, 30, 0.94) 0%, rgba(15, 15, 19, 0.96) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(180deg, rgba(26, 26, 34, 0.92) 0%, rgba(13, 13, 17, 0.96) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.13);
             border-radius: 16px;
             padding: 28px 24px 26px;
             display: flex;
             flex-direction: column;
             gap: 14px;
             overflow: hidden;
-            box-shadow: 0 22px 48px rgba(0, 0, 0, 0.65);
+            box-shadow: 0 24px 52px rgba(0, 0, 0, 0.75), 0 0 26px rgba(255, 255, 255, 0.04);
             opacity: 0;
             transform: translateY(36px) scale(0.985);
             transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
@@ -346,8 +357,8 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: linear-gradient(90deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.06));
-            opacity: 0.45;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.06));
+            opacity: 0.5;
             transition: opacity 0.25s ease;
         }
 
@@ -357,9 +368,9 @@
         }
 
         .servicio-card.visible:hover {
-            border-color: rgba(255, 255, 255, 0.34);
+            border-color: rgba(255, 255, 255, 0.38);
             transform: translateY(-7px);
-            box-shadow: 0 28px 56px rgba(0, 0, 0, 0.78), 0 0 28px rgba(255, 255, 255, 0.06);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.85), 0 0 34px rgba(255, 255, 255, 0.11);
         }
 
         .servicio-card.visible:hover::before {
@@ -377,17 +388,18 @@
             height: 36px;
             border-radius: 10px;
             background-color: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--accent);
-            transition: transform 0.25s ease, border-color 0.25s ease;
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
         }
 
         .servicio-card:hover .servicio-icono {
             transform: scale(1.06);
-            border-color: rgba(255, 255, 255, 0.28);
+            border-color: rgba(255, 255, 255, 0.34);
+            box-shadow: 0 0 16px rgba(255, 255, 255, 0.14);
         }
 
         .servicio-icono svg {
@@ -425,10 +437,9 @@
                 grid-template-columns: 1fr;
             }
 
-            .servicios-escenario::before,
-            .servicios-escenario::after {
-                width: 80%;
-                height: 110%;
+            .neon-ambiente::before,
+            .neon-ambiente::after {
+                width: 78vw;
             }
         }
 
@@ -441,6 +452,9 @@
     </style>
 </head>
 <body>
+
+    <!-- Iluminación lateral estilo neón hacia el centro en toda la página -->
+    <div class="neon-ambiente" aria-hidden="true"></div>
 
     <header class="topbar">
         <div class="topbar-inner">
@@ -463,7 +477,7 @@
         </div>
     </header>
 
-    <main>
+    <main class="contenido-principal">
         <section class="hero-gif" id="inicio">
             <div class="gif-marco" id="marcoGif">
                 <img
@@ -490,49 +504,47 @@
                 </div>
             </div>
 
-            <div class="servicios-escenario">
-                <div class="servicios-grid">
-                    <article class="servicio-card">
-                        <div class="servicio-top">
-                            <div class="servicio-icono" aria-hidden="true">
-                                <svg viewBox="0 0 24 24">
-                                    <path d="M12 3l7 3v6c0 5-3 8.5-7 9-4-.5-7-4-7-9V6l7-3z" />
-                                </svg>
-                            </div>
-                            <span class="servicio-num">01</span>
+            <div class="servicios-grid">
+                <article class="servicio-card">
+                    <div class="servicio-top">
+                        <div class="servicio-icono" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 3l7 3v6c0 5-3 8.5-7 9-4-.5-7-4-7-9V6l7-3z" />
+                            </svg>
                         </div>
-                        <h3>Seguridad indoor</h3>
-                        <p>Planificación de vuelos en espacios interiores, evaluando el entorno y aplicando medidas de resguardo en cada toma.</p>
-                    </article>
+                        <span class="servicio-num">01</span>
+                    </div>
+                    <h3>Seguridad indoor</h3>
+                    <p>Planificación de vuelos en espacios interiores, evaluando el entorno y aplicando medidas de resguardo en cada toma.</p>
+                </article>
 
-                    <article class="servicio-card">
-                        <div class="servicio-top">
-                            <div class="servicio-icono" aria-hidden="true">
-                                <svg viewBox="0 0 24 24">
-                                    <path d="M4 16c3-7 6-7 8 0s5 7 8 0" />
-                                    <circle cx="20" cy="16" r="1.5" />
-                                </svg>
-                            </div>
-                            <span class="servicio-num">02</span>
+                <article class="servicio-card">
+                    <div class="servicio-top">
+                        <div class="servicio-icono" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M4 16c3-7 6-7 8 0s5 7 8 0" />
+                                <circle cx="20" cy="16" r="1.5" />
+                            </svg>
                         </div>
-                        <h3>Recorridos fluidos</h3>
-                        <p>Movimientos continuos y controlados que conectan distintas áreas y muestran la distribución real de tu espacio.</p>
-                    </article>
+                        <span class="servicio-num">02</span>
+                    </div>
+                    <h3>Recorridos fluidos</h3>
+                    <p>Movimientos continuos y controlados que conectan distintas áreas y muestran la distribución real de tu espacio.</p>
+                </article>
 
-                    <article class="servicio-card">
-                        <div class="servicio-top">
-                            <div class="servicio-icono" aria-hidden="true">
-                                <svg viewBox="0 0 24 24">
-                                    <rect x="3" y="6" width="14" height="12" rx="2" />
-                                    <path d="M17 10l4-2v8l-4-2v-4z" />
-                                </svg>
-                            </div>
-                            <span class="servicio-num">03</span>
+                <article class="servicio-card">
+                    <div class="servicio-top">
+                        <div class="servicio-icono" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="3" y="6" width="14" height="12" rx="2" />
+                                <path d="M17 10l4-2v8l-4-2v-4z" />
+                            </svg>
                         </div>
-                        <h3>Producción audiovisual</h3>
-                        <p>Captura, estabilización y edición final lista para difundir tu negocio en redes, web o presentaciones.</p>
-                    </article>
-                </div>
+                        <span class="servicio-num">03</span>
+                    </div>
+                    <h3>Producción audiovisual</h3>
+                    <p>Captura, estabilización y edición final lista para difundir tu negocio en redes, web o presentaciones.</p>
+                </article>
             </div>
         </section>
 
