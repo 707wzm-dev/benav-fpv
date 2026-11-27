@@ -979,15 +979,18 @@
                     arrastrando = false;
                     wrapServicios.classList.remove("arrastrando");
 
-                    if (wrapServicios.hasPointerCapture(e.pointerId)) wrapServicios.releasePointerCapture(e.pointerId);
+                    if (wrapServicios.hasPointerCapture(e.pointerId)) {
+                        wrapServicios.releasePointerCapture(e.pointerId);
+                    }
 
-                    const deltaFinalX = e.clientX - inicioPunteroX;
                     const idxCercano = encontrarTarjetaMasCercanaAlCentro();
 
                     if (distanciaArrastrePx < 8 && tarjetaTocadaEnInicio !== null) {
-                        seleccionarIndice(tarjetaTocadaEnInicio !== indiceObjetivo ? tarjetaTocadaEnInicio : idxCercano, true);
-                    } else if (Math.abs(deltaFinalX) > 45) {
-                        seleccionarIndice(idxCercano + (deltaFinalX > 0 ? -1 : 1), true);
+                        if (tarjetaTocadaEnInicio !== indiceObjetivo) {
+                            seleccionarIndice(tarjetaTocadaEnInicio, true);
+                        } else {
+                            seleccionarIndice(idxCercano + 1, true);
+                        }
                     } else {
                         seleccionarIndice(idxCercano, true);
                     }
