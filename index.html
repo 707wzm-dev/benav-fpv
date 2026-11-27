@@ -250,7 +250,7 @@
             letter-spacing: 0.02em;
         }
 
-        /* 3 cuadros de Servicios en seguidilla */
+        /* 3 cuadros de Servicios en seguidilla con animación de entrada */
         .servicios-grid {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -265,13 +265,25 @@
             display: flex;
             flex-direction: column;
             gap: 14px;
-            transition: border-color 0.22s ease, transform 0.22s ease, background-color 0.22s ease;
+            opacity: 0;
+            transform: translateY(36px) scale(0.98);
+            transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+                        border-color 0.22s ease,
+                        background-color 0.22s ease,
+                        box-shadow 0.25s ease;
         }
 
-        .servicio-card:hover {
-            border-color: #3a3a46;
+        .servicio-card.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .servicio-card.visible:hover {
+            border-color: rgba(255, 255, 255, 0.35);
             background-color: #16161c;
-            transform: translateY(-3px);
+            transform: translateY(-6px);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.45);
         }
 
         .servicio-top {
@@ -285,6 +297,11 @@
             height: 8px;
             border-radius: 50%;
             background-color: var(--accent);
+            transition: transform 0.25s ease;
+        }
+
+        .servicio-card:hover .servicio-punto {
+            transform: scale(1.35);
         }
 
         .servicio-num {
@@ -481,6 +498,30 @@
             }
 
             setTimeout(cicloMarca, 300);
+
+            /* 3. Animación escalonada de los 3 cuadros de Servicios al bajar */
+            const tarjetasServicios = document.querySelectorAll(".servicio-card");
+
+            if ("IntersectionObserver" in window && tarjetasServicios.length > 0) {
+                const observadorServicios = new IntersectionObserver((entradas, obs) => {
+                    entradas.forEach(entrada => {
+                        if (entrada.isIntersecting) {
+                            tarjetasServicios.forEach((tarjeta, index) => {
+                                setTimeout(() => {
+                                    tarjeta.classList.add("visible");
+                                }, index * 150); // 0ms, 150ms, 300ms
+                            });
+                            obs.unobserve(entrada.target);
+                        }
+                    });
+                }, {
+                    threshold: 0.2
+                });
+
+                observadorServicios.observe(document.querySelector("#servicios"));
+            } else {
+                tarjetasServicios.forEach(tarjeta => tarjeta.classList.add("visible"));
+            }
         });
     </script>
 
