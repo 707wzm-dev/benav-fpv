@@ -20,19 +20,8 @@
             --accent-green-glow: rgba(74, 222, 128, 0.12);
             --accent-green-line: rgba(74, 222, 128, 0.45);
         }
-
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
         body {
             position: relative;
             background-color: var(--bg-main);
@@ -41,23 +30,10 @@
             line-height: 1.65;
             overflow-x: hidden;
         }
-
         /* Canvas de partículas ambientales en el fondo */
-        #particulasFondo {
-            position: fixed;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-
+        #particulasFondo { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
         /* Capa principal por encima del fondo */
-        .contenido-principal {
-            position: relative;
-            z-index: 2;
-        }
-
+        .contenido-principal { position: relative; z-index: 2; }
         /* Barra superior fija */
         .topbar {
             position: sticky;
@@ -68,7 +44,6 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 6px 28px rgba(0, 0, 0, 0.45);
         }
-
         .topbar-inner {
             position: relative;
             max-width: 1140px;
@@ -78,7 +53,6 @@
             align-items: center;
             gap: 16px;
         }
-
         /* Botón de 3 rallitas */
         .menu-btn {
             width: 42px;
@@ -95,13 +69,11 @@
             gap: 5px;
             transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
         }
-
         .menu-btn:hover {
             border-color: var(--accent);
             background-color: var(--bg-surface);
             box-shadow: 0 0 16px rgba(255, 255, 255, 0.16);
         }
-
         .menu-btn span {
             display: block;
             width: 18px;
@@ -110,19 +82,9 @@
             border-radius: 2px;
             transition: transform 0.25s ease, opacity 0.25s ease;
         }
-
-        .menu-btn.abierto span:nth-child(1) {
-            transform: translateY(7px) rotate(45deg);
-        }
-
-        .menu-btn.abierto span:nth-child(2) {
-            opacity: 0;
-        }
-
-        .menu-btn.abierto span:nth-child(3) {
-            transform: translateY(-7px) rotate(-45deg);
-        }
-
+        .menu-btn.abierto span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .menu-btn.abierto span:nth-child(2) { opacity: 0; }
+        .menu-btn.abierto span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
         /* Nombre animado letra por letra al lado del botón */
         .marca {
             color: var(--accent);
@@ -137,20 +99,13 @@
             padding: 4px 2px;
             text-shadow: 0 0 18px rgba(255, 255, 255, 0.22);
         }
-
         .marca .letra {
             display: inline-block;
             opacity: 0;
             transform: translateX(32px);
-            transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-                        opacity 0.35s ease;
+            transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
         }
-
-        .marca .letra.visible {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
+        .marca .letra.visible { opacity: 1; transform: translateX(0); }
         /* Menú flotante compacto debajo del botón */
         .menu-desplegable {
             display: none;
@@ -166,17 +121,8 @@
             backdrop-filter: blur(12px);
             z-index: 120;
         }
-
-        .menu-desplegable.activo {
-            display: block;
-        }
-
-        .menu-lista {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
+        .menu-desplegable.activo { display: block; }
+        .menu-lista { display: flex; flex-direction: column; gap: 4px; }
         .menu-lista a {
             display: block;
             width: 100%;
@@ -187,20 +133,9 @@
             font-size: 0.95rem;
             transition: background-color 0.2s ease, transform 0.15s ease;
         }
-
-        .menu-lista a:hover {
-            background-color: rgba(255, 255, 255, 0.08);
-            transform: translateX(3px);
-        }
-
+        .menu-lista a:hover { background-color: rgba(255, 255, 255, 0.08); transform: translateX(3px); }
         /* Sección Inicio: GIF del dron girando 360° + lema debajo */
-        .hero-gif {
-            max-width: 1140px;
-            margin: 0 auto;
-            padding: 28px 20px 56px;
-            scroll-margin-top: 76px;
-        }
-
+        .hero-gif { max-width: 1140px; margin: 0 auto; padding: 28px 20px 56px; scroll-margin-top: 76px; }
         .gif-marco {
             position: relative;
             z-index: 1;
@@ -214,7 +149,6 @@
             justify-content: center;
             align-items: center;
         }
-
         /* Halo verde difuminado que sale desde atrás hacia los lados */
         .gif-marco::before {
             content: "";
@@ -231,7 +165,6 @@
             pointer-events: none;
             z-index: -1;
         }
-
         .gif-marco img {
             position: relative;
             z-index: 2;
@@ -242,7 +175,6 @@
             border-radius: 16px;
             display: block;
         }
-
         .gif-placeholder {
             position: relative;
             z-index: 2;
@@ -251,14 +183,7 @@
             color: var(--text-muted);
             font-size: 0.95rem;
         }
-
-        .gif-placeholder code {
-            color: var(--text-main);
-            background-color: #1a1a22;
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-
+        .gif-placeholder code { color: var(--text-main); background-color: #1a1a22; padding: 2px 6px; border-radius: 4px; }
         /* Palabras debajo del GIF */
         .lema-gif {
             margin-top: 24px;
@@ -270,12 +195,7 @@
             text-transform: uppercase;
             text-shadow: 0 0 20px rgba(255, 255, 255, 0.18);
         }
-
-        .lema-gif .separador {
-            color: var(--text-muted);
-            margin: 0 6px;
-        }
-
+        .lema-gif .separador { color: var(--text-muted); margin: 0 6px; }
         /* Segmentos */
         .segmento {
             position: relative;
@@ -285,42 +205,11 @@
             border-top: 1px solid rgba(255, 255, 255, 0.08);
             scroll-margin-top: 76px;
         }
-
-        .encabezado-seccion {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-bottom: 34px;
-        }
-
-        .encabezado-seccion .etiqueta {
-            font-size: 0.82rem;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            color: var(--text-muted);
-        }
-
-        .encabezado-titulo-fila {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .segmento h2 {
-            font-size: clamp(1.65rem, 3vw, 2.15rem);
-            font-weight: 700;
-            letter-spacing: 0.02em;
-        }
-
-        .linea-acento {
-            height: 1px;
-            flex: 1;
-            max-width: 160px;
-            background: linear-gradient(90deg, var(--accent-green-line), transparent);
-        }
-
+        .encabezado-seccion { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 6px; margin-bottom: 34px; }
+        .encabezado-seccion .etiqueta { font-size: 0.82rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); }
+        .encabezado-titulo-fila { display: flex; align-items: center; gap: 16px; }
+        .segmento h2 { font-size: clamp(1.65rem, 3vw, 2.15rem); font-weight: 700; letter-spacing: 0.02em; }
+        .linea-acento { height: 1px; flex: 1; max-width: 160px; background: linear-gradient(90deg, var(--accent-green-line), transparent); }
         /* Anillo curvo con perspectiva, enfoque central y desenfoque lateral */
         .servicios-anillo-wrap {
             position: relative;
@@ -338,11 +227,7 @@
             mask-image: linear-gradient(90deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
             -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
         }
-
-        .servicios-anillo-wrap.arrastrando {
-            cursor: grabbing;
-        }
-
+        .servicios-anillo-wrap.arrastrando { cursor: grabbing; }
         .servicios-pista {
             display: flex;
             align-items: center;
@@ -351,7 +236,6 @@
             transform-style: preserve-3d;
             will-change: transform;
         }
-
         .servicio-card {
             position: relative;
             flex: 0 0 415px;
@@ -373,7 +257,6 @@
                 0 -5px 16px -4px var(--accent-green-glow);
             transition: border-color 0.25s ease, box-shadow 0.28s ease;
         }
-
         .servicio-card::before {
             content: "";
             position: absolute;
@@ -381,14 +264,9 @@
             left: 0;
             right: 0;
             height: 58px;
-            background: linear-gradient(
-                180deg,
-                var(--accent-green-soft) 0%,
-                transparent 100%
-            );
+            background: linear-gradient(180deg, var(--accent-green-soft) 0%, transparent 100%);
             pointer-events: none;
         }
-
         .servicio-card::after {
             content: "";
             position: absolute;
@@ -400,7 +278,6 @@
             pointer-events: none;
             transition: left 0.3s ease, right 0.3s ease;
         }
-
         .servicio-card.en-foco {
             border-color: var(--border-hover);
             border-top-color: rgba(74, 222, 128, 0.78);
@@ -408,20 +285,8 @@
                 0 28px 58px rgba(0, 0, 0, 0.88),
                 0 -6px 22px -4px rgba(74, 222, 128, 0.22);
         }
-
-        .servicio-card.en-foco::after {
-            left: 8%;
-            right: 8%;
-        }
-
-        .servicio-top {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
+        .servicio-card.en-foco::after { left: 8%; right: 8%; }
+        .servicio-top { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; }
         .servicio-icono {
             width: 42px;
             height: 42px;
@@ -433,7 +298,6 @@
             justify-content: center;
             color: var(--accent-green);
         }
-
         .servicio-icono svg {
             width: 21px;
             height: 21px;
@@ -443,14 +307,7 @@
             stroke-linecap: round;
             stroke-linejoin: round;
         }
-
-        .servicio-num {
-            font-size: 0.92rem;
-            letter-spacing: 0.2em;
-            color: rgba(74, 222, 128, 0.8);
-            font-weight: 700;
-        }
-
+        .servicio-num { font-size: 0.92rem; letter-spacing: 0.2em; color: rgba(74, 222, 128, 0.8); font-weight: 700; }
         .servicio-card h3 {
             position: relative;
             z-index: 1;
@@ -460,15 +317,7 @@
             letter-spacing: 0.01em;
             line-height: 1.3;
         }
-
-        .servicio-card p {
-            position: relative;
-            z-index: 1;
-            color: var(--text-muted);
-            font-size: 1.06rem;
-            line-height: 1.7;
-        }
-
+        .servicio-card p { position: relative; z-index: 1; color: var(--text-muted); font-size: 1.06rem; line-height: 1.7; }
         /* Barra de progreso estilo estado de WhatsApp debajo del cuadro central */
         .servicio-barra-wrap {
             position: relative;
@@ -481,12 +330,7 @@
             transition: opacity 0.25s ease, transform 0.25s ease;
             pointer-events: none;
         }
-
-        .servicio-card.en-foco .servicio-barra-wrap {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
+        .servicio-card.en-foco .servicio-barra-wrap { opacity: 1; transform: translateY(0); }
         .servicio-barra-track {
             width: 100%;
             height: 3px;
@@ -494,7 +338,6 @@
             background-color: rgba(255, 255, 255, 0.12);
             overflow: hidden;
         }
-
         .servicio-barra-relleno {
             width: 100%;
             height: 100%;
@@ -505,7 +348,6 @@
             transform-origin: left center;
             will-change: transform;
         }
-
         /* Bloques secundarios con un acabado sobrio y discreto */
         .caja-sobria {
             position: relative;
@@ -519,73 +361,26 @@
             overflow: hidden;
             box-shadow: 0 20px 44px rgba(0, 0, 0, 0.72);
         }
-
-        .caja-sobria p {
-            position: relative;
-            z-index: 1;
-        }
-
+        .caja-sobria p { position: relative; z-index: 1; }
         @media (max-width: 600px) {
-            .lema-gif {
-                letter-spacing: 0.12em;
-                line-height: 1.8;
-            }
-
-            .gif-marco::before {
-                left: -14px;
-                right: -14px;
-                filter: blur(14px);
-            }
-
-            .servicio-card {
-                flex: 0 0 320px;
-                min-height: 245px;
-                padding: 28px 24px 22px;
-            }
-
-            .servicio-card h3 {
-                font-size: 1.24rem;
-            }
-
-            .servicio-card p {
-                font-size: 1rem;
-            }
+            .lema-gif { letter-spacing: 0.12em; line-height: 1.8; }
+            .gif-marco::before { left: -14px; right: -14px; filter: blur(14px); }
+            .servicio-card { flex: 0 0 320px; min-height: 245px; padding: 28px 24px 22px; }
+            .servicio-card h3 { font-size: 1.24rem; }
+            .servicio-card p { font-size: 1rem; }
         }
-
         @media (prefers-reduced-motion: reduce) {
-            #particulasFondo {
-                display: none;
-            }
-
-            .servicios-anillo-wrap {
-                perspective: none;
-                cursor: auto;
-            }
-
-            .servicios-pista {
-                flex-wrap: wrap;
-                width: 100%;
-                transform: none !important;
-            }
-
-            .servicio-card {
-                flex: 1 1 300px;
-                filter: none !important;
-                opacity: 1 !important;
-                transform: none !important;
-            }
-
-            .servicio-barra-wrap {
-                display: none;
-            }
+            #particulasFondo { display: none; }
+            .servicios-anillo-wrap { perspective: none; cursor: auto; }
+            .servicios-pista { flex-wrap: wrap; width: 100%; transform: none !important; }
+            .servicio-card { flex: 1 1 300px; filter: none !important; opacity: 1 !important; transform: none !important; }
+            .servicio-barra-wrap { display: none; }
         }
     </style>
 </head>
 <body>
-
     <!-- Partículas ambientales flotando en el fondo -->
     <canvas id="particulasFondo" aria-hidden="true"></canvas>
-
     <header class="topbar">
         <div class="topbar-inner">
             <button class="menu-btn" id="btnMenu" aria-label="Abrir menú" aria-expanded="false">
@@ -593,9 +388,7 @@
                 <span></span>
                 <span></span>
             </button>
-
             <a href="#inicio" class="marca" id="marcaAnimada" aria-label="B Ξ N Λ V · FPV"></a>
-
             <nav class="menu-desplegable" id="menuDesplegable" aria-label="Navegación principal">
                 <div class="menu-lista">
                     <a href="#inicio">Inicio</a>
@@ -606,7 +399,6 @@
             </nav>
         </div>
     </header>
-
     <main class="contenido-principal">
         <section class="hero-gif" id="inicio">
             <div class="gif-marco" id="marcoGif">
@@ -619,12 +411,10 @@
                     Sube tu archivo <code>dron-360.gif</code> a la raíz del repositorio (o cambia el nombre en <code>src="dron-360.gif"</code>).
                 </div>
             </div>
-
             <p class="lema-gif" aria-label="Movimiento, precisión y experiencia">
                 MOVIMIENTO <span class="separador">·</span> PRECISIÓN <span class="separador">·</span> EXPERIENCIA
             </p>
         </section>
-
         <section class="segmento" id="servicios">
             <div class="encabezado-seccion">
                 <span class="etiqueta">Lo que hacemos</span>
@@ -633,7 +423,6 @@
                     <span class="linea-acento" aria-hidden="true"></span>
                 </div>
             </div>
-
             <div class="servicios-anillo-wrap" id="anilloServicios" aria-label="Anillo horizontal de servicios con bucle infinito">
                 <div class="servicios-pista" id="pistaServicios">
                     <!-- Bloque A (anterior para retroceder sin tope) -->
@@ -654,7 +443,6 @@
                             </div>
                         </div>
                     </article>
-
                     <article class="servicio-card" data-slot="1" aria-hidden="true">
                         <div class="servicio-top">
                             <div class="servicio-icono">
@@ -673,7 +461,6 @@
                             </div>
                         </div>
                     </article>
-
                     <article class="servicio-card" data-slot="2" aria-hidden="true">
                         <div class="servicio-top">
                             <div class="servicio-icono">
@@ -692,7 +479,6 @@
                             </div>
                         </div>
                     </article>
-
                     <!-- Bloque B (principal) -->
                     <article class="servicio-card" data-slot="3">
                         <div class="servicio-top">
@@ -711,7 +497,6 @@
                             </div>
                         </div>
                     </article>
-
                     <article class="servicio-card" data-slot="4">
                         <div class="servicio-top">
                             <div class="servicio-icono" aria-hidden="true">
@@ -730,7 +515,6 @@
                             </div>
                         </div>
                     </article>
-
                     <article class="servicio-card" data-slot="5">
                         <div class="servicio-top">
                             <div class="servicio-icono" aria-hidden="true">
@@ -749,7 +533,6 @@
                             </div>
                         </div>
                     </article>
-
                     <!-- Bloque C (siguiente para avanzar sin tope) -->
                     <article class="servicio-card" data-slot="6" aria-hidden="true">
                         <div class="servicio-top">
@@ -767,9 +550,7 @@
                                 <div class="servicio-barra-relleno"></div>
                             </div>
                         </div>
-                    </article>
-
-                    <article class="servicio-card" data-slot="7" aria-hidden="true">
+                    </article><article class="servicio-card" data-slot="7" aria-hidden="true">
                         <div class="servicio-top">
                             <div class="servicio-icono">
                                 <svg viewBox="0 0 24 24">
@@ -787,7 +568,6 @@
                             </div>
                         </div>
                     </article>
-
                     <article class="servicio-card" data-slot="8" aria-hidden="true">
                         <div class="servicio-top">
                             <div class="servicio-icono">
@@ -809,7 +589,6 @@
                 </div>
             </div>
         </section>
-
         <section class="segmento" id="portafolio">
             <div class="encabezado-seccion">
                 <span class="etiqueta">Muestras</span>
@@ -822,7 +601,6 @@
                 <p>Espacio reservado para tus videos y vuelos de prueba.</p>
             </div>
         </section>
-
         <section class="segmento" id="contacto">
             <div class="encabezado-seccion">
                 <span class="etiqueta">Hablemos</span>
@@ -836,41 +614,30 @@
             </div>
         </section>
     </main>
-
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             /* 1. Lógica del menú hamburguesa */
             const btnMenu = document.querySelector("#btnMenu");
             const menuDesplegable = document.querySelector("#menuDesplegable");
             const enlacesMenu = menuDesplegable.querySelectorAll("a");
-
             function cerrarMenu() {
                 menuDesplegable.classList.remove("activo");
                 btnMenu.classList.remove("abierto");
                 btnMenu.setAttribute("aria-expanded", "false");
             }
-
             btnMenu.addEventListener("click", (e) => {
                 e.stopPropagation();
                 const estaAbierto = menuDesplegable.classList.toggle("activo");
                 btnMenu.classList.toggle("abierto", estaAbierto);
                 btnMenu.setAttribute("aria-expanded", estaAbierto);
             });
-
-            enlacesMenu.forEach(enlace => {
-                enlace.addEventListener("click", cerrarMenu);
-            });
-
+            enlacesMenu.forEach(enlace => enlace.addEventListener("click", cerrarMenu));
             document.addEventListener("click", (e) => {
-                if (!menuDesplegable.contains(e.target) && !btnMenu.contains(e.target)) {
-                    cerrarMenu();
-                }
+                if (!menuDesplegable.contains(e.target) && !btnMenu.contains(e.target)) cerrarMenu();
             });
-
             /* 2. Animación letra por letra de B Ξ N Λ V · FPV */
             const marca = document.querySelector("#marcaAnimada");
             const textoMarca = "B Ξ N Λ V · FPV";
-
             const letras = textoMarca.split("").map(caracter => {
                 const span = document.createElement("span");
                 span.className = "letra";
@@ -878,64 +645,33 @@
                 marca.appendChild(span);
                 return span;
             });
-
-            const pasoLetraMs = 77;
-            const pausaVisibleMs = 10000;
-            const pausaOcultoMs = 3500;
-
+            const pasoLetraMs = 77, pausaVisibleMs = 10000, pausaOcultoMs = 3500;
             function cicloMarca() {
                 letras.forEach((letra, index) => {
-                    setTimeout(() => {
-                        letra.classList.add("visible");
-                    }, index * pasoLetraMs);
+                    setTimeout(() => letra.classList.add("visible"), index * pasoLetraMs);
                 });
-
                 const tiempoEntradaTotal = letras.length * pasoLetraMs;
-
                 setTimeout(() => {
                     [...letras].reverse().forEach((letra, index) => {
-                        setTimeout(() => {
-                            letra.classList.remove("visible");
-                        }, index * pasoLetraMs);
+                        setTimeout(() => letra.classList.remove("visible"), index * pasoLetraMs);
                     });
-
                     setTimeout(cicloMarca, tiempoEntradaTotal + pausaOcultoMs);
                 }, tiempoEntradaTotal + pausaVisibleMs);
             }
-
             setTimeout(cicloMarca, 300);
-
             /* 3. Anillo curvo horizontal: bucle infinito 1-2-3, pausa solo en central y arrastre clic/touch */
             const wrapServicios = document.querySelector("#anilloServicios");
             const pistaServicios = document.querySelector("#pistaServicios");
             const prefiereMenosMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
             if (wrapServicios && pistaServicios && !prefiereMenosMovimiento) {
                 const tarjetas = Array.from(pistaServicios.querySelectorAll(".servicio-card"));
-                const totalUnicos = 3;
-                const bloqueCentralInicio = totalUnicos; // 3 (01 central)
-                const bloqueCentralFin = totalUnicos * 2 - 1; // 5 (03 central)
+                const totalUnicos = 3, bloqueCentralInicio = totalUnicos, bloqueCentralFin = totalUnicos * 2 - 1;
                 const duracionPausaMs = 4200;
-
-                // Empezamos en el índice 4 (02 del bloque central) para ver 01 a la izquierda y 03 a la derecha
-                let indiceObjetivo = 4;
-                let posicionX = 0;
-                let posicionDeseadaX = 0;
-                let anchoBloqueUnico = 0;
-                let ultimoTiempo = null;
-                let tiempoEnCentroMs = 0;
-                let enPosicionCentral = false;
-
-                let punteroEnCentral = false;
-                let arrastrando = false;
-                let inicioPunteroX = 0;
-                let inicioPosicionX = 0;
-                let distanciaArrastrePx = 0;
-                let tarjetaTocadaEnInicio = null;
-                let tipoPunteroActivo = null;
-
+                let indiceObjetivo = 4, posicionX = 0, posicionDeseadaX = 0, anchoBloqueUnico = 0;
+                let ultimoTiempo = null, tiempoEnCentroMs = 0, enPosicionCentral = false;
+                let punteroEnCentral = false, arrastrando = false, inicioPunteroX = 0, inicioPosicionX = 0;
+                let distanciaArrastrePx = 0, tarjetaTocadaEnInicio = null, tipoPunteroActivo = null;
                 const barrasRelleno = tarjetas.map(card => card.querySelector(".servicio-barra-relleno"));
-
                 function calcularAnchoBloqueUnico() {
                     if (tarjetas.length >= totalUnicos * 2) {
                         const dx = tarjetas[totalUnicos].offsetLeft - tarjetas[0].offsetLeft;
@@ -944,16 +680,11 @@
                         anchoBloqueUnico = pistaServicios.scrollWidth / 3 || 1;
                     }
                 }
-
                 function calcularPosicionParaIndice(idx) {
                     const tarjetaRef = tarjetas[idx];
                     if (!tarjetaRef) return posicionX;
-
-                    const wrapCentroLocal = wrapServicios.clientWidth / 2;
-                    const cardCentroLocal = tarjetaRef.offsetLeft + tarjetaRef.offsetWidth / 2;
-                    return wrapCentroLocal - cardCentroLocal;
+                    return (wrapServicios.clientWidth / 2) - (tarjetaRef.offsetLeft + tarjetaRef.offsetWidth / 2);
                 }
-
                 function centrarEnBloquePrincipalSinSalto() {
                     calcularAnchoBloqueUnico();
                     while (indiceObjetivo < bloqueCentralInicio) {
@@ -968,7 +699,6 @@
                     }
                     pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
                 }
-
                 function recalcularMedidas(inmediato = false) {
                     calcularAnchoBloqueUnico();
                     posicionDeseadaX = calcularPosicionParaIndice(indiceObjetivo);
@@ -977,124 +707,82 @@
                         pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
                     }
                 }
-
                 function seleccionarIndice(nuevoIdx, reiniciarTiempo = true) {
                     indiceObjetivo = nuevoIdx;
                     posicionDeseadaX = calcularPosicionParaIndice(indiceObjetivo);
-                    if (reiniciarTiempo) {
-                        tiempoEnCentroMs = 0;
-                    }
+                    if (reiniciarTiempo) tiempoEnCentroMs = 0;
                     enPosicionCentral = false;
                 }
-
-                function irASiguienteTarjeta() {
-                    seleccionarIndice(indiceObjetivo + 1, true);
-                }
-
+                function irASiguienteTarjeta() { seleccionarIndice(indiceObjetivo + 1, true); }
                 function encontrarTarjetaMasCercanaAlCentro() {
                     const rectWrap = wrapServicios.getBoundingClientRect();
                     const centroWrap = rectWrap.left + rectWrap.width / 2;
-                    let mejorIdx = indiceObjetivo;
-                    let menorDistancia = Infinity;
-
+                    let mejorIdx = indiceObjetivo, menorDistancia = Infinity;
                     tarjetas.forEach((tarjeta, idx) => {
                         const rectCard = tarjeta.getBoundingClientRect();
-                        const centroCard = rectCard.left + rectCard.width / 2;
-                        const dist = Math.abs(centroCard - centroWrap);
-                        if (dist < menorDistancia) {
-                            menorDistancia = dist;
-                            mejorIdx = idx;
-                        }
+                        const dist = Math.abs((rectCard.left + rectCard.width / 2) - centroWrap);
+                        if (dist < menorDistancia) { menorDistancia = dist; mejorIdx = idx; }
                     });
-
                     return mejorIdx;
                 }
-
                 function actualizarAnilloYEnfoque(progresoActual) {
                     const rectWrap = wrapServicios.getBoundingClientRect();
                     const centroWrap = rectWrap.left + rectWrap.width / 2;
                     const radioArco = Math.max(rectWrap.width * 0.48, 260);
-
                     tarjetas.forEach((tarjeta, idx) => {
                         const rectCard = tarjeta.getBoundingClientRect();
                         const centroCard = rectCard.left + rectCard.width / 2;
                         const deltaNorm = Math.max(-1.35, Math.min(1.35, (centroCard - centroWrap) / radioArco));
                         const absDelta = Math.min(1, Math.abs(deltaNorm));
                         const nitidez = 1 - absDelta;
-
                         const anguloY = (-deltaNorm * 34).toFixed(2);
                         const profundidadZ = (-Math.pow(absDelta, 1.35) * 140).toFixed(1);
                         const arcoY = (Math.pow(absDelta, 1.5) * 12).toFixed(1);
                         const escala = (0.9 + nitidez * 0.1).toFixed(3);
                         const desenfoquePx = (Math.pow(absDelta, 1.15) * 4.5).toFixed(2);
                         const opacidad = (0.24 + nitidez * 0.76).toFixed(3);
-
                         tarjeta.style.transform =
                             `translate3d(0, ${arcoY}px, ${profundidadZ}px) rotateY(${anguloY}deg) scale(${escala})`;
                         tarjeta.style.filter = `blur(${desenfoquePx}px)`;
                         tarjeta.style.opacity = opacidad;
-
                         const estaEnFoco = absDelta < 0.22 || (idx === indiceObjetivo && enPosicionCentral);
                         tarjeta.classList.toggle("en-foco", estaEnFoco);
-
                         const barra = barrasRelleno[idx];
                         if (barra) {
-                            if (idx === indiceObjetivo && enPosicionCentral) {
-                                barra.style.transform = `scaleX(${Math.max(0, Math.min(1, progresoActual)).toFixed(4)})`;
-                            } else {
-                                barra.style.transform = "scaleX(0)";
-                            }
+                            barra.style.transform = (idx === indiceObjetivo && enPosicionCentral)
+                                ? `scaleX(${Math.max(0, Math.min(1, progresoActual)).toFixed(4)})`
+                                : "scaleX(0)";
                         }
                     });
                 }
-
-                // Pausa en PC solo cuando el cursor está encima de la tarjeta central/enfocada
                 tarjetas.forEach(tarjeta => {
                     tarjeta.addEventListener("pointerenter", (e) => {
-                        if (e.pointerType !== "touch" && tarjeta.classList.contains("en-foco")) {
-                            punteroEnCentral = true;
-                        }
+                        if (e.pointerType !== "touch" && tarjeta.classList.contains("en-foco")) punteroEnCentral = true;
                     });
-
                     tarjeta.addEventListener("pointermove", (e) => {
-                        if (e.pointerType !== "touch" && !arrastrando) {
-                            punteroEnCentral = tarjeta.classList.contains("en-foco");
-                        }
+                        if (e.pointerType !== "touch" && !arrastrando) punteroEnCentral = tarjeta.classList.contains("en-foco");
                     });
-
                     tarjeta.addEventListener("pointerleave", (e) => {
-                        if (e.pointerType !== "touch") {
-                            punteroEnCentral = false;
-                        }
+                        if (e.pointerType !== "touch") punteroEnCentral = false;
                     });
                 });
-
-                // Arrastre con clic o dedo sin tope en ningún sentido
                 wrapServicios.addEventListener("pointerdown", (e) => {
                     if (e.pointerType === "mouse" && e.button !== 0) return;
-
                     arrastrando = true;
                     tipoPunteroActivo = e.pointerType;
                     inicioPunteroX = e.clientX;
                     inicioPosicionX = posicionX;
                     distanciaArrastrePx = 0;
-
                     const cardClick = e.target.closest(".servicio-card");
                     tarjetaTocadaEnInicio = cardClick ? tarjetas.indexOf(cardClick) : null;
-
                     wrapServicios.classList.add("arrastrando");
                     wrapServicios.setPointerCapture(e.pointerId);
                 });
-
                 wrapServicios.addEventListener("pointermove", (e) => {
                     if (!arrastrando) return;
-
                     const deltaX = e.clientX - inicioPunteroX;
                     distanciaArrastrePx = Math.max(distanciaArrastrePx, Math.abs(deltaX));
-
                     posicionX = inicioPosicionX + deltaX;
-
-                    // Envoltura continua durante el arrastre para que nunca haya tope lateral
                     if (anchoBloqueUnico > 0) {
                         const posBloqueCentral = calcularPosicionParaIndice(4);
                         if (posicionX > posBloqueCentral + anchoBloqueUnico * 0.9) {
@@ -1105,111 +793,73 @@
                             inicioPosicionX += anchoBloqueUnico;
                         }
                     }
-
                     pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
                     enPosicionCentral = false;
                 });
-
                 function finalizarArrastre(e) {
                     if (!arrastrando) return;
                     arrastrando = false;
                     wrapServicios.classList.remove("arrastrando");
-
-                    if (wrapServicios.hasPointerCapture(e.pointerId)) {
-                        wrapServicios.releasePointerCapture(e.pointerId);
-                    }
-
+                    if (wrapServicios.hasPointerCapture(e.pointerId)) wrapServicios.releasePointerCapture(e.pointerId);
                     const deltaFinalX = e.clientX - inicioPunteroX;
-
                     if (distanciaArrastrePx < 8 && tarjetaTocadaEnInicio !== null) {
-                        if (tarjetaTocadaEnInicio !== indiceObjetivo) {
-                            seleccionarIndice(tarjetaTocadaEnInicio, true);
-                        }
+                        if (tarjetaTocadaEnInicio !== indiceObjetivo) seleccionarIndice(tarjetaTocadaEnInicio, true);
                     } else if (Math.abs(deltaFinalX) > 35) {
-                        const direccion = deltaFinalX > 0 ? -1 : 1;
-                        seleccionarIndice(indiceObjetivo + direccion, true);
+                        seleccionarIndice(indiceObjetivo + (deltaFinalX > 0 ? -1 : 1), true);
                     } else {
-                        const cercana = encontrarTarjetaMasCercanaAlCentro();
-                        seleccionarIndice(cercana, true);
+                        seleccionarIndice(encontrarTarjetaMasCercanaAlCentro(), true);
                     }
-
                     if (tipoPunteroActivo === "touch") {
                         const cardActual = e.target.closest(".servicio-card");
                         punteroEnCentral = Boolean(cardActual && cardActual.classList.contains("en-foco"));
                     }
-
                     tarjetaTocadaEnInicio = null;
                     tipoPunteroActivo = null;
                 }
-
                 wrapServicios.addEventListener("pointerup", finalizarArrastre);
                 wrapServicios.addEventListener("pointercancel", (e) => {
-                    if (tipoPunteroActivo === "touch") {
-                        punteroEnCentral = false;
-                    }
+                    if (tipoPunteroActivo === "touch") punteroEnCentral = false;
                     finalizarArrastre(e);
                 });
-
                 recalcularMedidas(true);
                 actualizarAnilloYEnfoque(0);
-
                 window.addEventListener("resize", () => {
                     recalcularMedidas(true);
                     actualizarAnilloYEnfoque(tiempoEnCentroMs / duracionPausaMs);
                 }, { passive: true });
-
                 function pasoAnillo(ahora) {
-                    if (ultimoTiempo === null) {
-                        ultimoTiempo = ahora;
-                    }
+                    if (ultimoTiempo === null) ultimoTiempo = ahora;
                     const dtMs = Math.min(ahora - ultimoTiempo, 50);
                     ultimoTiempo = ahora;
-
                     if (!arrastrando && !document.hidden) {
                         const distanciaRestante = posicionDeseadaX - posicionX;
-
                         if (Math.abs(distanciaRestante) > 0.6) {
-                            const factorSuavizado = 1 - Math.exp(-dtMs * 0.0095);
-                            posicionX += distanciaRestante * factorSuavizado;
+                            posicionX += distanciaRestante * (1 - Math.exp(-dtMs * 0.0095));
                             pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
                             enPosicionCentral = false;
                         } else {
                             posicionX = posicionDeseadaX;
                             pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
                             enPosicionCentral = true;
-
-                            // Normalizamos silenciosamente al bloque central cuando termina de llegar
                             if (indiceObjetivo < bloqueCentralInicio || indiceObjetivo > bloqueCentralFin) {
                                 centrarEnBloquePrincipalSinSalto();
                             }
-
                             if (!punteroEnCentral) {
                                 tiempoEnCentroMs += dtMs;
-                                if (tiempoEnCentroMs >= duracionPausaMs) {
-                                    irASiguienteTarjeta();
-                                }
+                                if (tiempoEnCentroMs >= duracionPausaMs) irASiguienteTarjeta();
                             }
                         }
                     }
-
-                    const progreso = enPosicionCentral ? (tiempoEnCentroMs / duracionPausaMs) : 0;
-                    actualizarAnilloYEnfoque(progreso);
+                    actualizarAnilloYEnfoque(enPosicionCentral ? (tiempoEnCentroMs / duracionPausaMs) : 0);
                     requestAnimationFrame(pasoAnillo);
                 }
-
                 requestAnimationFrame(pasoAnillo);
             }
-
             /* 4. Partículas ambientales flotando en el fondo */
             const canvas = document.querySelector("#particulasFondo");
-
             if (canvas && !prefiereMenosMovimiento) {
                 const ctx = canvas.getContext("2d");
-                let ancho = 0;
-                let alto = 0;
-                let dpr = 1;
-                let particulas = [];
-
+                let ancho = 0, alto = 0, dpr = 1, particulas = [];
                 function crearParticula(aleatoriaEnPantalla = true) {
                     const esAcentoVerde = Math.random() < 0.22;
                     return {
@@ -1224,7 +874,6 @@
                         esVerde: esAcentoVerde
                     };
                 }
-
                 function redimensionarCanvas() {
                     dpr = Math.min(window.devicePixelRatio || 1, 2);
                     ancho = window.innerWidth;
@@ -1232,50 +881,30 @@
                     canvas.width = Math.floor(ancho * dpr);
                     canvas.height = Math.floor(alto * dpr);
                     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
                     const cantidad = ancho < 640 ? 28 : 48;
-                    if (particulas.length === 0) {
-                        particulas = Array.from({ length: cantidad }, () => crearParticula(true));
-                    } else if (particulas.length > cantidad) {
-                        particulas.length = cantidad;
-                    } else {
-                        while (particulas.length < cantidad) {
-                            particulas.push(crearParticula(true));
-                        }
-                    }
+                    if (particulas.length === 0) particulas = Array.from({ length: cantidad }, () => crearParticula(true));
+                    else if (particulas.length > cantidad) particulas.length = cantidad;
+                    else while (particulas.length < cantidad) particulas.push(crearParticula(true));
                 }
-
                 redimensionarCanvas();
                 window.addEventListener("resize", redimensionarCanvas, { passive: true });
-
                 let ultimoTiempoParticulas = null;
-
                 function animarParticulas(ahora) {
-                    if (ultimoTiempoParticulas === null) {
-                        ultimoTiempoParticulas = ahora;
-                    }
+                    if (ultimoTiempoParticulas === null) ultimoTiempoParticulas = ahora;
                     const dt = Math.min((ahora - ultimoTiempoParticulas) / (1000 / 60), 2.5);
                     ultimoTiempoParticulas = ahora;
-
                     if (!document.hidden) {
                         ctx.clearRect(0, 0, ancho, alto);
-
                         for (let i = 0; i < particulas.length; i++) {
                             const p = particulas[i];
                             p.fase += p.velFase * dt;
                             p.x += (p.vx + Math.sin(p.fase) * 0.16) * dt;
                             p.y += p.vy * dt;
-
-                            if (p.y < -16) {
-                                particulas[i] = crearParticula(false);
-                                continue;
-                            }
+                            if (p.y < -16) { particulas[i] = crearParticula(false); continue; }
                             if (p.x < -16) p.x = ancho + 16;
                             if (p.x > ancho + 16) p.x = -16;
-
                             const pulso = 0.65 + Math.sin(p.fase * 1.4) * 0.35;
                             const alfa = p.alfaBase * pulso;
-
                             ctx.beginPath();
                             ctx.arc(p.x, p.y, p.radio, 0, Math.PI * 2);
                             ctx.fillStyle = p.esVerde
@@ -1284,10 +913,8 @@
                             ctx.fill();
                         }
                     }
-
                     requestAnimationFrame(animarParticulas);
                 }
-
                 requestAnimationFrame(animarParticulas);
             }
         });
