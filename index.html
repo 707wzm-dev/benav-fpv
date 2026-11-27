@@ -8,7 +8,9 @@
         :root {
             --bg-main: #09090b;
             --bg-surface: #121216;
-            --border-subtle: #23232b;
+            --bg-card-top: #16161c;
+            --border-subtle: #24242d;
+            --border-hover: #464656;
             --text-main: #f4f4f5;
             --text-muted: #a1a1aa;
             --accent: #ffffff;
@@ -29,6 +31,7 @@
             color: var(--text-main);
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
         /* Barra superior fija */
@@ -37,7 +40,7 @@
             top: 0;
             z-index: 100;
             background-color: rgba(9, 9, 11, 0.88);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border-subtle);
         }
 
@@ -132,7 +135,7 @@
             border: 1px solid var(--border-subtle);
             border-radius: 12px;
             padding: 8px;
-            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.55);
+            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.65);
             z-index: 120;
         }
 
@@ -166,8 +169,7 @@
         .hero-gif {
             max-width: 1140px;
             margin: 0 auto;
-            padding: 28px 20px 64px;
-            border-bottom: 1px solid var(--border-subtle);
+            padding: 28px 20px 56px;
             scroll-margin-top: 76px;
         }
 
@@ -175,10 +177,11 @@
             position: relative;
             width: 100%;
             max-height: 75vh;
-            border-radius: 14px;
+            border-radius: 16px;
             overflow: hidden;
             background-color: var(--bg-surface);
             border: 1px solid var(--border-subtle);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -224,54 +227,82 @@
 
         /* Segmentos */
         .segmento {
+            position: relative;
             max-width: 1140px;
             margin: 0 auto;
-            padding: 84px 20px;
-            border-bottom: 1px solid var(--border-subtle);
+            padding: 76px 20px;
+            border-top: 1px solid var(--border-subtle);
             scroll-margin-top: 76px;
         }
 
         .encabezado-seccion {
-            margin-bottom: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 34px;
         }
 
         .encabezado-seccion .etiqueta {
-            display: inline-block;
-            font-size: 0.78rem;
-            letter-spacing: 0.18em;
+            font-size: 0.76rem;
+            letter-spacing: 0.2em;
             text-transform: uppercase;
             color: var(--text-muted);
-            margin-bottom: 6px;
+        }
+
+        .encabezado-titulo-fila {
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
 
         .segmento h2 {
-            font-size: clamp(1.45rem, 2.5vw, 1.85rem);
+            font-size: clamp(1.5rem, 2.6vw, 1.9rem);
             font-weight: 700;
             letter-spacing: 0.02em;
         }
 
-        /* 3 cuadros de Servicios en seguidilla con animación de entrada */
+        .linea-acento {
+            height: 1px;
+            flex: 1;
+            max-width: 140px;
+            background: linear-gradient(90deg, var(--border-hover), transparent);
+        }
+
+        /* 3 cuadros de Servicios en seguidilla */
         .servicios-grid {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 20px;
+            gap: 22px;
         }
 
         .servicio-card {
-            background-color: var(--bg-surface);
+            position: relative;
+            background: linear-gradient(180deg, var(--bg-card-top) 0%, var(--bg-surface) 100%);
             border: 1px solid var(--border-subtle);
-            border-radius: 14px;
-            padding: 28px 24px;
+            border-radius: 16px;
+            padding: 28px 24px 26px;
             display: flex;
             flex-direction: column;
             gap: 14px;
+            overflow: hidden;
             opacity: 0;
-            transform: translateY(36px) scale(0.98);
+            transform: translateY(36px) scale(0.985);
             transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
                         transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-                        border-color 0.22s ease,
-                        background-color 0.22s ease,
-                        box-shadow 0.25s ease;
+                        border-color 0.25s ease,
+                        box-shadow 0.28s ease;
+        }
+
+        .servicio-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.05));
+            opacity: 0.45;
+            transition: opacity 0.25s ease;
         }
 
         .servicio-card.visible {
@@ -280,10 +311,13 @@
         }
 
         .servicio-card.visible:hover {
-            border-color: rgba(255, 255, 255, 0.35);
-            background-color: #16161c;
+            border-color: var(--border-hover);
             transform: translateY(-6px);
-            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.55);
+        }
+
+        .servicio-card.visible:hover::before {
+            opacity: 1;
         }
 
         .servicio-top {
@@ -292,29 +326,46 @@
             justify-content: space-between;
         }
 
-        .servicio-punto {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: var(--accent);
-            transition: transform 0.25s ease;
+        .servicio-icono {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            transition: transform 0.25s ease, border-color 0.25s ease;
         }
 
-        .servicio-card:hover .servicio-punto {
-            transform: scale(1.35);
+        .servicio-card:hover .servicio-icono {
+            transform: scale(1.06);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .servicio-icono svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .servicio-num {
             font-size: 0.78rem;
-            letter-spacing: 0.16em;
+            letter-spacing: 0.18em;
             color: var(--text-muted);
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .servicio-card h3 {
-            font-size: 1.15rem;
+            font-size: 1.16rem;
             font-weight: 600;
             color: var(--text-main);
+            letter-spacing: 0.01em;
         }
 
         .servicio-card p {
@@ -381,13 +432,20 @@
         <section class="segmento" id="servicios">
             <div class="encabezado-seccion">
                 <span class="etiqueta">Lo que hacemos</span>
-                <h2>Servicios</h2>
+                <div class="encabezado-titulo-fila">
+                    <h2>Servicios</h2>
+                    <span class="linea-acento" aria-hidden="true"></span>
+                </div>
             </div>
 
             <div class="servicios-grid">
                 <article class="servicio-card">
                     <div class="servicio-top">
-                        <span class="servicio-punto" aria-hidden="true"></span>
+                        <div class="servicio-icono" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 3l7 3v6c0 5-3 8.5-7 9-4-.5-7-4-7-9V6l7-3z" />
+                            </svg>
+                        </div>
                         <span class="servicio-num">01</span>
                     </div>
                     <h3>Seguridad indoor</h3>
@@ -396,7 +454,12 @@
 
                 <article class="servicio-card">
                     <div class="servicio-top">
-                        <span class="servicio-punto" aria-hidden="true"></span>
+                        <div class="servicio-icono" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M4 16c3-7 6-7 8 0s5 7 8 0" />
+                                <circle cx="20" cy="16" r="1.5" />
+                            </svg>
+                        </div>
                         <span class="servicio-num">02</span>
                     </div>
                     <h3>Recorridos fluidos</h3>
@@ -405,7 +468,12 @@
 
                 <article class="servicio-card">
                     <div class="servicio-top">
-                        <span class="servicio-punto" aria-hidden="true"></span>
+                        <div class="servicio-icono" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="3" y="6" width="14" height="12" rx="2" />
+                                <path d="M17 10l4-2v8l-4-2v-4z" />
+                            </svg>
+                        </div>
                         <span class="servicio-num">03</span>
                     </div>
                     <h3>Producción audiovisual</h3>
@@ -417,15 +485,21 @@
         <section class="segmento" id="portafolio">
             <div class="encabezado-seccion">
                 <span class="etiqueta">Muestras</span>
-                <h2>Portafolio</h2>
+                <div class="encabezado-titulo-fila">
+                    <h2>Portafolio</h2>
+                    <span class="linea-acento" aria-hidden="true"></span>
+                </div>
             </div>
             <p style="color: var(--text-muted);">Espacio reservado para tus videos y vuelos de prueba.</p>
         </section>
 
-        <section class="segmento" id="contacto" style="border-bottom: none;">
+        <section class="segmento" id="contacto">
             <div class="encabezado-seccion">
                 <span class="etiqueta">Hablemos</span>
-                <h2>Contacto</h2>
+                <div class="encabezado-titulo-fila">
+                    <h2>Contacto</h2>
+                    <span class="linea-acento" aria-hidden="true"></span>
+                </div>
             </div>
             <p style="color: var(--text-muted);">Espacio para cotizaciones y canales directos.</p>
         </section>
@@ -509,7 +583,7 @@
                             tarjetasServicios.forEach((tarjeta, index) => {
                                 setTimeout(() => {
                                     tarjeta.classList.add("visible");
-                                }, index * 150); // 0ms, 150ms, 300ms
+                                }, index * 150);
                             });
                             obs.unobserve(entrada.target);
                         }
