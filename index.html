@@ -15,9 +15,8 @@
             --text-muted: #a1a1aa;
             --accent: #ffffff;
             --neon-green: #39ff14;
-            --neon-green-glow: rgba(57, 255, 20, 0.24);
-            --neon-green-soft: rgba(57, 255, 20, 0.10);
-            --neon-green-border: rgba(57, 255, 20, 0.34);
+            --neon-green-top-glow: rgba(57, 255, 20, 0.26);
+            --neon-green-top-soft: rgba(57, 255, 20, 0.11);
         }
 
         * {
@@ -298,7 +297,7 @@
             background: linear-gradient(90deg, rgba(57, 255, 20, 0.55), transparent);
         }
 
-        /* 3 cuadros de Servicios con iluminación verde neón propia */
+        /* 3 cuadros de Servicios con iluminación verde neón solo en la parte superior */
         .servicios-grid {
             position: relative;
             z-index: 2;
@@ -309,8 +308,9 @@
 
         .servicio-card {
             position: relative;
-            background: linear-gradient(180deg, rgba(22, 28, 23, 0.94) 0%, rgba(12, 16, 13, 0.97) 100%);
-            border: 1px solid var(--neon-green-border);
+            background: linear-gradient(180deg, rgba(22, 27, 23, 0.95) 0%, rgba(13, 13, 17, 0.98) 58%);
+            border: 1px solid var(--border-subtle);
+            border-top: 1px solid rgba(57, 255, 20, 0.55);
             border-radius: 16px;
             padding: 28px 24px 26px;
             display: flex;
@@ -318,9 +318,8 @@
             gap: 14px;
             overflow: hidden;
             box-shadow:
-                0 22px 48px rgba(0, 0, 0, 0.78),
-                0 0 26px var(--neon-green-glow),
-                inset 0 0 18px var(--neon-green-soft);
+                0 22px 46px rgba(0, 0, 0, 0.78),
+                0 -8px 24px -4px var(--neon-green-top-glow);
             opacity: 0;
             transform: translateY(36px) scale(0.985);
             transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
@@ -329,17 +328,34 @@
                         box-shadow 0.28s ease;
         }
 
+        /* Barra y haz verde concentrados únicamente en la zona superior */
         .servicio-card::before {
             content: "";
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--neon-green), rgba(57, 255, 20, 0.08));
-            box-shadow: 0 0 14px rgba(57, 255, 20, 0.75);
-            opacity: 0.85;
+            height: 68px;
+            background: linear-gradient(
+                180deg,
+                var(--neon-green-top-soft) 0%,
+                rgba(57, 255, 20, 0.02) 65%,
+                transparent 100%
+            );
+            pointer-events: none;
             transition: opacity 0.25s ease;
+        }
+
+        .servicio-card::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-green) 25%, var(--neon-green) 75%, transparent);
+            box-shadow: 0 0 14px rgba(57, 255, 20, 0.85);
+            pointer-events: none;
         }
 
         .servicio-card.visible {
@@ -348,19 +364,17 @@
         }
 
         .servicio-card.visible:hover {
-            border-color: rgba(57, 255, 20, 0.72);
+            border-color: var(--border-subtle);
+            border-top-color: var(--neon-green);
             transform: translateY(-7px);
             box-shadow:
-                0 28px 58px rgba(0, 0, 0, 0.86),
-                0 0 40px rgba(57, 255, 20, 0.36),
-                inset 0 0 24px rgba(57, 255, 20, 0.14);
-        }
-
-        .servicio-card.visible:hover::before {
-            opacity: 1;
+                0 28px 56px rgba(0, 0, 0, 0.86),
+                0 -10px 30px -2px rgba(57, 255, 20, 0.36);
         }
 
         .servicio-top {
+            position: relative;
+            z-index: 1;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -370,9 +384,9 @@
             width: 36px;
             height: 36px;
             border-radius: 10px;
-            background-color: rgba(57, 255, 20, 0.07);
-            border: 1px solid rgba(57, 255, 20, 0.34);
-            box-shadow: 0 0 14px rgba(57, 255, 20, 0.22);
+            background-color: rgba(57, 255, 20, 0.06);
+            border: 1px solid rgba(57, 255, 20, 0.35);
+            box-shadow: 0 0 12px rgba(57, 255, 20, 0.18);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -382,8 +396,8 @@
 
         .servicio-card:hover .servicio-icono {
             transform: scale(1.06);
-            border-color: rgba(57, 255, 20, 0.75);
-            box-shadow: 0 0 22px rgba(57, 255, 20, 0.42);
+            border-color: rgba(57, 255, 20, 0.72);
+            box-shadow: 0 0 18px rgba(57, 255, 20, 0.34);
         }
 
         .servicio-icono svg {
@@ -399,38 +413,74 @@
         .servicio-num {
             font-size: 0.78rem;
             letter-spacing: 0.18em;
-            color: rgba(57, 255, 20, 0.72);
+            color: rgba(57, 255, 20, 0.78);
             font-weight: 700;
             text-shadow: 0 0 10px rgba(57, 255, 20, 0.25);
         }
 
         .servicio-card h3 {
+            position: relative;
+            z-index: 1;
             font-size: 1.16rem;
             font-weight: 600;
             color: var(--text-main);
             letter-spacing: 0.01em;
-            text-shadow: 0 0 14px rgba(57, 255, 20, 0.22);
         }
 
         .servicio-card p {
+            position: relative;
+            z-index: 1;
             color: var(--text-muted);
             font-size: 0.94rem;
             line-height: 1.65;
         }
 
-        /* Cuadros de texto / bloques de sección con iluminación verde neón propia */
+        /* Cuadros de texto / bloques de sección con iluminación verde neón solo arriba */
         .caja-neon {
             position: relative;
             z-index: 2;
-            background: linear-gradient(180deg, rgba(20, 26, 21, 0.93) 0%, rgba(12, 16, 13, 0.97) 100%);
-            border: 1px solid var(--neon-green-border);
+            background: linear-gradient(180deg, rgba(21, 26, 22, 0.95) 0%, rgba(13, 13, 17, 0.98) 60%);
+            border: 1px solid var(--border-subtle);
+            border-top: 1px solid rgba(57, 255, 20, 0.5);
             border-radius: 16px;
             padding: 24px;
             color: var(--text-muted);
+            overflow: hidden;
             box-shadow:
-                0 20px 44px rgba(0, 0, 0, 0.75),
-                0 0 24px var(--neon-green-glow),
-                inset 0 0 16px var(--neon-green-soft);
+                0 20px 44px rgba(0, 0, 0, 0.76),
+                0 -8px 22px -4px var(--neon-green-top-glow);
+        }
+
+        .caja-neon::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 54px;
+            background: linear-gradient(
+                180deg,
+                var(--neon-green-top-soft) 0%,
+                transparent 100%
+            );
+            pointer-events: none;
+        }
+
+        .caja-neon::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(57, 255, 20, 0.85) 20%, rgba(57, 255, 20, 0.85) 80%, transparent);
+            box-shadow: 0 0 12px rgba(57, 255, 20, 0.75);
+            pointer-events: none;
+        }
+
+        .caja-neon p {
+            position: relative;
+            z-index: 1;
         }
 
         @media (max-width: 900px) {
