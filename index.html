@@ -14,8 +14,6 @@
             --text-main: #f4f4f5;
             --text-muted: #a1a1aa;
             --accent: #ffffff;
-            --neon-core: rgba(255, 255, 255, 0.20);
-            --neon-mid: rgba(210, 214, 240, 0.09);
         }
 
         * {
@@ -37,41 +35,7 @@
             overflow-x: hidden;
         }
 
-        /* Iluminación lateral estilo neón proyectada hacia el centro en toda la página */
-        .neon-ambiente {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-
-        .neon-ambiente::before,
-        .neon-ambiente::after {
-            content: "";
-            position: absolute;
-            top: -10%;
-            width: 52vw;
-            height: 120vh;
-            filter: blur(72px);
-            opacity: 0.95;
-        }
-
-        .neon-ambiente::before {
-            left: -14vw;
-            background:
-                radial-gradient(ellipse 75% 45% at 0% 25%, var(--neon-core), var(--neon-mid) 50%, transparent 78%),
-                radial-gradient(ellipse 80% 50% at 0% 72%, var(--neon-core), var(--neon-mid) 52%, transparent 80%);
-        }
-
-        .neon-ambiente::after {
-            right: -14vw;
-            background:
-                radial-gradient(ellipse 75% 45% at 100% 25%, var(--neon-core), var(--neon-mid) 50%, transparent 78%),
-                radial-gradient(ellipse 80% 50% at 100% 72%, var(--neon-core), var(--neon-mid) 52%, transparent 80%);
-        }
-
-        /* Canvas de estelas de dron en el fondo */
+        /* Canvas de estelas de dron con iluminación propia en el fondo */
         #estelasDron {
             position: fixed;
             inset: 0;
@@ -79,7 +43,7 @@
             height: 100%;
             pointer-events: none;
             z-index: 1;
-            opacity: 0.92;
+            opacity: 0.96;
         }
 
         /* Capa principal por encima del fondo para que todo flote */
@@ -94,9 +58,9 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background-color: rgba(9, 9, 11, 0.84);
+            background-color: rgba(9, 9, 11, 0.86);
             backdrop-filter: blur(14px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 6px 28px rgba(0, 0, 0, 0.45);
         }
 
@@ -115,7 +79,7 @@
             width: 42px;
             height: 42px;
             flex-shrink: 0;
-            background: rgba(18, 18, 22, 0.7);
+            background: rgba(18, 18, 22, 0.75);
             border: 1px solid var(--border-subtle);
             border-radius: 8px;
             cursor: pointer;
@@ -130,7 +94,7 @@
         .menu-btn:hover {
             border-color: var(--accent);
             background-color: var(--bg-surface);
-            box-shadow: 0 0 16px rgba(255, 255, 255, 0.14);
+            box-shadow: 0 0 16px rgba(255, 255, 255, 0.16);
         }
 
         .menu-btn span {
@@ -238,9 +202,9 @@
             max-height: 75vh;
             border-radius: 16px;
             overflow: hidden;
-            background-color: rgba(18, 18, 22, 0.92);
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            box-shadow: 0 26px 65px rgba(0, 0, 0, 0.75), 0 0 42px rgba(255, 255, 255, 0.07);
+            background-color: rgba(18, 18, 22, 0.94);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            box-shadow: 0 26px 65px rgba(0, 0, 0, 0.78), 0 0 32px rgba(255, 255, 255, 0.08);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -277,7 +241,7 @@
             letter-spacing: 0.22em;
             color: var(--text-main);
             text-transform: uppercase;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.16);
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.18);
         }
 
         .lema-gif .separador {
@@ -327,10 +291,10 @@
             height: 1px;
             flex: 1;
             max-width: 160px;
-            background: linear-gradient(90deg, rgba(255, 255, 255, 0.38), transparent);
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.42), transparent);
         }
 
-        /* 3 cuadros de Servicios flotando sobre la iluminación neón y las estelas */
+        /* 3 cuadros de Servicios con iluminación neón propia */
         .servicios-grid {
             position: relative;
             z-index: 2;
@@ -341,15 +305,18 @@
 
         .servicio-card {
             position: relative;
-            background: linear-gradient(180deg, rgba(26, 26, 34, 0.92) 0%, rgba(13, 13, 17, 0.96) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.13);
+            background: linear-gradient(180deg, rgba(26, 26, 35, 0.94) 0%, rgba(13, 13, 18, 0.97) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.16);
             border-radius: 16px;
             padding: 28px 24px 26px;
             display: flex;
             flex-direction: column;
             gap: 14px;
             overflow: hidden;
-            box-shadow: 0 24px 52px rgba(0, 0, 0, 0.75), 0 0 26px rgba(255, 255, 255, 0.04);
+            box-shadow:
+                0 22px 48px rgba(0, 0, 0, 0.75),
+                0 0 24px rgba(255, 255, 255, 0.07),
+                inset 0 0 18px rgba(255, 255, 255, 0.03);
             opacity: 0;
             transform: translateY(36px) scale(0.985);
             transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
@@ -365,8 +332,9 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: linear-gradient(90deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.06));
-            opacity: 0.5;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.08));
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.45);
+            opacity: 0.65;
             transition: opacity 0.25s ease;
         }
 
@@ -376,9 +344,12 @@
         }
 
         .servicio-card.visible:hover {
-            border-color: rgba(255, 255, 255, 0.38);
+            border-color: rgba(255, 255, 255, 0.45);
             transform: translateY(-7px);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.85), 0 0 34px rgba(255, 255, 255, 0.11);
+            box-shadow:
+                0 28px 58px rgba(0, 0, 0, 0.85),
+                0 0 36px rgba(255, 255, 255, 0.16),
+                inset 0 0 22px rgba(255, 255, 255, 0.05);
         }
 
         .servicio-card.visible:hover::before {
@@ -396,7 +367,8 @@
             height: 36px;
             border-radius: 10px;
             background-color: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.08);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -406,8 +378,8 @@
 
         .servicio-card:hover .servicio-icono {
             transform: scale(1.06);
-            border-color: rgba(255, 255, 255, 0.34);
-            box-shadow: 0 0 16px rgba(255, 255, 255, 0.14);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 18px rgba(255, 255, 255, 0.22);
         }
 
         .servicio-icono svg {
@@ -432,6 +404,7 @@
             font-weight: 600;
             color: var(--text-main);
             letter-spacing: 0.01em;
+            text-shadow: 0 0 14px rgba(255, 255, 255, 0.12);
         }
 
         .servicio-card p {
@@ -440,14 +413,24 @@
             line-height: 1.65;
         }
 
+        /* Cuadros de texto / bloques de sección con iluminación neón propia */
+        .caja-neon {
+            position: relative;
+            z-index: 2;
+            background: linear-gradient(180deg, rgba(24, 24, 32, 0.92) 0%, rgba(13, 13, 18, 0.96) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 16px;
+            padding: 24px;
+            color: var(--text-muted);
+            box-shadow:
+                0 20px 44px rgba(0, 0, 0, 0.72),
+                0 0 22px rgba(255, 255, 255, 0.06),
+                inset 0 0 16px rgba(255, 255, 255, 0.025);
+        }
+
         @media (max-width: 900px) {
             .servicios-grid {
                 grid-template-columns: 1fr;
-            }
-
-            .neon-ambiente::before,
-            .neon-ambiente::after {
-                width: 78vw;
             }
         }
 
@@ -467,10 +450,7 @@
 </head>
 <body>
 
-    <!-- Iluminación lateral estilo neón hacia el centro en toda la página -->
-    <div class="neon-ambiente" aria-hidden="true"></div>
-
-    <!-- Estelas de drones invisibles entrando y saliendo aleatoriamente en el fondo -->
+    <!-- Estelas de drones invisibles con iluminación neón propia en el fondo -->
     <canvas id="estelasDron" aria-hidden="true"></canvas>
 
     <header class="topbar">
@@ -573,7 +553,9 @@
                     <span class="linea-acento" aria-hidden="true"></span>
                 </div>
             </div>
-            <p style="color: var(--text-muted);">Espacio reservado para tus videos y vuelos de prueba.</p>
+            <div class="caja-neon">
+                <p>Espacio reservado para tus videos y vuelos de prueba.</p>
+            </div>
         </section>
 
         <section class="segmento" id="contacto">
@@ -584,7 +566,9 @@
                     <span class="linea-acento" aria-hidden="true"></span>
                 </div>
             </div>
-            <p style="color: var(--text-muted);">Espacio para cotizaciones y canales directos.</p>
+            <div class="caja-neon">
+                <p>Espacio para cotizaciones y canales directos.</p>
+            </div>
         </section>
     </main>
 
@@ -680,7 +664,7 @@
                 tarjetasServicios.forEach(tarjeta => tarjeta.classList.add("visible"));
             }
 
-            /* 4. Estelas de dron invisible entrando y saliendo aleatoriamente en el fondo */
+            /* 4. Estelas de dron invisible con iluminación neón propia en el fondo */
             const canvas = document.querySelector("#estelasDron");
             const prefiereMenosMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -704,7 +688,7 @@
 
                 function crearDronEstela(iniciarEnCamino = false) {
                     const margen = 90;
-                    const bordeEntrada = Math.floor(Math.random() * 4); // 0: izq, 1: der, 2: arriba, 3: abajo
+                    const bordeEntrada = Math.floor(Math.random() * 4);
                     let x, y, anguloBase;
 
                     if (bordeEntrada === 0) {
@@ -725,7 +709,7 @@
                         anguloBase = -Math.PI / 2 + (Math.random() - 0.5) * 1.1;
                     }
 
-                    const longitudEstela = ancho < 640 ? 34 : 56;
+                    const longitudEstela = ancho < 640 ? 38 : 62;
                     const puntos = [];
 
                     if (iniciarEnCamino) {
@@ -743,7 +727,7 @@
                         derivaGiroFase: Math.random() * Math.PI * 2,
                         derivaGiroVel: 0.012 + Math.random() * 0.018,
                         longitudEstela,
-                        brilloMax: 0.11 + Math.random() * 0.11,
+                        brilloMax: 0.22 + Math.random() * 0.16,
                         puntos,
                         esperaRestante: iniciarEnCamino ? 0 : Math.floor(Math.random() * 140),
                         activo: iniciarEnCamino
@@ -769,7 +753,6 @@
                             return;
                         }
 
-                        // Curvas orgánicas como un vuelo FPV suave con cambios de dirección
                         dron.derivaGiroFase += dron.derivaGiroVel;
                         const giroActual = dron.giroVel + Math.sin(dron.derivaGiroFase) * 0.018;
                         dron.angulo += giroActual;
@@ -782,31 +765,33 @@
                             dron.puntos.shift();
                         }
 
-                        // Dibujar estela segmento a segmento desvaneciéndose hacia atrás
                         if (dron.puntos.length > 2) {
+                            ctx.save();
+                            ctx.shadowColor = "rgba(255, 255, 255, 0.75)";
+                            ctx.shadowBlur = 14;
+
                             for (let i = 1; i < dron.puntos.length; i++) {
                                 const pAnterior = dron.puntos[i - 1];
                                 const pActual = dron.puntos[i];
-                                const progreso = i / dron.puntos.length; // 0 en cola -> 1 en el dron
+                                const progreso = i / dron.puntos.length;
 
                                 ctx.beginPath();
                                 ctx.moveTo(pAnterior.x, pAnterior.y);
                                 ctx.lineTo(pActual.x, pActual.y);
                                 ctx.strokeStyle = `rgba(255, 255, 255, ${progreso * progreso * dron.brilloMax})`;
-                                ctx.lineWidth = 0.8 + progreso * 1.6;
+                                ctx.lineWidth = 0.9 + progreso * 1.9;
                                 ctx.lineCap = "round";
                                 ctx.stroke();
                             }
 
-                            // Pequeño punto de luz tenue en la punta (el dron invisible)
                             const cabeza = dron.puntos[dron.puntos.length - 1];
                             ctx.beginPath();
-                            ctx.arc(cabeza.x, cabeza.y, 1.8, 0, Math.PI * 2);
-                            ctx.fillStyle = `rgba(255, 255, 255, ${dron.brilloMax * 1.4})`;
+                            ctx.arc(cabeza.x, cabeza.y, 2.2, 0, Math.PI * 2);
+                            ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(1, dron.brilloMax * 2.2)})`;
                             ctx.fill();
+                            ctx.restore();
                         }
 
-                        // Comprobar si salió por completo de la pantalla para esconderse y reaparecer luego
                         const salioDelPantalla =
                             dron.x < -margenSalida ||
                             dron.x > ancho + margenSalida ||
