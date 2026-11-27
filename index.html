@@ -42,15 +42,14 @@
             overflow-x: hidden;
         }
 
-        /* Canvas de estela única en el fondo */
-        #estelasDron {
+        /* Canvas de partículas ambientales en el fondo */
+        #particulasFondo {
             position: fixed;
             inset: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
             z-index: 1;
-            opacity: 0.96;
         }
 
         /* Capa principal por encima del fondo */
@@ -493,7 +492,7 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
-            #estelasDron {
+            #particulasFondo {
                 display: none;
             }
         }
@@ -501,8 +500,8 @@
 </head>
 <body>
 
-    <!-- Estela única con micro-onda continua en el fondo -->
-    <canvas id="estelasDron" aria-hidden="true"></canvas>
+    <!-- Partículas ambientales flotando en el fondo -->
+    <canvas id="particulasFondo" aria-hidden="true"></canvas>
 
     <header class="topbar">
         <div class="topbar-inner">
@@ -715,8 +714,8 @@
                 tarjetasServicios.forEach(tarjeta => tarjeta.classList.add("visible"));
             }
 
-            /* 4. Estela única con micro-onda continua en el fondo */
-            const canvas = document.querySelector("#estelasDron");
+            /* 4. Partículas ambientales flotando en el fondo */
+            const canvas = document.querySelector("#particulasFondo");
             const prefiereMenosMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
             if (canvas && !prefiereMenosMovimiento) {
@@ -724,6 +723,22 @@
                 let ancho = 0;
                 let alto = 0;
                 let dpr = 1;
+                let particulas = [];
+
+                function crearParticula(aleatoriaEnPantalla = true) {
+                    const esAcentoVerde = Math.random() < 0.22;
+                    return {
+                        x: Math.random() * ancho,
+                        y: aleatoriaEnPantalla ? Math.random() * alto : alto + 12,
+                        radio: 0.8 + Math.random() * 1.9,
+                        vx: (Math.random() - 0.5) * 0.28,
+                        vy: -(0.14 + Math.random() * 0.36),
+                        fase: Math.random() * Math.PI * 2,
+                        velFase: 0.015 + Math.random() * 0.025,
+                        alfaBase: esAcentoVerde ? (0.16 + Math.random() * 0.18) : (0.12 + Math.random() * 0.24),
+                        esVerde: esAcentoVerde
+                    };
+                }
 
                 function redimensionarCanvas() {
                     dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -732,172 +747,45 @@
                     canvas.width = Math.floor(ancho * dpr);
                     canvas.height = Math.floor(alto * dpr);
                     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+                    const cantidad = ancho < 640 ? 28 : 48;
+                    particulas = Array.from({ length: cantidad }, () => crearParticula(true));
                 }
 
                 redimensionarCanvas();
                 window.addEventListener("resize", redimensionarCanvas, { passive: true });
 
-                function elegirManiobra(dron) {
-                    const r = Math.random();
-
-                    if (r < 0.35) {
-                        dron.velocidadObjetivo = 3.1 + Math.random() * 1.8;
-                        dron.tasaGiroObjetivo = (Math.random() - 0.5) * 0.014;
-                    } else if (r < 0.78) {
-                        dron.velocidadObjetivo = 2.2 + Math.random() * 1.2;
-                        const dir = Math.random() < 0.5 ? -1 : 1;
-                        dron.tasaGiroObjetivo = dir * (0.022 + Math.random() * 0.024);
-                    } else {
-                        dron.velocidadObjetivo = 1.8 + Math.random() * 0.9;
-                        const dir = Math.random() < 0.5 ? -1 : 1;
-                        dron.tasaGiroObjetivo = dir * (0.038 + Math.random() * 0.022);
-                    }
-
-                    dron.framesManiobra = 35 + Math.floor(Math.random() * 75);
-                }
-
-                function crearDronUnico(iniciarCentrado = false) {
-                    const margen = 80;
-                    const borde = Math.floor(Math.random() * 4);
-                    let x, y, angulo;
-
-                    if (iniciarCentrado) {
-                        x = ancho * (0.2 + Math.random() * 0.6);
-                        y = alto * (0.2 + Math.random() * 0.6);
-                        angulo = Math.random() * Math.PI * 2;
-                    } else if (borde === 0) {
-                        x = -margen;
-                        y = Math.random() * alto;
-                        angulo = (Math.random() - 0.5) * 1.0;
-                    } else if (borde === 1) {
-                        x = ancho + margen;
-                        y = Math.random() * alto;
-                        angulo = Math.PI + (Math.random() - 0.5) * 1.0;
-                    } else if (borde === 2) {
-                        x = Math.random() * ancho;
-                        y = -margen;
-                        angulo = Math.PI / 2 + (Math.random() - 0.5) * 1.0;
-                    } else {
-                        x = Math.random() * ancho;
-                        y = alto + margen;
-                        angulo = -Math.PI / 2 + (Math.random() - 0.5) * 1.0;
-                    }
-
-                    const dron = {
-                        x,
-                        y,
-                        angulo,
-                        velocidadActual: 2.5,
-                        velocidadObjetivo: 3.0,
-                        tasaGiroActual: 0,
-                        tasaGiroObjetivo: 0,
-                        framesManiobra: 0,
-                        faseOnda: Math.random() * Math.PI * 2,
-                        longitudEstela: ancho < 640 ? 80 : 125,
-                        brilloMax: 0.24,
-                        puntos: [],
-                        espera: 0,
-                        activo: true
-                    };
-
-                    elegirManiobra(dron);
-                    return dron;
-                }
-
-                let dron = crearDronUnico(true);
-
-                function actualizarYdibujarEstela() {
+                function animarParticulas() {
                     ctx.clearRect(0, 0, ancho, alto);
-                    const margenSalida = 200;
 
-                    if (!dron.activo) {
-                        dron.espera -= 1;
-                        if (dron.espera <= 0) {
-                            dron = crearDronUnico(false);
+                    for (let i = 0; i < particulas.length; i++) {
+                        const p = particulas[i];
+                        p.fase += p.velFase;
+                        p.x += p.vx + Math.sin(p.fase) * 0.16;
+                        p.y += p.vy;
+
+                        if (p.y < -16) {
+                            particulas[i] = crearParticula(false);
+                            continue;
                         }
-                        requestAnimationFrame(actualizarYdibujarEstela);
-                        return;
+                        if (p.x < -16) p.x = ancho + 16;
+                        if (p.x > ancho + 16) p.x = -16;
+
+                        const pulso = 0.65 + Math.sin(p.fase * 1.4) * 0.35;
+                        const alfa = p.alfaBase * pulso;
+
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.radio, 0, Math.PI * 2);
+                        ctx.fillStyle = p.esVerde
+                            ? `rgba(74, 222, 128, ${alfa})`
+                            : `rgba(244, 244, 245, ${alfa})`;
+                        ctx.fill();
                     }
 
-                    dron.framesManiobra -= 1;
-                    if (dron.framesManiobra <= 0) {
-                        elegirManiobra(dron);
-                    }
-
-                    dron.velocidadActual += (dron.velocidadObjetivo - dron.velocidadActual) * 0.045;
-                    dron.tasaGiroActual += (dron.tasaGiroObjetivo - dron.tasaGiroActual) * 0.055;
-
-                    const factorCurva = Math.min(0.22, Math.abs(dron.tasaGiroActual) * 2.4);
-                    const velEfectiva = dron.velocidadActual * (1 - factorCurva);
-
-                    dron.angulo += dron.tasaGiroActual;
-                    dron.x += Math.cos(dron.angulo) * velEfectiva;
-                    dron.y += Math.sin(dron.angulo) * velEfectiva;
-                    dron.faseOnda += 0.14;
-
-                    // Micro-ondulación integrada en la estela para evitar líneas paralelas separadas
-                    const retrocesoActual = 0;
-                    const perpX = -Math.sin(dron.angulo);
-                    const perpY = Math.cos(dron.angulo);
-                    const microSalto = Math.sin(dron.faseOnda) * 1.4;
-
-                    dron.puntos.push({
-                        x: dron.x + perpX * microSalto,
-                        y: dron.y + perpY * microSalto,
-                        angulo: dron.angulo
-                    });
-                    if (dron.puntos.length > dron.longitudEstela) {
-                        dron.puntos.shift();
-                    }
-
-                    if (dron.puntos.length > 3) {
-                        ctx.save();
-                        ctx.shadowColor = "rgba(255, 255, 255, 0.5)";
-                        ctx.shadowBlur = 11;
-
-                        // Estela única con ensanchamiento suave y desvanecido gradual
-                        for (let i = 1; i < dron.puntos.length; i++) {
-                            const pAnt = dron.puntos[i - 1];
-                            const pAct = dron.puntos[i];
-                            const prog = i / dron.puntos.length; // 0 cola -> 1 punta
-                            const retro = 1 - prog;
-
-                            // Pequeña onda que se atenúa hacia la cola
-                            const onda = Math.sin(prog * Math.PI * 4 - dron.faseOnda) * 1.6 * prog;
-                            const pX = -Math.sin(pAct.angulo);
-                            const pY = Math.cos(pAct.angulo);
-
-                            const alfa = Math.pow(prog, 1.9) * dron.brilloMax;
-                            const grosor = 0.8 + Math.pow(prog, 1.35) * 3.8 + Math.sin(retro * Math.PI) * 0.9;
-
-                            ctx.beginPath();
-                            ctx.moveTo(pAnt.x, pAnt.y);
-                            ctx.lineTo(pAct.x + pX * onda, pAct.y + pY * onda);
-                            ctx.strokeStyle = `rgba(255, 255, 255, ${alfa})`;
-                            ctx.lineWidth = grosor;
-                            ctx.lineCap = "round";
-                            ctx.stroke();
-                        }
-
-                        ctx.restore();
-                    }
-
-                    const fueraDePantalla =
-                        dron.x < -margenSalida ||
-                        dron.x > ancho + margenSalida ||
-                        dron.y < -margenSalida ||
-                        dron.y > alto + margenSalida;
-
-                    if (fueraDePantalla) {
-                        dron.activo = false;
-                        dron.puntos = [];
-                        dron.espera = 25 + Math.floor(Math.random() * 80);
-                    }
-
-                    requestAnimationFrame(actualizarYdibujarEstela);
+                    requestAnimationFrame(animarParticulas);
                 }
 
-                requestAnimationFrame(actualizarYdibujarEstela);
+                requestAnimationFrame(animarParticulas);
             }
         });
     </script>
