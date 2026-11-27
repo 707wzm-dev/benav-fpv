@@ -42,7 +42,7 @@
             overflow-x: hidden;
         }
 
-        /* Canvas de estela única con micro-ola en el fondo */
+        /* Canvas de estela única en el fondo */
         #estelasDron {
             position: fixed;
             inset: 0;
@@ -501,7 +501,7 @@
 </head>
 <body>
 
-    <!-- Estela única con micro-ola en el fondo -->
+    <!-- Estela única con micro-onda continua en el fondo -->
     <canvas id="estelasDron" aria-hidden="true"></canvas>
 
     <header class="topbar">
@@ -715,7 +715,7 @@
                 tarjetasServicios.forEach(tarjeta => tarjeta.classList.add("visible"));
             }
 
-            /* 4. Estela única con micro-ola tipo lancha en el fondo */
+            /* 4. Estela única con micro-onda continua en el fondo */
             const canvas = document.querySelector("#estelasDron");
             const prefiereMenosMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -792,7 +792,8 @@
                         tasaGiroActual: 0,
                         tasaGiroObjetivo: 0,
                         framesManiobra: 0,
-                        longitudEstela: ancho < 640 ? 75 : 120,
+                        faseOnda: Math.random() * Math.PI * 2,
+                        longitudEstela: ancho < 640 ? 80 : 125,
                         brilloMax: 0.24,
                         puntos: [],
                         espera: 0,
@@ -832,10 +833,17 @@
                     dron.angulo += dron.tasaGiroActual;
                     dron.x += Math.cos(dron.angulo) * velEfectiva;
                     dron.y += Math.sin(dron.angulo) * velEfectiva;
+                    dron.faseOnda += 0.14;
+
+                    // Micro-ondulación integrada en la estela para evitar líneas paralelas separadas
+                    const retrocesoActual = 0;
+                    const perpX = -Math.sin(dron.angulo);
+                    const perpY = Math.cos(dron.angulo);
+                    const microSalto = Math.sin(dron.faseOnda) * 1.4;
 
                     dron.puntos.push({
-                        x: dron.x,
-                        y: dron.y,
+                        x: dron.x + perpX * microSalto,
+                        y: dron.y + perpY * microSalto,
                         angulo: dron.angulo
                     });
                     if (dron.puntos.length > dron.longitudEstela) {
@@ -844,71 +852,29 @@
 
                     if (dron.puntos.length > 3) {
                         ctx.save();
-                        ctx.shadowColor = "rgba(255, 255, 255, 0.45)";
-                        ctx.shadowBlur = 10;
+                        ctx.shadowColor = "rgba(255, 255, 255, 0.5)";
+                        ctx.shadowBlur = 11;
 
-                        // Micro-olas laterales (efecto estela en V que se abre hacia atrás)
-                        const maxAperturaOnda = ancho < 640 ? 22 : 34;
-                        const pasoOnda = 2;
-
-                        for (let i = pasoOnda; i < dron.puntos.length; i += pasoOnda) {
-                            const pAnt = dron.puntos[i - pasoOnda];
-                            const pAct = dron.puntos[i];
-                            const prog = i / dron.puntos.length; // 0 atrás -> 1 adelante
-                            const retroceso = 1 - prog; // 0 adelante -> 1 atrás
-
-                            // La onda se abre conforme retrocede desde la punta y se apaga al final
-                            const campanaOnda = Math.sin(retroceso * Math.PI);
-                            const apertura = Math.pow(retroceso, 0.85) * maxAperturaOnda;
-
-                            // Vector perpendicular al rumbo del dron
-                            const perpX = -Math.sin(pAct.angulo);
-                            const perpY = Math.cos(pAct.angulo);
-
-                            // Leve ondulación senoidal para simular micro-ola
-                            const ripple = Math.sin(retroceso * Math.PI * 3.5) * 2.5 * campanaOnda;
-                            const offsetAct = apertura + ripple;
-
-                            const progAnt = (i - pasoOnda) / dron.puntos.length;
-                            const retroAnt = 1 - progAnt;
-                            const aperturaAnt = Math.pow(retroAnt, 0.85) * maxAperturaOnda;
-                            const rippleAnt = Math.sin(retroAnt * Math.PI * 3.5) * 2.5 * Math.sin(retroAnt * Math.PI);
-                            const offsetAnt = aperturaAnt + rippleAnt;
-
-                            const alfaOnda = campanaOnda * prog * dron.brilloMax * 0.58;
-                            if (alfaOnda > 0.008) {
-                                // Ola izquierda
-                                ctx.beginPath();
-                                ctx.moveTo(pAnt.x + perpX * offsetAnt, pAnt.y + perpY * offsetAnt);
-                                ctx.lineTo(pAct.x + perpX * offsetAct, pAct.y + perpY * offsetAct);
-                                ctx.strokeStyle = `rgba(255, 255, 255, ${alfaOnda})`;
-                                ctx.lineWidth = 0.7 + campanaOnda * 1.25;
-                                ctx.lineCap = "round";
-                                ctx.stroke();
-
-                                // Ola derecha
-                                ctx.beginPath();
-                                ctx.moveTo(pAnt.x - perpX * offsetAnt, pAnt.y - perpY * offsetAnt);
-                                ctx.lineTo(pAct.x - perpX * offsetAct, pAct.y - perpY * offsetAct);
-                                ctx.strokeStyle = `rgba(255, 255, 255, ${alfaOnda})`;
-                                ctx.lineWidth = 0.7 + campanaOnda * 1.25;
-                                ctx.lineCap = "round";
-                                ctx.stroke();
-                            }
-                        }
-
-                        // Trazo central principal
+                        // Estela única con ensanchamiento suave y desvanecido gradual
                         for (let i = 1; i < dron.puntos.length; i++) {
                             const pAnt = dron.puntos[i - 1];
                             const pAct = dron.puntos[i];
-                            const prog = i / dron.puntos.length;
-                            const alfa = Math.pow(prog, 1.85) * dron.brilloMax;
+                            const prog = i / dron.puntos.length; // 0 cola -> 1 punta
+                            const retro = 1 - prog;
+
+                            // Pequeña onda que se atenúa hacia la cola
+                            const onda = Math.sin(prog * Math.PI * 4 - dron.faseOnda) * 1.6 * prog;
+                            const pX = -Math.sin(pAct.angulo);
+                            const pY = Math.cos(pAct.angulo);
+
+                            const alfa = Math.pow(prog, 1.9) * dron.brilloMax;
+                            const grosor = 0.8 + Math.pow(prog, 1.35) * 3.8 + Math.sin(retro * Math.PI) * 0.9;
 
                             ctx.beginPath();
                             ctx.moveTo(pAnt.x, pAnt.y);
-                            ctx.lineTo(pAct.x, pAct.y);
+                            ctx.lineTo(pAct.x + pX * onda, pAct.y + pY * onda);
                             ctx.strokeStyle = `rgba(255, 255, 255, ${alfa})`;
-                            ctx.lineWidth = 1.0 + Math.pow(prog, 1.4) * 3.2;
+                            ctx.lineWidth = grosor;
                             ctx.lineCap = "round";
                             ctx.stroke();
                         }
