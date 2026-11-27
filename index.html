@@ -333,8 +333,14 @@
             user-select: none;
             -webkit-user-select: none;
             -webkit-touch-callout: none;
+            touch-action: pan-y;
+            cursor: grab;
             mask-image: linear-gradient(90deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
             -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
+        }
+
+        .servicios-anillo-wrap.arrastrando {
+            cursor: grabbing;
         }
 
         .servicios-pista {
@@ -553,6 +559,7 @@
 
             .servicios-anillo-wrap {
                 perspective: none;
+                cursor: auto;
             }
 
             .servicios-pista {
@@ -630,7 +637,7 @@
             <div class="servicios-anillo-wrap" id="anilloServicios" aria-label="Anillo horizontal de servicios con enfoque central">
                 <div class="servicios-pista" id="pistaServicios">
                     <!-- Conjunto 1 -->
-                    <article class="servicio-card">
+                    <article class="servicio-card" data-indice="0">
                         <div class="servicio-top">
                             <div class="servicio-icono" aria-hidden="true">
                                 <svg viewBox="0 0 24 24">
@@ -648,7 +655,7 @@
                         </div>
                     </article>
 
-                    <article class="servicio-card">
+                    <article class="servicio-card" data-indice="1">
                         <div class="servicio-top">
                             <div class="servicio-icono" aria-hidden="true">
                                 <svg viewBox="0 0 24 24">
@@ -667,7 +674,7 @@
                         </div>
                     </article>
 
-                    <article class="servicio-card">
+                    <article class="servicio-card" data-indice="2">
                         <div class="servicio-top">
                             <div class="servicio-icono" aria-hidden="true">
                                 <svg viewBox="0 0 24 24">
@@ -687,7 +694,7 @@
                     </article>
 
                     <!-- Conjunto 2 para rotación continua del anillo -->
-                    <article class="servicio-card" aria-hidden="true">
+                    <article class="servicio-card" data-indice="3" aria-hidden="true">
                         <div class="servicio-top">
                             <div class="servicio-icono">
                                 <svg viewBox="0 0 24 24">
@@ -705,7 +712,7 @@
                         </div>
                     </article>
 
-                    <article class="servicio-card" aria-hidden="true">
+                    <article class="servicio-card" data-indice="4" aria-hidden="true">
                         <div class="servicio-top">
                             <div class="servicio-icono">
                                 <svg viewBox="0 0 24 24">
@@ -724,7 +731,7 @@
                         </div>
                     </article>
 
-                    <article class="servicio-card" aria-hidden="true">
+                    <article class="servicio-card" data-indice="5" aria-hidden="true">
                         <div class="servicio-top">
                             <div class="servicio-icono">
                                 <svg viewBox="0 0 24 24">
@@ -841,7 +848,7 @@
 
             setTimeout(cicloMarca, 300);
 
-            /* 3. Anillo curvo horizontal con pausa central tipo estado de WhatsApp y barra de progreso */
+            /* 3. Anillo curvo horizontal: pausa solo en tarjeta central, arrastre clic/touch y barra WhatsApp */
             const wrapServicios = document.querySelector("#anilloServicios");
             const pistaServicios = document.querySelector("#pistaServicios");
             const prefiereMenosMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -857,17 +864,32 @@
                 let ultimoTiempo = null;
                 let tiempoEnCentroMs = 0;
                 let enPosicionCentral = false;
-                let cursorEncima = false;
-                let dedoPulsando = false;
+
+                // Estados de interacción: pausa solo sobre tarjeta central + arrastre clic/touch
+                let punteroEnCentral = false;
+                let arrastrando = false;
+                let inicioPunteroX = 0;
+                let inicioPosicionX = 0;
+                let distanciaArrastrePx = 0;
+                let tarjetaTocadaEnInicio = null;
+                let tipoPunteroActivo = null;
 
                 const barrasRelleno = tarjetas.map(card => card.querySelector(".servicio-barra-relleno"));
 
-                function resetearBarras() {
-                    barrasRelleno.forEach(barra => {
-                        if (barra) {
-                            barra.style.transform = "scaleX(0)";
-                        }
-                    });
+                function normalizarIndiceSiConviene() {
+                    if (indiceObjetivo >= totalUnicos * 2) {
+                        const offsetPrevio = posicionX - posicionDeseadaX;
+                        indiceObjetivo -= totalUnicos;
+                        posicionDeseadaX = calcularPosicionParaIndice(indiceObjetivo);
+                        posicionX = posicionDeseadaX + offsetPrevio;
+                        pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
+                    } else if (indiceObjetivo < 0) {
+                        const offsetPrevio = posicionX - posicionDeseadaX;
+                        indiceObjetivo += totalUnicos;
+                        posicionDeseadaX = calcularPosicionParaIndice(indiceObjetivo);
+                        posicionX = posicionDeseadaX + offsetPrevio;
+                        pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
+                    }
                 }
 
                 function calcularPosicionParaIndice(idx) {
@@ -887,6 +909,15 @@
                     }
                 }
 
+                function seleccionarIndice(nuevoIdx, reiniciarTiempo = true) {
+                    indiceObjetivo = Math.max(0, Math.min(tarjetas.length - 1, nuevoIdx));
+                    posicionDeseadaX = calcularPosicionParaIndice(indiceObjetivo);
+                    if (reiniciarTiempo) {
+                        tiempoEnCentroMs = 0;
+                    }
+                    enPosicionCentral = false;
+                }
+
                 function irASiguienteTarjeta() {
                     if (indiceObjetivo >= totalUnicos) {
                         const offsetPrevio = posicionX - posicionDeseadaX;
@@ -896,11 +927,26 @@
                         pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
                     }
 
-                    indiceObjetivo += 1;
-                    posicionDeseadaX = calcularPosicionParaIndice(indiceObjetivo);
-                    tiempoEnCentroMs = 0;
-                    enPosicionCentral = false;
-                    resetearBarras();
+                    seleccionarIndice(indiceObjetivo + 1, true);
+                }
+
+                function encontrarTarjetaMasCercanaAlCentro() {
+                    const rectWrap = wrapServicios.getBoundingClientRect();
+                    const centroWrap = rectWrap.left + rectWrap.width / 2;
+                    let mejorIdx = indiceObjetivo;
+                    let menorDistancia = Infinity;
+
+                    tarjetas.forEach((tarjeta, idx) => {
+                        const rectCard = tarjeta.getBoundingClientRect();
+                        const centroCard = rectCard.left + rectCard.width / 2;
+                        const dist = Math.abs(centroCard - centroWrap);
+                        if (dist < menorDistancia) {
+                            menorDistancia = dist;
+                            mejorIdx = idx;
+                        }
+                    });
+
+                    return mejorIdx;
                 }
 
                 function actualizarAnilloYEnfoque(progresoActual) {
@@ -927,12 +973,12 @@
                         tarjeta.style.filter = `blur(${desenfoquePx}px)`;
                         tarjeta.style.opacity = opacidad;
 
-                        const esCentral = idx === indiceObjetivo && enPosicionCentral;
-                        tarjeta.classList.toggle("en-foco", absDelta < 0.22 || esCentral);
+                        const estaEnFoco = absDelta < 0.22 || (idx === indiceObjetivo && enPosicionCentral);
+                        tarjeta.classList.toggle("en-foco", estaEnFoco);
 
                         const barra = barrasRelleno[idx];
                         if (barra) {
-                            if (idx === indiceObjetivo) {
+                            if (idx === indiceObjetivo && enPosicionCentral) {
                                 barra.style.transform = `scaleX(${Math.max(0, Math.min(1, progresoActual)).toFixed(4)})`;
                             } else {
                                 barra.style.transform = "scaleX(0)";
@@ -940,6 +986,102 @@
                         }
                     });
                 }
+
+                // Pausa en PC solo cuando el cursor está encima de la tarjeta central/enfocada
+                tarjetas.forEach(tarjeta => {
+                    tarjeta.addEventListener("pointerenter", (e) => {
+                        if (e.pointerType !== "touch" && tarjeta.classList.contains("en-foco")) {
+                            punteroEnCentral = true;
+                        }
+                    });
+
+                    tarjeta.addEventListener("pointermove", (e) => {
+                        if (e.pointerType !== "touch" && !arrastrando) {
+                            punteroEnCentral = tarjeta.classList.contains("en-foco");
+                        }
+                    });
+
+                    tarjeta.addEventListener("pointerleave", (e) => {
+                        if (e.pointerType !== "touch") {
+                            punteroEnCentral = false;
+                        }
+                    });
+                });
+
+                // Arrastre con clic o dedo (izquierda / derecha) y toque en tarjetas laterales
+                wrapServicios.addEventListener("pointerdown", (e) => {
+                    if (e.pointerType === "mouse" && e.button !== 0) return;
+
+                    arrastrando = true;
+                    tipoPunteroActivo = e.pointerType;
+                    inicioPunteroX = e.clientX;
+                    inicioPosicionX = posicionX;
+                    distanciaArrastrePx = 0;
+
+                    const cardClick = e.target.closest(".servicio-card");
+                    tarjetaTocadaEnInicio = cardClick ? tarjetas.indexOf(cardClick) : null;
+
+                    wrapServicios.classList.add("arrastrando");
+                    wrapServicios.setPointerCapture(e.pointerId);
+                });
+
+                wrapServicios.addEventListener("pointermove", (e) => {
+                    if (!arrastrando) return;
+
+                    const deltaX = e.clientX - inicioPunteroX;
+                    distanciaArrastrePx = Math.max(distanciaArrastrePx, Math.abs(deltaX));
+
+                    // Limite suave de recorrido para que siempre haya tarjetas a ambos lados
+                    const minX = calcularPosicionParaIndice(tarjetas.length - 1) - 90;
+                    const maxX = calcularPosicionParaIndice(0) + 90;
+                    posicionX = Math.max(minX, Math.min(maxX, inicioPosicionX + deltaX));
+                    pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
+                    enPosicionCentral = false;
+                });
+
+                function finalizarArrastre(e) {
+                    if (!arrastrando) return;
+                    arrastrando = false;
+                    wrapServicios.classList.remove("arrastrando");
+
+                    if (wrapServicios.hasPointerCapture(e.pointerId)) {
+                        wrapServicios.releasePointerCapture(e.pointerId);
+                    }
+
+                    const deltaFinalX = e.clientX - inicioPunteroX;
+
+                    if (distanciaArrastrePx < 8 && tarjetaTocadaEnInicio !== null) {
+                        // Clic o toque rápido sobre una tarjeta: la centramos si no es ya la activa
+                        if (tarjetaTocadaEnInicio !== indiceObjetivo) {
+                            seleccionarIndice(tarjetaTocadaEnInicio, true);
+                        }
+                    } else if (Math.abs(deltaFinalX) > 35) {
+                        // Arrastre deliberado hacia derecha (devolver anterior) o izquierda (avanzar siguiente)
+                        const direccion = deltaFinalX > 0 ? -1 : 1;
+                        const candidato = Math.max(0, Math.min(tarjetas.length - 1, indiceObjetivo + direccion));
+                        seleccionarIndice(candidato, true);
+                    } else {
+                        const cercana = encontrarTarjetaMasCercanaAlCentro();
+                        seleccionarIndice(cercana, true);
+                    }
+
+                    // Si en touch el dedo quedó sobre la tarjeta central, mantener pausa mientras está pulsado
+                    if (tipoPunteroActivo === "touch") {
+                        const cardActual = e.target.closest(".servicio-card");
+                        punteroEnCentral = Boolean(cardActual && cardActual.classList.contains("en-foco"));
+                    }
+
+                    tarjetaTocadaEnInicio = null;
+                    tipoPunteroActivo = null;
+                }
+
+                wrapServicios.addEventListener("pointerup", finalizarArrastre);
+                wrapServicios.addEventListener("pointercancel", (e) => {
+                    if (tipoPunteroActivo === "touch") {
+                        punteroEnCentral = false;
+                    }
+                    finalizarArrastre(e);
+                });
 
                 recalcularMedidas(true);
                 actualizarAnilloYEnfoque(0);
@@ -949,25 +1091,6 @@
                     actualizarAnilloYEnfoque(tiempoEnCentroMs / duracionPausaMs);
                 }, { passive: true });
 
-                wrapServicios.addEventListener("pointerenter", (e) => {
-                    if (e.pointerType !== "touch") cursorEncima = true;
-                });
-
-                wrapServicios.addEventListener("pointerleave", (e) => {
-                    if (e.pointerType !== "touch") cursorEncima = false;
-                });
-
-                wrapServicios.addEventListener("touchstart", () => {
-                    dedoPulsando = true;
-                }, { passive: true });
-
-                const liberarToque = () => {
-                    dedoPulsando = false;
-                };
-
-                window.addEventListener("touchend", liberarToque, { passive: true });
-                window.addEventListener("touchcancel", liberarToque, { passive: true });
-
                 function pasoAnillo(ahora) {
                     if (ultimoTiempo === null) {
                         ultimoTiempo = ahora;
@@ -975,13 +1098,13 @@
                     const dtMs = Math.min(ahora - ultimoTiempo, 50);
                     ultimoTiempo = ahora;
 
-                    const pausado = cursorEncima || dedoPulsando || document.hidden;
+                    const pausado = arrastrando || punteroEnCentral || document.hidden;
 
-                    if (!pausado) {
+                    if (!arrastrando && !document.hidden) {
                         const distanciaRestante = posicionDeseadaX - posicionX;
 
                         if (Math.abs(distanciaRestante) > 0.6) {
-                            const factorSuavizado = 1 - Math.exp(-dtMs * 0.0085);
+                            const factorSuavizado = 1 - Math.exp(-dtMs * 0.0095);
                             posicionX += distanciaRestante * factorSuavizado;
                             pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
                             enPosicionCentral = false;
@@ -990,9 +1113,11 @@
                             pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
                             enPosicionCentral = true;
 
-                            tiempoEnCentroMs += dtMs;
-                            if (tiempoEnCentroMs >= duracionPausaMs) {
-                                irASiguienteTarjeta();
+                            if (!punteroEnCentral) {
+                                tiempoEnCentroMs += dtMs;
+                                if (tiempoEnCentroMs >= duracionPausaMs) {
+                                    irASiguienteTarjeta();
+                                }
                             }
                         }
                     }
