@@ -71,15 +71,15 @@
                 radial-gradient(ellipse 80% 50% at 100% 72%, var(--neon-core), var(--neon-mid) 52%, transparent 80%);
         }
 
-        /* Canvas de ondas aleatorias en el fondo */
-        #ondasFondo {
+        /* Canvas de estelas de dron en el fondo */
+        #estelasDron {
             position: fixed;
             inset: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
             z-index: 1;
-            opacity: 0.85;
+            opacity: 0.92;
         }
 
         /* Capa principal por encima del fondo para que todo flote */
@@ -330,7 +330,7 @@
             background: linear-gradient(90deg, rgba(255, 255, 255, 0.38), transparent);
         }
 
-        /* 3 cuadros de Servicios flotando sobre la iluminación neón y las ondas */
+        /* 3 cuadros de Servicios flotando sobre la iluminación neón y las estelas */
         .servicios-grid {
             position: relative;
             z-index: 2;
@@ -459,7 +459,7 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
-            #ondasFondo {
+            #estelasDron {
                 display: none;
             }
         }
@@ -470,8 +470,8 @@
     <!-- Iluminación lateral estilo neón hacia el centro en toda la página -->
     <div class="neon-ambiente" aria-hidden="true"></div>
 
-    <!-- Ondas aleatorias animadas en el fondo -->
-    <canvas id="ondasFondo" aria-hidden="true"></canvas>
+    <!-- Estelas de drones invisibles entrando y saliendo aleatoriamente en el fondo -->
+    <canvas id="estelasDron" aria-hidden="true"></canvas>
 
     <header class="topbar">
         <div class="topbar-inner">
@@ -680,8 +680,8 @@
                 tarjetasServicios.forEach(tarjeta => tarjeta.classList.add("visible"));
             }
 
-            /* 4. Ondas aleatorias orgánicas en el fondo */
-            const canvas = document.querySelector("#ondasFondo");
+            /* 4. Estelas de dron invisible entrando y saliendo aleatoriamente en el fondo */
+            const canvas = document.querySelector("#estelasDron");
             const prefiereMenosMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
             if (canvas && !prefiereMenosMovimiento) {
@@ -702,72 +702,128 @@
                 redimensionarCanvas();
                 window.addEventListener("resize", redimensionarCanvas, { passive: true });
 
-                // Creamos varias ondas con parámetros aleatorios que derivan suavemente
-                const cantidadOndas = 6;
-                const ondas = Array.from({ length: cantidadOndas }, (_, idx) => ({
-                    baseYRatio: 0.16 + (idx / (cantidadOndas - 1)) * 0.72,
-                    amplitud: 14 + Math.random() * 26,
-                    frecuencia1: 0.0022 + Math.random() * 0.0032,
-                    frecuencia2: 0.0055 + Math.random() * 0.005,
-                    velocidad: (0.0006 + Math.random() * 0.0012) * (Math.random() > 0.5 ? 1 : -1),
-                    fase1: Math.random() * Math.PI * 2,
-                    fase2: Math.random() * Math.PI * 2,
-                    // Semillas aleatorias para variar amplitud y altura de forma continua
-                    derivaAmpFase: Math.random() * Math.PI * 2,
-                    derivaAmpVel: 0.0004 + Math.random() * 0.0007,
-                    derivaYVel: 0.00025 + Math.random() * 0.00045,
-                    alpha: 0.055 + Math.random() * 0.075,
-                    grosor: 1 + Math.random() * 1.1
-                }));
+                function crearDronEstela(iniciarEnCamino = false) {
+                    const margen = 90;
+                    const bordeEntrada = Math.floor(Math.random() * 4); // 0: izq, 1: der, 2: arriba, 3: abajo
+                    let x, y, anguloBase;
 
-                let tiempo = 0;
+                    if (bordeEntrada === 0) {
+                        x = -margen;
+                        y = Math.random() * alto;
+                        anguloBase = (Math.random() - 0.5) * 1.1;
+                    } else if (bordeEntrada === 1) {
+                        x = ancho + margen;
+                        y = Math.random() * alto;
+                        anguloBase = Math.PI + (Math.random() - 0.5) * 1.1;
+                    } else if (bordeEntrada === 2) {
+                        x = Math.random() * ancho;
+                        y = -margen;
+                        anguloBase = Math.PI / 2 + (Math.random() - 0.5) * 1.1;
+                    } else {
+                        x = Math.random() * ancho;
+                        y = alto + margen;
+                        anguloBase = -Math.PI / 2 + (Math.random() - 0.5) * 1.1;
+                    }
 
-                function dibujarOndas() {
-                    tiempo += 1;
-                    ctx.clearRect(0, 0, ancho, alto);
+                    const longitudEstela = ancho < 640 ? 34 : 56;
+                    const puntos = [];
 
-                    const pasoX = ancho < 640 ? 18 : 12;
+                    if (iniciarEnCamino) {
+                        x = ancho * (0.15 + Math.random() * 0.7);
+                        y = alto * (0.15 + Math.random() * 0.7);
+                        anguloBase = Math.random() * Math.PI * 2;
+                    }
 
-                    ondas.forEach(onda => {
-                        onda.fase1 += onda.velocidad * 16;
-                        onda.fase2 -= onda.velocidad * 10;
-                        onda.derivaAmpFase += onda.derivaAmpVel * 16;
-
-                        const ampActual = onda.amplitud * (0.65 + 0.45 * Math.sin(onda.derivaAmpFase));
-                        const yBaseActual =
-                            (onda.baseYRatio + Math.sin(tiempo * onda.derivaYVel + onda.fase1 * 0.25) * 0.045) * alto;
-
-                        ctx.beginPath();
-                        for (let x = 0; x <= ancho + pasoX; x += pasoX) {
-                            const y =
-                                yBaseActual +
-                                Math.sin(x * onda.frecuencia1 + onda.fase1) * ampActual +
-                                Math.cos(x * onda.frecuencia2 + onda.fase2) * (ampActual * 0.42);
-
-                            if (x === 0) {
-                                ctx.moveTo(x, y);
-                            } else {
-                                ctx.lineTo(x, y);
-                            }
-                        }
-
-                        // Degradado horizontal para que nazca suave en los bordes y se integre al centro
-                        const gradiente = ctx.createLinearGradient(0, 0, ancho, 0);
-                        gradiente.addColorStop(0, `rgba(255, 255, 255, ${onda.alpha * 1.35})`);
-                        gradiente.addColorStop(0.25, `rgba(220, 225, 255, ${onda.alpha * 0.7})`);
-                        gradiente.addColorStop(0.5, `rgba(255, 255, 255, ${onda.alpha * 0.32})`);
-                        gradiente.addColorStop(0.75, `rgba(220, 225, 255, ${onda.alpha * 0.7})`);
-                        gradiente.addColorStop(1, `rgba(255, 255, 255, ${onda.alpha * 1.35})`);
-
-                        ctx.strokeStyle = gradiente;
-                        ctx.lineWidth = onda.grosor;
-                        ctx.stroke();
-                    });
-
-                    requestAnimationFrame(dibujarOndas);
+                    return {
+                        x,
+                        y,
+                        angulo: anguloBase,
+                        velocidad: 2.2 + Math.random() * 2.4,
+                        giroVel: (Math.random() - 0.5) * 0.022,
+                        derivaGiroFase: Math.random() * Math.PI * 2,
+                        derivaGiroVel: 0.012 + Math.random() * 0.018,
+                        longitudEstela,
+                        brilloMax: 0.11 + Math.random() * 0.11,
+                        puntos,
+                        esperaRestante: iniciarEnCamino ? 0 : Math.floor(Math.random() * 140),
+                        activo: iniciarEnCamino
+                    };
                 }
 
-                requestAnimationFrame(dibujarOndas);
+                const cantidadDrones = ancho < 640 ? 3 : 4;
+                const drones = Array.from({ length: cantidadDrones }, (_, i) =>
+                    crearDronEstela(i < 2)
+                );
+
+                function actualizarYdibujarDrones() {
+                    ctx.clearRect(0, 0, ancho, alto);
+                    const margenSalida = 140;
+
+                    drones.forEach((dron, idx) => {
+                        if (!dron.activo) {
+                            dron.esperaRestante -= 1;
+                            if (dron.esperaRestante <= 0) {
+                                drones[idx] = crearDronEstela(false);
+                                drones[idx].activo = true;
+                            }
+                            return;
+                        }
+
+                        // Curvas orgánicas como un vuelo FPV suave con cambios de dirección
+                        dron.derivaGiroFase += dron.derivaGiroVel;
+                        const giroActual = dron.giroVel + Math.sin(dron.derivaGiroFase) * 0.018;
+                        dron.angulo += giroActual;
+
+                        dron.x += Math.cos(dron.angulo) * dron.velocidad;
+                        dron.y += Math.sin(dron.angulo) * dron.velocidad;
+
+                        dron.puntos.push({ x: dron.x, y: dron.y });
+                        if (dron.puntos.length > dron.longitudEstela) {
+                            dron.puntos.shift();
+                        }
+
+                        // Dibujar estela segmento a segmento desvaneciéndose hacia atrás
+                        if (dron.puntos.length > 2) {
+                            for (let i = 1; i < dron.puntos.length; i++) {
+                                const pAnterior = dron.puntos[i - 1];
+                                const pActual = dron.puntos[i];
+                                const progreso = i / dron.puntos.length; // 0 en cola -> 1 en el dron
+
+                                ctx.beginPath();
+                                ctx.moveTo(pAnterior.x, pAnterior.y);
+                                ctx.lineTo(pActual.x, pActual.y);
+                                ctx.strokeStyle = `rgba(255, 255, 255, ${progreso * progreso * dron.brilloMax})`;
+                                ctx.lineWidth = 0.8 + progreso * 1.6;
+                                ctx.lineCap = "round";
+                                ctx.stroke();
+                            }
+
+                            // Pequeño punto de luz tenue en la punta (el dron invisible)
+                            const cabeza = dron.puntos[dron.puntos.length - 1];
+                            ctx.beginPath();
+                            ctx.arc(cabeza.x, cabeza.y, 1.8, 0, Math.PI * 2);
+                            ctx.fillStyle = `rgba(255, 255, 255, ${dron.brilloMax * 1.4})`;
+                            ctx.fill();
+                        }
+
+                        // Comprobar si salió por completo de la pantalla para esconderse y reaparecer luego
+                        const salioDelPantalla =
+                            dron.x < -margenSalida ||
+                            dron.x > ancho + margenSalida ||
+                            dron.y < -margenSalida ||
+                            dron.y > alto + margenSalida;
+
+                        if (salioDelPantalla) {
+                            dron.activo = false;
+                            dron.puntos = [];
+                            dron.esperaRestante = 50 + Math.floor(Math.random() * 190);
+                        }
+                    });
+
+                    requestAnimationFrame(actualizarYdibujarDrones);
+                }
+
+                requestAnimationFrame(actualizarYdibujarDrones);
             }
         });
     </script>
