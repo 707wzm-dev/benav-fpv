@@ -741,16 +741,13 @@
                     const r = Math.random();
 
                     if (r < 0.35) {
-                        // Recta ágil con leve deriva
                         dron.velocidadObjetivo = 3.2 + Math.random() * 1.9;
                         dron.tasaGiroObjetivo = (Math.random() - 0.5) * 0.014;
                     } else if (r < 0.78) {
-                        // Curva amplia y fluida
                         dron.velocidadObjetivo = 2.2 + Math.random() * 1.3;
                         const dir = Math.random() < 0.5 ? -1 : 1;
                         dron.tasaGiroObjetivo = dir * (0.022 + Math.random() * 0.025);
                     } else {
-                        // Giro más pronunciado
                         dron.velocidadObjetivo = 1.8 + Math.random() * 1.0;
                         const dir = Math.random() < 0.5 ? -1 : 1;
                         dron.tasaGiroObjetivo = dir * (0.04 + Math.random() * 0.025);
@@ -795,8 +792,8 @@
                         tasaGiroActual: 0,
                         tasaGiroObjetivo: 0,
                         framesManiobra: 0,
-                        longitudEstela: ancho < 640 ? 48 : 78,
-                        brilloMax: 0.24,
+                        longitudEstela: ancho < 640 ? 85 : 135,
+                        brilloMax: 0.25,
                         puntos: [],
                         espera: 0,
                         activo: true
@@ -810,7 +807,7 @@
 
                 function actualizarYdibujarEstela() {
                     ctx.clearRect(0, 0, ancho, alto);
-                    const margenSalida = 140;
+                    const margenSalida = 180;
 
                     if (!dron.activo) {
                         dron.espera -= 1;
@@ -844,19 +841,19 @@
                     if (dron.puntos.length > 2) {
                         ctx.save();
                         ctx.shadowColor = "rgba(255, 255, 255, 0.55)";
-                        ctx.shadowBlur = 10;
+                        ctx.shadowBlur = 12;
 
                         for (let i = 1; i < dron.puntos.length; i++) {
                             const pAnt = dron.puntos[i - 1];
                             const pAct = dron.puntos[i];
                             const prog = i / dron.puntos.length;
-                            const alfa = Math.pow(prog, 2.3) * dron.brilloMax;
+                            const alfa = Math.pow(prog, 1.85) * dron.brilloMax;
 
                             ctx.beginPath();
                             ctx.moveTo(pAnt.x, pAnt.y);
                             ctx.lineTo(pAct.x, pAct.y);
                             ctx.strokeStyle = `rgba(255, 255, 255, ${alfa})`;
-                            ctx.lineWidth = 0.8 + prog * 1.6;
+                            ctx.lineWidth = 1.1 + Math.pow(prog, 1.4) * 3.8;
                             ctx.lineCap = "round";
                             ctx.stroke();
                         }
@@ -873,7 +870,7 @@
                     if (fueraDePantalla) {
                         dron.activo = false;
                         dron.puntos = [];
-                        dron.espera = 30 + Math.floor(Math.random() * 90);
+                        dron.espera = 25 + Math.floor(Math.random() * 80);
                     }
 
                     requestAnimationFrame(actualizarYdibujarEstela);
