@@ -321,45 +321,33 @@
             background: linear-gradient(90deg, var(--accent-green-line), transparent);
         }
 
-        /* Carrusel / anillo horizontal automático de Servicios */
+        /* Carrusel / anillo horizontal con enfoque central y desenfoque lateral */
         .servicios-anillo-wrap {
             position: relative;
             z-index: 2;
             overflow: hidden;
             border-radius: 16px;
-            padding-top: 6px;
-            padding-bottom: 10px;
-            mask-image: linear-gradient(90deg, transparent 0%, #000 3%, #000 97%, transparent 100%);
-            -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 3%, #000 97%, transparent 100%);
+            padding: 14px 0 18px;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            mask-image: linear-gradient(90deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
+            -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
         }
 
         .servicios-pista {
             display: flex;
-            gap: 22px;
+            align-items: center;
+            gap: 24px;
             width: max-content;
             will-change: transform;
-            animation: rotarAnilloServicios 24s linear infinite;
-        }
-
-        .servicios-anillo-wrap:hover .servicios-pista,
-        .servicios-anillo-wrap:focus-within .servicios-pista {
-            animation-play-state: paused;
-        }
-
-        @keyframes rotarAnilloServicios {
-            0% {
-                transform: translateX(0);
-            }
-            100% {
-                transform: translateX(-50%);
-            }
         }
 
         .servicio-card {
             position: relative;
-            flex: 0 0 340px;
-            max-width: calc(100vw - 56px);
-            background: linear-gradient(180deg, rgba(20, 25, 22, 0.96) 0%, rgba(13, 13, 17, 0.98) 62%);
+            flex: 0 0 360px;
+            max-width: calc(100vw - 64px);
+            background: linear-gradient(180deg, rgba(20, 25, 22, 0.97) 0%, rgba(13, 13, 17, 0.99) 62%);
             border: 1px solid var(--border-subtle);
             border-top: 1px solid var(--accent-green-line);
             border-radius: 16px;
@@ -368,12 +356,11 @@
             flex-direction: column;
             gap: 14px;
             overflow: hidden;
+            will-change: transform, filter, opacity;
             box-shadow:
                 0 22px 46px rgba(0, 0, 0, 0.75),
                 0 -5px 16px -4px var(--accent-green-glow);
-            transition: border-color 0.25s ease,
-                        transform 0.28s ease,
-                        box-shadow 0.28s ease;
+            transition: border-color 0.25s ease, box-shadow 0.28s ease;
         }
 
         .servicio-card::before {
@@ -403,16 +390,15 @@
             transition: left 0.3s ease, right 0.3s ease;
         }
 
-        .servicio-card:hover {
+        .servicio-card.en-foco {
             border-color: var(--border-hover);
             border-top-color: rgba(74, 222, 128, 0.75);
-            transform: translateY(-4px);
             box-shadow:
-                0 26px 52px rgba(0, 0, 0, 0.84),
-                0 -6px 20px -4px rgba(74, 222, 128, 0.18);
+                0 26px 54px rgba(0, 0, 0, 0.86),
+                0 -6px 20px -4px rgba(74, 222, 128, 0.2);
         }
 
-        .servicio-card:hover::after {
+        .servicio-card.en-foco::after {
             left: 8%;
             right: 8%;
         }
@@ -435,13 +421,6 @@
             align-items: center;
             justify-content: center;
             color: var(--accent-green);
-            transition: transform 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
-        }
-
-        .servicio-card:hover .servicio-icono {
-            transform: scale(1.05);
-            border-color: rgba(74, 222, 128, 0.5);
-            background-color: rgba(74, 222, 128, 0.12);
         }
 
         .servicio-icono svg {
@@ -510,7 +489,7 @@
             }
 
             .servicio-card {
-                flex: 0 0 290px;
+                flex: 0 0 295px;
             }
         }
 
@@ -520,13 +499,16 @@
             }
 
             .servicios-pista {
-                animation: none;
                 flex-wrap: wrap;
                 width: 100%;
+                transform: none !important;
             }
 
             .servicio-card {
                 flex: 1 1 280px;
+                filter: none !important;
+                opacity: 1 !important;
+                transform: none !important;
             }
         }
     </style>
@@ -584,9 +566,9 @@
                 </div>
             </div>
 
-            <div class="servicios-anillo-wrap" aria-label="Carrusel horizontal de servicios">
-                <div class="servicios-pista">
-                    <!-- Grupo 1 -->
+            <div class="servicios-anillo-wrap" id="anilloServicios" aria-label="Carrusel horizontal de servicios con enfoque central">
+                <div class="servicios-pista" id="pistaServicios">
+                    <!-- Conjunto 1 -->
                     <article class="servicio-card">
                         <div class="servicio-top">
                             <div class="servicio-icono" aria-hidden="true">
@@ -628,7 +610,7 @@
                         <p>Captura, estabilización y edición final lista para difundir tu negocio en redes, web o presentaciones.</p>
                     </article>
 
-                    <!-- Grupo duplicado para bucle continuo sin corte -->
+                    <!-- Conjunto 2 para rotación continua -->
                     <article class="servicio-card" aria-hidden="true">
                         <div class="servicio-top">
                             <div class="servicio-icono">
@@ -768,9 +750,107 @@
 
             setTimeout(cicloMarca, 300);
 
-            /* 3. Partículas ambientales flotando en el fondo */
-            const canvas = document.querySelector("#particulasFondo");
+            /* 3. Anillo horizontal de Servicios con enfoque central y pausa al mantener pulsado / hover */
+            const wrapServicios = document.querySelector("#anilloServicios");
+            const pistaServicios = document.querySelector("#pistaServicios");
             const prefiereMenosMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+            if (wrapServicios && pistaServicios && !prefiereMenosMovimiento) {
+                const tarjetas = Array.from(pistaServicios.querySelectorAll(".servicio-card"));
+                let posicionX = 0;
+                let anchoCiclo = 0;
+                let ultimoTiempo = null;
+                let cursorEncima = false;
+                let dedoPulsando = false;
+                const velocidadPxPorSeg = 46;
+
+                function calcularAnchoCiclo() {
+                    const mitad = pistaServicios.scrollWidth / 2;
+                    anchoCiclo = mitad > 0 ? mitad : 1;
+                }
+
+                function actualizarEnfoqueCentral() {
+                    const rectWrap = wrapServicios.getBoundingClientRect();
+                    const centroWrap = rectWrap.left + rectWrap.width / 2;
+                    const radioInfluencia = Math.max(rectWrap.width * 0.42, 220);
+
+                    tarjetas.forEach(tarjeta => {
+                        const rectCard = tarjeta.getBoundingClientRect();
+                        const centroCard = rectCard.left + rectCard.width / 2;
+                        const distancia = Math.abs(centroWrap - centroCard);
+                        const factor = Math.min(1, distancia / radioInfluencia);
+
+                        // 1 en el centro -> 0 lejos del centro
+                        const nitidez = 1 - factor;
+                        const desenfoquePx = (Math.pow(factor, 1.15) * 4.5).toFixed(2);
+                        const escala = (0.91 + nitidez * 0.09).toFixed(3);
+                        const opacidad = (0.28 + nitidez * 0.72).toFixed(3);
+
+                        tarjeta.style.filter = `blur(${desenfoquePx}px)`;
+                        tarjeta.style.transform = `scale(${escala})`;
+                        tarjeta.style.opacity = opacidad;
+                        tarjeta.classList.toggle("en-foco", factor < 0.22);
+                    });
+                }
+
+                calcularAnchoCiclo();
+                actualizarEnfoqueCentral();
+
+                window.addEventListener("resize", () => {
+                    calcularAnchoCiclo();
+                    actualizarEnfoqueCentral();
+                }, { passive: true });
+
+                // Pausa en PC solo cuando el cursor está encima
+                wrapServicios.addEventListener("pointerenter", (e) => {
+                    if (e.pointerType !== "touch") {
+                        cursorEncima = true;
+                    }
+                });
+
+                wrapServicios.addEventListener("pointerleave", (e) => {
+                    if (e.pointerType !== "touch") {
+                        cursorEncima = false;
+                    }
+                });
+
+                // Pausa en pantalla touch solo mientras se mantiene pulsado con el dedo
+                wrapServicios.addEventListener("touchstart", () => {
+                    dedoPulsando = true;
+                }, { passive: true });
+
+                const liberarToque = () => {
+                    dedoPulsando = false;
+                };
+
+                window.addEventListener("touchend", liberarToque, { passive: true });
+                window.addEventListener("touchcancel", liberarToque, { passive: true });
+
+                function pasoCarrusel(ahora) {
+                    if (ultimoTiempo === null) {
+                        ultimoTiempo = ahora;
+                    }
+                    const dt = Math.min((ahora - ultimoTiempo) / 1000, 0.05);
+                    ultimoTiempo = ahora;
+
+                    const pausado = cursorEncima || dedoPulsando;
+                    if (!pausado && anchoCiclo > 0) {
+                        posicionX -= velocidadPxPorSeg * dt;
+                        if (Math.abs(posicionX) >= anchoCiclo) {
+                            posicionX += anchoCiclo;
+                        }
+                        pistaServicios.style.transform = `translate3d(${posicionX}px, 0, 0)`;
+                    }
+
+                    actualizarEnfoqueCentral();
+                    requestAnimationFrame(pasoCarrusel);
+                }
+
+                requestAnimationFrame(pasoCarrusel);
+            }
+
+            /* 4. Partículas ambientales flotando en el fondo */
+            const canvas = document.querySelector("#particulasFondo");
 
             if (canvas && !prefiereMenosMovimiento) {
                 const ctx = canvas.getContext("2d");
