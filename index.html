@@ -349,13 +349,13 @@
         .servicio-card {
             position: relative;
             flex: 0 0 415px;
-            min-height: 250px;
+            min-height: 265px;
             max-width: calc(100vw - 48px);
             background: linear-gradient(180deg, rgba(20, 25, 22, 0.98) 0%, rgba(13, 13, 17, 0.99) 62%);
             border: 1px solid var(--border-subtle);
             border-top: 1px solid var(--accent-green-line);
             border-radius: 18px;
-            padding: 34px 30px 32px;
+            padding: 34px 30px 26px;
             display: flex;
             flex-direction: column;
             gap: 16px;
@@ -463,6 +463,43 @@
             line-height: 1.7;
         }
 
+        /* Barra de progreso estilo estado de WhatsApp debajo del cuadro central */
+        .servicio-barra-wrap {
+            position: relative;
+            z-index: 1;
+            margin-top: auto;
+            padding-top: 8px;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(4px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            pointer-events: none;
+        }
+
+        .servicio-card.en-foco .servicio-barra-wrap {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .servicio-barra-track {
+            width: 100%;
+            height: 3px;
+            border-radius: 999px;
+            background-color: rgba(255, 255, 255, 0.12);
+            overflow: hidden;
+        }
+
+        .servicio-barra-relleno {
+            width: 100%;
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(74, 222, 128, 0.65), var(--accent-green));
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.45);
+            transform: scaleX(0);
+            transform-origin: left center;
+            will-change: transform;
+        }
+
         /* Bloques secundarios con un acabado sobrio y discreto */
         .caja-sobria {
             position: relative;
@@ -496,8 +533,8 @@
 
             .servicio-card {
                 flex: 0 0 320px;
-                min-height: 230px;
-                padding: 28px 24px 26px;
+                min-height: 245px;
+                padding: 28px 24px 22px;
             }
 
             .servicio-card h3 {
@@ -529,6 +566,10 @@
                 filter: none !important;
                 opacity: 1 !important;
                 transform: none !important;
+            }
+
+            .servicio-barra-wrap {
+                display: none;
             }
         }
     </style>
@@ -600,6 +641,11 @@
                         </div>
                         <h3>Seguridad indoor</h3>
                         <p>Planificación de vuelos en espacios interiores, evaluando el entorno y aplicando medidas de resguardo en cada toma.</p>
+                        <div class="servicio-barra-wrap" aria-hidden="true">
+                            <div class="servicio-barra-track">
+                                <div class="servicio-barra-relleno"></div>
+                            </div>
+                        </div>
                     </article>
 
                     <article class="servicio-card">
@@ -614,6 +660,11 @@
                         </div>
                         <h3>Recorridos fluidos</h3>
                         <p>Movimientos continuos y controlados que conectan distintas áreas y muestran la distribución real de tu espacio.</p>
+                        <div class="servicio-barra-wrap" aria-hidden="true">
+                            <div class="servicio-barra-track">
+                                <div class="servicio-barra-relleno"></div>
+                            </div>
+                        </div>
                     </article>
 
                     <article class="servicio-card">
@@ -628,6 +679,11 @@
                         </div>
                         <h3>Producción audiovisual</h3>
                         <p>Captura, estabilización y edición final lista para difundir tu negocio en redes, web o presentaciones.</p>
+                        <div class="servicio-barra-wrap" aria-hidden="true">
+                            <div class="servicio-barra-track">
+                                <div class="servicio-barra-relleno"></div>
+                            </div>
+                        </div>
                     </article>
 
                     <!-- Conjunto 2 para rotación continua del anillo -->
@@ -642,6 +698,11 @@
                         </div>
                         <h3>Seguridad indoor</h3>
                         <p>Planificación de vuelos en espacios interiores, evaluando el entorno y aplicando medidas de resguardo en cada toma.</p>
+                        <div class="servicio-barra-wrap">
+                            <div class="servicio-barra-track">
+                                <div class="servicio-barra-relleno"></div>
+                            </div>
+                        </div>
                     </article>
 
                     <article class="servicio-card" aria-hidden="true">
@@ -656,6 +717,11 @@
                         </div>
                         <h3>Recorridos fluidos</h3>
                         <p>Movimientos continuos y controlados que conectan distintas áreas y muestran la distribución real de tu espacio.</p>
+                        <div class="servicio-barra-wrap">
+                            <div class="servicio-barra-track">
+                                <div class="servicio-barra-relleno"></div>
+                            </div>
+                        </div>
                     </article>
 
                     <article class="servicio-card" aria-hidden="true">
@@ -670,6 +736,11 @@
                         </div>
                         <h3>Producción audiovisual</h3>
                         <p>Captura, estabilización y edición final lista para difundir tu negocio en redes, web o presentaciones.</p>
+                        <div class="servicio-barra-wrap">
+                            <div class="servicio-barra-track">
+                                <div class="servicio-barra-relleno"></div>
+                            </div>
+                        </div>
                     </article>
                 </div>
             </div>
@@ -770,39 +841,80 @@
 
             setTimeout(cicloMarca, 300);
 
-            /* 3. Anillo curvo horizontal de Servicios con enfoque central y pausa al mantener pulsado / hover */
+            /* 3. Anillo curvo horizontal con pausa central tipo estado de WhatsApp y barra de progreso */
             const wrapServicios = document.querySelector("#anilloServicios");
             const pistaServicios = document.querySelector("#pistaServicios");
             const prefiereMenosMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
             if (wrapServicios && pistaServicios && !prefiereMenosMovimiento) {
                 const tarjetas = Array.from(pistaServicios.querySelectorAll(".servicio-card"));
+                const totalUnicos = 3;
+                const duracionPausaMs = 4200;
+
+                let indiceObjetivo = 1;
                 let posicionX = 0;
-                let anchoCiclo = 0;
+                let posicionDeseadaX = 0;
                 let ultimoTiempo = null;
+                let tiempoEnCentroMs = 0;
+                let enPosicionCentral = false;
                 let cursorEncima = false;
                 let dedoPulsando = false;
-                const velocidadPxPorSeg = 48;
 
-                function calcularAnchoCiclo() {
-                    const mitad = pistaServicios.scrollWidth / 2;
-                    anchoCiclo = mitad > 0 ? mitad : 1;
+                const barrasRelleno = tarjetas.map(card => card.querySelector(".servicio-barra-relleno"));
+
+                function resetearBarras() {
+                    barrasRelleno.forEach(barra => {
+                        if (barra) {
+                            barra.style.transform = "scaleX(0)";
+                        }
+                    });
                 }
 
-                function actualizarAnilloYEnfoque() {
+                function calcularPosicionParaIndice(idx) {
+                    const tarjetaRef = tarjetas[idx];
+                    if (!tarjetaRef) return posicionX;
+
+                    const wrapCentroLocal = wrapServicios.clientWidth / 2;
+                    const cardCentroLocal = tarjetaRef.offsetLeft + tarjetaRef.offsetWidth / 2;
+                    return wrapCentroLocal - cardCentroLocal;
+                }
+
+                function recalcularMedidas(inmediato = false) {
+                    posicionDeseadaX = calcularPosicionParaIndice(indiceObjetivo);
+                    if (inmediato) {
+                        posicionX = posicionDeseadaX;
+                        pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
+                    }
+                }
+
+                function irASiguienteTarjeta() {
+                    if (indiceObjetivo >= totalUnicos) {
+                        const offsetPrevio = posicionX - posicionDeseadaX;
+                        indiceObjetivo -= totalUnicos;
+                        posicionDeseadaX = calcularPosicionParaIndice(indiceObjetivo);
+                        posicionX = posicionDeseadaX + offsetPrevio;
+                        pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
+                    }
+
+                    indiceObjetivo += 1;
+                    posicionDeseadaX = calcularPosicionParaIndice(indiceObjetivo);
+                    tiempoEnCentroMs = 0;
+                    enPosicionCentral = false;
+                    resetearBarras();
+                }
+
+                function actualizarAnilloYEnfoque(progresoActual) {
                     const rectWrap = wrapServicios.getBoundingClientRect();
                     const centroWrap = rectWrap.left + rectWrap.width / 2;
                     const radioArco = Math.max(rectWrap.width * 0.48, 260);
 
-                    tarjetas.forEach(tarjeta => {
+                    tarjetas.forEach((tarjeta, idx) => {
                         const rectCard = tarjeta.getBoundingClientRect();
                         const centroCard = rectCard.left + rectCard.width / 2;
-                        // Offset normalizado (-1 a la izquierda, 0 al centro, +1 a la derecha)
                         const deltaNorm = Math.max(-1.35, Math.min(1.35, (centroCard - centroWrap) / radioArco));
                         const absDelta = Math.min(1, Math.abs(deltaNorm));
                         const nitidez = 1 - absDelta;
 
-                        // Curvatura tipo anillo: giro en Y y retroceso en Z hacia los bordes
                         const anguloY = (-deltaNorm * 34).toFixed(2);
                         const profundidadZ = (-Math.pow(absDelta, 1.35) * 140).toFixed(1);
                         const arcoY = (Math.pow(absDelta, 1.5) * 12).toFixed(1);
@@ -814,32 +926,37 @@
                             `translate3d(0, ${arcoY}px, ${profundidadZ}px) rotateY(${anguloY}deg) scale(${escala})`;
                         tarjeta.style.filter = `blur(${desenfoquePx}px)`;
                         tarjeta.style.opacity = opacidad;
-                        tarjeta.classList.toggle("en-foco", absDelta < 0.22);
+
+                        const esCentral = idx === indiceObjetivo && enPosicionCentral;
+                        tarjeta.classList.toggle("en-foco", absDelta < 0.22 || esCentral);
+
+                        const barra = barrasRelleno[idx];
+                        if (barra) {
+                            if (idx === indiceObjetivo) {
+                                barra.style.transform = `scaleX(${Math.max(0, Math.min(1, progresoActual)).toFixed(4)})`;
+                            } else {
+                                barra.style.transform = "scaleX(0)";
+                            }
+                        }
                     });
                 }
 
-                calcularAnchoCiclo();
-                actualizarAnilloYEnfoque();
+                recalcularMedidas(true);
+                actualizarAnilloYEnfoque(0);
 
                 window.addEventListener("resize", () => {
-                    calcularAnchoCiclo();
-                    actualizarAnilloYEnfoque();
+                    recalcularMedidas(true);
+                    actualizarAnilloYEnfoque(tiempoEnCentroMs / duracionPausaMs);
                 }, { passive: true });
 
-                // Pausa en PC solo cuando el cursor está encima
                 wrapServicios.addEventListener("pointerenter", (e) => {
-                    if (e.pointerType !== "touch") {
-                        cursorEncima = true;
-                    }
+                    if (e.pointerType !== "touch") cursorEncima = true;
                 });
 
                 wrapServicios.addEventListener("pointerleave", (e) => {
-                    if (e.pointerType !== "touch") {
-                        cursorEncima = false;
-                    }
+                    if (e.pointerType !== "touch") cursorEncima = false;
                 });
 
-                // Pausa en pantalla touch solo mientras se mantiene pulsado con el dedo
                 wrapServicios.addEventListener("touchstart", () => {
                     dedoPulsando = true;
                 }, { passive: true });
@@ -855,19 +972,33 @@
                     if (ultimoTiempo === null) {
                         ultimoTiempo = ahora;
                     }
-                    const dt = Math.min((ahora - ultimoTiempo) / 1000, 0.05);
+                    const dtMs = Math.min(ahora - ultimoTiempo, 50);
                     ultimoTiempo = ahora;
 
-                    const pausado = cursorEncima || dedoPulsando;
-                    if (!pausado && anchoCiclo > 0) {
-                        posicionX -= velocidadPxPorSeg * dt;
-                        if (Math.abs(posicionX) >= anchoCiclo) {
-                            posicionX += anchoCiclo;
+                    const pausado = cursorEncima || dedoPulsando || document.hidden;
+
+                    if (!pausado) {
+                        const distanciaRestante = posicionDeseadaX - posicionX;
+
+                        if (Math.abs(distanciaRestante) > 0.6) {
+                            const factorSuavizado = 1 - Math.exp(-dtMs * 0.0085);
+                            posicionX += distanciaRestante * factorSuavizado;
+                            pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
+                            enPosicionCentral = false;
+                        } else {
+                            posicionX = posicionDeseadaX;
+                            pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
+                            enPosicionCentral = true;
+
+                            tiempoEnCentroMs += dtMs;
+                            if (tiempoEnCentroMs >= duracionPausaMs) {
+                                irASiguienteTarjeta();
+                            }
                         }
-                        pistaServicios.style.transform = `translate3d(${posicionX}px, 0, 0)`;
                     }
 
-                    actualizarAnilloYEnfoque();
+                    const progreso = enPosicionCentral ? (tiempoEnCentroMs / duracionPausaMs) : 0;
+                    actualizarAnilloYEnfoque(progreso);
                     requestAnimationFrame(pasoAnillo);
                 }
 
@@ -908,37 +1039,55 @@
                     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
                     const cantidad = ancho < 640 ? 28 : 48;
-                    particulas = Array.from({ length: cantidad }, () => crearParticula(true));
+                    if (particulas.length === 0) {
+                        particulas = Array.from({ length: cantidad }, () => crearParticula(true));
+                    } else if (particulas.length > cantidad) {
+                        particulas.length = cantidad;
+                    } else {
+                        while (particulas.length < cantidad) {
+                            particulas.push(crearParticula(true));
+                        }
+                    }
                 }
 
                 redimensionarCanvas();
                 window.addEventListener("resize", redimensionarCanvas, { passive: true });
 
-                function animarParticulas() {
-                    ctx.clearRect(0, 0, ancho, alto);
+                let ultimoTiempoParticulas = null;
 
-                    for (let i = 0; i < particulas.length; i++) {
-                        const p = particulas[i];
-                        p.fase += p.velFase;
-                        p.x += p.vx + Math.sin(p.fase) * 0.16;
-                        p.y += p.vy;
+                function animarParticulas(ahora) {
+                    if (ultimoTiempoParticulas === null) {
+                        ultimoTiempoParticulas = ahora;
+                    }
+                    const dt = Math.min((ahora - ultimoTiempoParticulas) / (1000 / 60), 2.5);
+                    ultimoTiempoParticulas = ahora;
 
-                        if (p.y < -16) {
-                            particulas[i] = crearParticula(false);
-                            continue;
+                    if (!document.hidden) {
+                        ctx.clearRect(0, 0, ancho, alto);
+
+                        for (let i = 0; i < particulas.length; i++) {
+                            const p = particulas[i];
+                            p.fase += p.velFase * dt;
+                            p.x += (p.vx + Math.sin(p.fase) * 0.16) * dt;
+                            p.y += p.vy * dt;
+
+                            if (p.y < -16) {
+                                particulas[i] = crearParticula(false);
+                                continue;
+                            }
+                            if (p.x < -16) p.x = ancho + 16;
+                            if (p.x > ancho + 16) p.x = -16;
+
+                            const pulso = 0.65 + Math.sin(p.fase * 1.4) * 0.35;
+                            const alfa = p.alfaBase * pulso;
+
+                            ctx.beginPath();
+                            ctx.arc(p.x, p.y, p.radio, 0, Math.PI * 2);
+                            ctx.fillStyle = p.esVerde
+                                ? `rgba(74, 222, 128, ${alfa})`
+                                : `rgba(244, 244, 245, ${alfa})`;
+                            ctx.fill();
                         }
-                        if (p.x < -16) p.x = ancho + 16;
-                        if (p.x > ancho + 16) p.x = -16;
-
-                        const pulso = 0.65 + Math.sin(p.fase * 1.4) * 0.35;
-                        const alfa = p.alfaBase * pulso;
-
-                        ctx.beginPath();
-                        ctx.arc(p.x, p.y, p.radio, 0, Math.PI * 2);
-                        ctx.fillStyle = p.esVerde
-                            ? `rgba(74, 222, 128, ${alfa})`
-                            : `rgba(244, 244, 245, ${alfa})`;
-                        ctx.fill();
                     }
 
                     requestAnimationFrame(animarParticulas);
