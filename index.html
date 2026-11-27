@@ -715,7 +715,7 @@
                 tarjetasServicios.forEach(tarjeta => tarjeta.classList.add("visible"));
             }
 
-            /* 4. Estelas de dron invisible con iluminación propia en el fondo */
+            /* 4. Estelas de dron invisible con inercia, giros y pulso de luz */
             const canvas = document.querySelector("#estelasDron");
             const prefiereMenosMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -736,6 +736,28 @@
 
                 redimensionarCanvas();
                 window.addEventListener("resize", redimensionarCanvas, { passive: true });
+
+                function elegirNuevaManiobra(dron) {
+                    const tipo = Math.random();
+
+                    if (tipo < 0.35) {
+                        // Tramo rápido o recto con leve deriva
+                        dron.velocidadObjetivo = 3.2 + Math.random() * 2.1;
+                        dron.tasaGiroObjetivo = (Math.random() - 0.5) * 0.014;
+                    } else if (tipo < 0.78) {
+                        // Curva fluida tipo recorrido de dron
+                        dron.velocidadObjetivo = 2.1 + Math.random() * 1.4;
+                        const direccion = Math.random() < 0.5 ? -1 : 1;
+                        dron.tasaGiroObjetivo = direccion * (0.022 + Math.random() * 0.026);
+                    } else {
+                        // Giro más cerrado / maniobra ágil
+                        dron.velocidadObjetivo = 1.8 + Math.random() * 1.1;
+                        const direccion = Math.random() < 0.5 ? -1 : 1;
+                        dron.tasaGiroObjetivo = direccion * (0.042 + Math.random() * 0.028);
+                    }
+
+                    dron.framesRestantesManiobra = 35 + Math.floor(Math.random() * 75);
+                }
 
                 function crearDronEstela(iniciarEnCamino = false) {
                     const margen = 90;
@@ -760,29 +782,33 @@
                         anguloBase = -Math.PI / 2 + (Math.random() - 0.5) * 1.1;
                     }
 
-                    const longitudEstela = ancho < 640 ? 38 : 62;
-                    const puntos = [];
-
                     if (iniciarEnCamino) {
                         x = ancho * (0.15 + Math.random() * 0.7);
                         y = alto * (0.15 + Math.random() * 0.7);
                         anguloBase = Math.random() * Math.PI * 2;
                     }
 
-                    return {
+                    const longitudEstela = ancho < 640 ? 42 : 68;
+                    const dron = {
                         x,
                         y,
                         angulo: anguloBase,
-                        velocidad: 2.2 + Math.random() * 2.4,
-                        giroVel: (Math.random() - 0.5) * 0.022,
-                        derivaGiroFase: Math.random() * Math.PI * 2,
-                        derivaGiroVel: 0.012 + Math.random() * 0.018,
+                        velocidadActual: 2.5 + Math.random() * 1.6,
+                        velocidadObjetivo: 3.0,
+                        tasaGiroActual: 0,
+                        tasaGiroObjetivo: 0,
+                        framesRestantesManiobra: 0,
+                        faseLed: Math.random() * Math.PI * 2,
+                        velocidadLed: 0.06 + Math.random() * 0.05,
                         longitudEstela,
-                        brilloMax: 0.22 + Math.random() * 0.16,
-                        puntos,
-                        esperaRestante: iniciarEnCamino ? 0 : Math.floor(Math.random() * 140),
+                        brilloMax: 0.20 + Math.random() * 0.14,
+                        puntos: [],
+                        esperaRestante: iniciarEnCamino ? 0 : Math.floor(Math.random() * 130),
                         activo: iniciarEnCamino
                     };
+
+                    elegirNuevaManiobra(dron);
+                    return dron;
                 }
 
                 const cantidadDrones = ancho < 640 ? 3 : 4;
@@ -792,7 +818,7 @@
 
                 function actualizarYdibujarDrones() {
                     ctx.clearRect(0, 0, ancho, alto);
-                    const margenSalida = 140;
+                    const margenSalida = 150;
 
                     drones.forEach((dron, idx) => {
                         if (!dron.activo) {
@@ -804,12 +830,25 @@
                             return;
                         }
 
-                        dron.derivaGiroFase += dron.derivaGiroVel;
-                        const giroActual = dron.giroVel + Math.sin(dron.derivaGiroFase) * 0.018;
-                        dron.angulo += giroActual;
+                        dron.framesRestantesManiobra -= 1;
+                        if (dron.framesRestantesManiobra <= 0) {
+                            elegirNuevaManiobra(dron);
+                        }
 
-                        dron.x += Math.cos(dron.angulo) * dron.velocidad;
-                        dron.y += Math.sin(dron.angulo) * dron.velocidad;
+                        // Inercia en velocidad y tasa de giro
+                        dron.velocidadActual += (dron.velocidadObjetivo - dron.velocidadActual) * 0.045;
+                        dron.tasaGiroActual += (dron.tasaGiroObjetivo - dron.tasaGiroActual) * 0.06;
+
+                        // Al girar más fuerte, el dron tiende a perder un poco de velocidad punta
+                        const factorCurva = Math.min(0.22, Math.abs(dron.tasaGiroActual) * 2.5);
+                        const velEfectiva = dron.velocidadActual * (1 - factorCurva);
+
+                        dron.angulo += dron.tasaGiroActual;
+                        dron.x += Math.cos(dron.angulo) * velEfectiva;
+                        dron.y += Math.sin(dron.angulo) * velEfectiva;
+                        dron.faseLed += dron.velocidadLed;
+
+                        const pulsoLed = 0.85 + Math.sin(dron.faseLed) * 0.15;
 
                         dron.puntos.push({ x: dron.x, y: dron.y });
                         if (dron.puntos.length > dron.longitudEstela) {
@@ -818,41 +857,42 @@
 
                         if (dron.puntos.length > 2) {
                             ctx.save();
-                            ctx.shadowColor = "rgba(255, 255, 255, 0.75)";
-                            ctx.shadowBlur = 14;
+                            ctx.shadowColor = "rgba(255, 255, 255, 0.65)";
+                            ctx.shadowBlur = 12;
 
                             for (let i = 1; i < dron.puntos.length; i++) {
                                 const pAnterior = dron.puntos[i - 1];
                                 const pActual = dron.puntos[i];
                                 const progreso = i / dron.puntos.length;
+                                const curvaAlfa = Math.pow(progreso, 2.2) * dron.brilloMax * pulsoLed;
 
                                 ctx.beginPath();
                                 ctx.moveTo(pAnterior.x, pAnterior.y);
                                 ctx.lineTo(pActual.x, pActual.y);
-                                ctx.strokeStyle = `rgba(255, 255, 255, ${progreso * progreso * dron.brilloMax})`;
-                                ctx.lineWidth = 0.9 + progreso * 1.9;
+                                ctx.strokeStyle = `rgba(255, 255, 255, ${curvaAlfa})`;
+                                ctx.lineWidth = 0.7 + progreso * 1.85;
                                 ctx.lineCap = "round";
                                 ctx.stroke();
                             }
 
                             const cabeza = dron.puntos[dron.puntos.length - 1];
                             ctx.beginPath();
-                            ctx.arc(cabeza.x, cabeza.y, 2.2, 0, Math.PI * 2);
-                            ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(1, dron.brilloMax * 2.2)})`;
+                            ctx.arc(cabeza.x, cabeza.y, 2.1, 0, Math.PI * 2);
+                            ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(1, dron.brilloMax * 2.1 * pulsoLed)})`;
                             ctx.fill();
                             ctx.restore();
                         }
 
-                        const salioDelPantalla =
+                        const salioDePantalla =
                             dron.x < -margenSalida ||
                             dron.x > ancho + margenSalida ||
                             dron.y < -margenSalida ||
                             dron.y > alto + margenSalida;
 
-                        if (salioDelPantalla) {
+                        if (salioDePantalla) {
                             dron.activo = false;
                             dron.puntos = [];
-                            dron.esperaRestante = 50 + Math.floor(Math.random() * 190);
+                            dron.esperaRestante = 45 + Math.floor(Math.random() * 170);
                         }
                     });
 
