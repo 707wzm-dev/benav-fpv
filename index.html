@@ -634,10 +634,67 @@
                 </div>
             </div>
 
-            <div class="servicios-anillo-wrap" id="anilloServicios" aria-label="Anillo horizontal de servicios con enfoque central">
+            <div class="servicios-anillo-wrap" id="anilloServicios" aria-label="Anillo horizontal de servicios con bucle infinito">
                 <div class="servicios-pista" id="pistaServicios">
-                    <!-- Conjunto 1 -->
-                    <article class="servicio-card" data-indice="0">
+                    <!-- Bloque A (anterior para retroceder sin tope) -->
+                    <article class="servicio-card" data-slot="0" aria-hidden="true">
+                        <div class="servicio-top">
+                            <div class="servicio-icono">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M12 3l7 3v6c0 5-3 8.5-7 9-4-.5-7-4-7-9V6l7-3z" />
+                                </svg>
+                            </div>
+                            <span class="servicio-num">01</span>
+                        </div>
+                        <h3>Seguridad indoor</h3>
+                        <p>Planificación de vuelos en espacios interiores, evaluando el entorno y aplicando medidas de resguardo en cada toma.</p>
+                        <div class="servicio-barra-wrap">
+                            <div class="servicio-barra-track">
+                                <div class="servicio-barra-relleno"></div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="servicio-card" data-slot="1" aria-hidden="true">
+                        <div class="servicio-top">
+                            <div class="servicio-icono">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M4 16c3-7 6-7 8 0s5 7 8 0" />
+                                    <circle cx="20" cy="16" r="1.5" />
+                                </svg>
+                            </div>
+                            <span class="servicio-num">02</span>
+                        </div>
+                        <h3>Recorridos fluidos</h3>
+                        <p>Movimientos continuos y controlados que conectan distintas áreas y muestran la distribución real de tu espacio.</p>
+                        <div class="servicio-barra-wrap">
+                            <div class="servicio-barra-track">
+                                <div class="servicio-barra-relleno"></div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="servicio-card" data-slot="2" aria-hidden="true">
+                        <div class="servicio-top">
+                            <div class="servicio-icono">
+                                <svg viewBox="0 0 24 24">
+                                    <rect x="3" y="6" width="14" height="12" rx="2" />
+                                    <path d="M17 10l4-2v8l-4-2v-4z" />
+                                </svg>
+                            </div>
+                            <span class="servicio-num">03</span>
+                        </div>
+                        <h3>Producción audiovisual</h3>
+                        <p>Captura, estabilización y edición final lista para difundir tu negocio en redes, web o presentaciones.</p>
+                        <div class="servicio-barra-wrap">
+                            <div class="servicio-barra-track">
+                                <div class="servicio-barra-relleno"></div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Bloque B (principal) -->
+                    <article class="servicio-card" data-slot="3">
                         <div class="servicio-top">
                             <div class="servicio-icono" aria-hidden="true">
                                 <svg viewBox="0 0 24 24">
@@ -655,7 +712,7 @@
                         </div>
                     </article>
 
-                    <article class="servicio-card" data-indice="1">
+                    <article class="servicio-card" data-slot="4">
                         <div class="servicio-top">
                             <div class="servicio-icono" aria-hidden="true">
                                 <svg viewBox="0 0 24 24">
@@ -674,7 +731,7 @@
                         </div>
                     </article>
 
-                    <article class="servicio-card" data-indice="2">
+                    <article class="servicio-card" data-slot="5">
                         <div class="servicio-top">
                             <div class="servicio-icono" aria-hidden="true">
                                 <svg viewBox="0 0 24 24">
@@ -693,8 +750,8 @@
                         </div>
                     </article>
 
-                    <!-- Conjunto 2 para rotación continua del anillo -->
-                    <article class="servicio-card" data-indice="3" aria-hidden="true">
+                    <!-- Bloque C (siguiente para avanzar sin tope) -->
+                    <article class="servicio-card" data-slot="6" aria-hidden="true">
                         <div class="servicio-top">
                             <div class="servicio-icono">
                                 <svg viewBox="0 0 24 24">
@@ -712,7 +769,7 @@
                         </div>
                     </article>
 
-                    <article class="servicio-card" data-indice="4" aria-hidden="true">
+                    <article class="servicio-card" data-slot="7" aria-hidden="true">
                         <div class="servicio-top">
                             <div class="servicio-icono">
                                 <svg viewBox="0 0 24 24">
@@ -731,7 +788,7 @@
                         </div>
                     </article>
 
-                    <article class="servicio-card" data-indice="5" aria-hidden="true">
+                    <article class="servicio-card" data-slot="8" aria-hidden="true">
                         <div class="servicio-top">
                             <div class="servicio-icono">
                                 <svg viewBox="0 0 24 24">
@@ -848,7 +905,7 @@
 
             setTimeout(cicloMarca, 300);
 
-            /* 3. Anillo curvo horizontal: pausa solo en tarjeta central, arrastre clic/touch y barra WhatsApp */
+            /* 3. Anillo curvo horizontal: bucle infinito 1-2-3, pausa solo en central y arrastre clic/touch */
             const wrapServicios = document.querySelector("#anilloServicios");
             const pistaServicios = document.querySelector("#pistaServicios");
             const prefiereMenosMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -856,16 +913,19 @@
             if (wrapServicios && pistaServicios && !prefiereMenosMovimiento) {
                 const tarjetas = Array.from(pistaServicios.querySelectorAll(".servicio-card"));
                 const totalUnicos = 3;
+                const bloqueCentralInicio = totalUnicos; // 3 (01 central)
+                const bloqueCentralFin = totalUnicos * 2 - 1; // 5 (03 central)
                 const duracionPausaMs = 4200;
 
-                let indiceObjetivo = 1;
+                // Empezamos en el índice 4 (02 del bloque central) para ver 01 a la izquierda y 03 a la derecha
+                let indiceObjetivo = 4;
                 let posicionX = 0;
                 let posicionDeseadaX = 0;
+                let anchoBloqueUnico = 0;
                 let ultimoTiempo = null;
                 let tiempoEnCentroMs = 0;
                 let enPosicionCentral = false;
 
-                // Estados de interacción: pausa solo sobre tarjeta central + arrastre clic/touch
                 let punteroEnCentral = false;
                 let arrastrando = false;
                 let inicioPunteroX = 0;
@@ -876,19 +936,12 @@
 
                 const barrasRelleno = tarjetas.map(card => card.querySelector(".servicio-barra-relleno"));
 
-                function normalizarIndiceSiConviene() {
-                    if (indiceObjetivo >= totalUnicos * 2) {
-                        const offsetPrevio = posicionX - posicionDeseadaX;
-                        indiceObjetivo -= totalUnicos;
-                        posicionDeseadaX = calcularPosicionParaIndice(indiceObjetivo);
-                        posicionX = posicionDeseadaX + offsetPrevio;
-                        pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
-                    } else if (indiceObjetivo < 0) {
-                        const offsetPrevio = posicionX - posicionDeseadaX;
-                        indiceObjetivo += totalUnicos;
-                        posicionDeseadaX = calcularPosicionParaIndice(indiceObjetivo);
-                        posicionX = posicionDeseadaX + offsetPrevio;
-                        pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
+                function calcularAnchoBloqueUnico() {
+                    if (tarjetas.length >= totalUnicos * 2) {
+                        const dx = tarjetas[totalUnicos].offsetLeft - tarjetas[0].offsetLeft;
+                        anchoBloqueUnico = dx > 0 ? dx : (pistaServicios.scrollWidth / 3);
+                    } else {
+                        anchoBloqueUnico = pistaServicios.scrollWidth / 3 || 1;
                     }
                 }
 
@@ -901,7 +954,23 @@
                     return wrapCentroLocal - cardCentroLocal;
                 }
 
+                function centrarEnBloquePrincipalSinSalto() {
+                    calcularAnchoBloqueUnico();
+                    while (indiceObjetivo < bloqueCentralInicio) {
+                        indiceObjetivo += totalUnicos;
+                        posicionX -= anchoBloqueUnico;
+                        posicionDeseadaX -= anchoBloqueUnico;
+                    }
+                    while (indiceObjetivo > bloqueCentralFin) {
+                        indiceObjetivo -= totalUnicos;
+                        posicionX += anchoBloqueUnico;
+                        posicionDeseadaX += anchoBloqueUnico;
+                    }
+                    pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
+                }
+
                 function recalcularMedidas(inmediato = false) {
+                    calcularAnchoBloqueUnico();
                     posicionDeseadaX = calcularPosicionParaIndice(indiceObjetivo);
                     if (inmediato) {
                         posicionX = posicionDeseadaX;
@@ -910,7 +979,7 @@
                 }
 
                 function seleccionarIndice(nuevoIdx, reiniciarTiempo = true) {
-                    indiceObjetivo = Math.max(0, Math.min(tarjetas.length - 1, nuevoIdx));
+                    indiceObjetivo = nuevoIdx;
                     posicionDeseadaX = calcularPosicionParaIndice(indiceObjetivo);
                     if (reiniciarTiempo) {
                         tiempoEnCentroMs = 0;
@@ -919,14 +988,6 @@
                 }
 
                 function irASiguienteTarjeta() {
-                    if (indiceObjetivo >= totalUnicos) {
-                        const offsetPrevio = posicionX - posicionDeseadaX;
-                        indiceObjetivo -= totalUnicos;
-                        posicionDeseadaX = calcularPosicionParaIndice(indiceObjetivo);
-                        posicionX = posicionDeseadaX + offsetPrevio;
-                        pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
-                    }
-
                     seleccionarIndice(indiceObjetivo + 1, true);
                 }
 
@@ -1008,7 +1069,7 @@
                     });
                 });
 
-                // Arrastre con clic o dedo (izquierda / derecha) y toque en tarjetas laterales
+                // Arrastre con clic o dedo sin tope en ningún sentido
                 wrapServicios.addEventListener("pointerdown", (e) => {
                     if (e.pointerType === "mouse" && e.button !== 0) return;
 
@@ -1031,10 +1092,20 @@
                     const deltaX = e.clientX - inicioPunteroX;
                     distanciaArrastrePx = Math.max(distanciaArrastrePx, Math.abs(deltaX));
 
-                    // Limite suave de recorrido para que siempre haya tarjetas a ambos lados
-                    const minX = calcularPosicionParaIndice(tarjetas.length - 1) - 90;
-                    const maxX = calcularPosicionParaIndice(0) + 90;
-                    posicionX = Math.max(minX, Math.min(maxX, inicioPosicionX + deltaX));
+                    posicionX = inicioPosicionX + deltaX;
+
+                    // Envoltura continua durante el arrastre para que nunca haya tope lateral
+                    if (anchoBloqueUnico > 0) {
+                        const posBloqueCentral = calcularPosicionParaIndice(4);
+                        if (posicionX > posBloqueCentral + anchoBloqueUnico * 0.9) {
+                            posicionX -= anchoBloqueUnico;
+                            inicioPosicionX -= anchoBloqueUnico;
+                        } else if (posicionX < posBloqueCentral - anchoBloqueUnico * 0.9) {
+                            posicionX += anchoBloqueUnico;
+                            inicioPosicionX += anchoBloqueUnico;
+                        }
+                    }
+
                     pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
                     enPosicionCentral = false;
                 });
@@ -1051,21 +1122,17 @@
                     const deltaFinalX = e.clientX - inicioPunteroX;
 
                     if (distanciaArrastrePx < 8 && tarjetaTocadaEnInicio !== null) {
-                        // Clic o toque rápido sobre una tarjeta: la centramos si no es ya la activa
                         if (tarjetaTocadaEnInicio !== indiceObjetivo) {
                             seleccionarIndice(tarjetaTocadaEnInicio, true);
                         }
                     } else if (Math.abs(deltaFinalX) > 35) {
-                        // Arrastre deliberado hacia derecha (devolver anterior) o izquierda (avanzar siguiente)
                         const direccion = deltaFinalX > 0 ? -1 : 1;
-                        const candidato = Math.max(0, Math.min(tarjetas.length - 1, indiceObjetivo + direccion));
-                        seleccionarIndice(candidato, true);
+                        seleccionarIndice(indiceObjetivo + direccion, true);
                     } else {
                         const cercana = encontrarTarjetaMasCercanaAlCentro();
                         seleccionarIndice(cercana, true);
                     }
 
-                    // Si en touch el dedo quedó sobre la tarjeta central, mantener pausa mientras está pulsado
                     if (tipoPunteroActivo === "touch") {
                         const cardActual = e.target.closest(".servicio-card");
                         punteroEnCentral = Boolean(cardActual && cardActual.classList.contains("en-foco"));
@@ -1098,8 +1165,6 @@
                     const dtMs = Math.min(ahora - ultimoTiempo, 50);
                     ultimoTiempo = ahora;
 
-                    const pausado = arrastrando || punteroEnCentral || document.hidden;
-
                     if (!arrastrando && !document.hidden) {
                         const distanciaRestante = posicionDeseadaX - posicionX;
 
@@ -1112,6 +1177,11 @@
                             posicionX = posicionDeseadaX;
                             pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
                             enPosicionCentral = true;
+
+                            // Normalizamos silenciosamente al bloque central cuando termina de llegar
+                            if (indiceObjetivo < bloqueCentralInicio || indiceObjetivo > bloqueCentralFin) {
+                                centrarEnBloquePrincipalSinSalto();
+                            }
 
                             if (!punteroEnCentral) {
                                 tiempoEnCentroMs += dtMs;
