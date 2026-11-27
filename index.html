@@ -222,22 +222,94 @@
             margin: 0 6px;
         }
 
-        /* Segmentos siguientes */
+        /* Segmentos */
         .segmento {
             max-width: 1140px;
             margin: 0 auto;
-            padding: 90px 20px;
+            padding: 84px 20px;
             border-bottom: 1px solid var(--border-subtle);
             scroll-margin-top: 76px;
         }
 
-        .segmento h2 {
-            font-size: 1.6rem;
-            margin-bottom: 8px;
+        .encabezado-seccion {
+            margin-bottom: 32px;
         }
 
-        .segmento p {
+        .encabezado-seccion .etiqueta {
+            display: inline-block;
+            font-size: 0.78rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
             color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .segmento h2 {
+            font-size: clamp(1.45rem, 2.5vw, 1.85rem);
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        /* 3 cuadros de Servicios en seguidilla */
+        .servicios-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .servicio-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 28px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            transition: border-color 0.22s ease, transform 0.22s ease, background-color 0.22s ease;
+        }
+
+        .servicio-card:hover {
+            border-color: #3a3a46;
+            background-color: #16161c;
+            transform: translateY(-3px);
+        }
+
+        .servicio-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .servicio-punto {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent);
+        }
+
+        .servicio-num {
+            font-size: 0.78rem;
+            letter-spacing: 0.16em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .servicio-card h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .servicio-card p {
+            color: var(--text-muted);
+            font-size: 0.94rem;
+            line-height: 1.65;
+        }
+
+        @media (max-width: 900px) {
+            .servicios-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 600px) {
@@ -290,18 +362,55 @@
         </section>
 
         <section class="segmento" id="servicios">
-            <h2>Servicios</h2>
-            <p>Aquí integraremos los 3 cuadros en seguidilla.</p>
+            <div class="encabezado-seccion">
+                <span class="etiqueta">Lo que hacemos</span>
+                <h2>Servicios</h2>
+            </div>
+
+            <div class="servicios-grid">
+                <article class="servicio-card">
+                    <div class="servicio-top">
+                        <span class="servicio-punto" aria-hidden="true"></span>
+                        <span class="servicio-num">01</span>
+                    </div>
+                    <h3>Seguridad indoor</h3>
+                    <p>Planificación de vuelos en espacios interiores, evaluando el entorno y aplicando medidas de resguardo en cada toma.</p>
+                </article>
+
+                <article class="servicio-card">
+                    <div class="servicio-top">
+                        <span class="servicio-punto" aria-hidden="true"></span>
+                        <span class="servicio-num">02</span>
+                    </div>
+                    <h3>Recorridos fluidos</h3>
+                    <p>Movimientos continuos y controlados que conectan distintas áreas y muestran la distribución real de tu espacio.</p>
+                </article>
+
+                <article class="servicio-card">
+                    <div class="servicio-top">
+                        <span class="servicio-punto" aria-hidden="true"></span>
+                        <span class="servicio-num">03</span>
+                    </div>
+                    <h3>Producción audiovisual</h3>
+                    <p>Captura, estabilización y edición final lista para difundir tu negocio en redes, web o presentaciones.</p>
+                </article>
+            </div>
         </section>
 
         <section class="segmento" id="portafolio">
-            <h2>Portafolio</h2>
-            <p>Espacio reservado para tus muestras de vuelo y videos.</p>
+            <div class="encabezado-seccion">
+                <span class="etiqueta">Muestras</span>
+                <h2>Portafolio</h2>
+            </div>
+            <p style="color: var(--text-muted);">Espacio reservado para tus videos y vuelos de prueba.</p>
         </section>
 
         <section class="segmento" id="contacto" style="border-bottom: none;">
-            <h2>Contacto</h2>
-            <p>Espacio para cotizaciones y redes.</p>
+            <div class="encabezado-seccion">
+                <span class="etiqueta">Hablemos</span>
+                <h2>Contacto</h2>
+            </div>
+            <p style="color: var(--text-muted);">Espacio para cotizaciones y canales directos.</p>
         </section>
     </main>
 
