@@ -14,7 +14,6 @@
             --text-main: #f4f4f5;
             --text-muted: #a1a1aa;
             --accent: #ffffff;
-            /* Intensidad base del neón lateral (ajústala fácil aquí) */
             --neon-core: rgba(255, 255, 255, 0.20);
             --neon-mid: rgba(210, 214, 240, 0.09);
         }
@@ -58,7 +57,6 @@
             opacity: 0.95;
         }
 
-        /* Luz neón lateral izquierda hacia el centro */
         .neon-ambiente::before {
             left: -14vw;
             background:
@@ -66,7 +64,6 @@
                 radial-gradient(ellipse 80% 50% at 0% 72%, var(--neon-core), var(--neon-mid) 52%, transparent 80%);
         }
 
-        /* Luz neón lateral derecha hacia el centro */
         .neon-ambiente::after {
             right: -14vw;
             background:
@@ -74,7 +71,18 @@
                 radial-gradient(ellipse 80% 50% at 100% 72%, var(--neon-core), var(--neon-mid) 52%, transparent 80%);
         }
 
-        /* Capa principal por encima del neón para que todo flote sobre la luz */
+        /* Canvas de ondas aleatorias en el fondo */
+        #ondasFondo {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.85;
+        }
+
+        /* Capa principal por encima del fondo para que todo flote */
         .contenido-principal,
         .topbar {
             position: relative;
@@ -322,7 +330,7 @@
             background: linear-gradient(90deg, rgba(255, 255, 255, 0.38), transparent);
         }
 
-        /* 3 cuadros de Servicios flotando sobre la iluminación neón */
+        /* 3 cuadros de Servicios flotando sobre la iluminación neón y las ondas */
         .servicios-grid {
             position: relative;
             z-index: 2;
@@ -449,12 +457,21 @@
                 line-height: 1.8;
             }
         }
+
+        @media (prefers-reduced-motion: reduce) {
+            #ondasFondo {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
 
     <!-- Iluminación lateral estilo neón hacia el centro en toda la página -->
     <div class="neon-ambiente" aria-hidden="true"></div>
+
+    <!-- Ondas aleatorias animadas en el fondo -->
+    <canvas id="ondasFondo" aria-hidden="true"></canvas>
 
     <header class="topbar">
         <div class="topbar-inner">
@@ -661,6 +678,96 @@
                 observadorServicios.observe(document.querySelector("#servicios"));
             } else {
                 tarjetasServicios.forEach(tarjeta => tarjeta.classList.add("visible"));
+            }
+
+            /* 4. Ondas aleatorias orgánicas en el fondo */
+            const canvas = document.querySelector("#ondasFondo");
+            const prefiereMenosMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+            if (canvas && !prefiereMenosMovimiento) {
+                const ctx = canvas.getContext("2d");
+                let ancho = 0;
+                let alto = 0;
+                let dpr = 1;
+
+                function redimensionarCanvas() {
+                    dpr = Math.min(window.devicePixelRatio || 1, 2);
+                    ancho = window.innerWidth;
+                    alto = window.innerHeight;
+                    canvas.width = Math.floor(ancho * dpr);
+                    canvas.height = Math.floor(alto * dpr);
+                    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                }
+
+                redimensionarCanvas();
+                window.addEventListener("resize", redimensionarCanvas, { passive: true });
+
+                // Creamos varias ondas con parámetros aleatorios que derivan suavemente
+                const cantidadOndas = 6;
+                const ondas = Array.from({ length: cantidadOndas }, (_, idx) => ({
+                    baseYRatio: 0.16 + (idx / (cantidadOndas - 1)) * 0.72,
+                    amplitud: 14 + Math.random() * 26,
+                    frecuencia1: 0.0022 + Math.random() * 0.0032,
+                    frecuencia2: 0.0055 + Math.random() * 0.005,
+                    velocidad: (0.0006 + Math.random() * 0.0012) * (Math.random() > 0.5 ? 1 : -1),
+                    fase1: Math.random() * Math.PI * 2,
+                    fase2: Math.random() * Math.PI * 2,
+                    // Semillas aleatorias para variar amplitud y altura de forma continua
+                    derivaAmpFase: Math.random() * Math.PI * 2,
+                    derivaAmpVel: 0.0004 + Math.random() * 0.0007,
+                    derivaYVel: 0.00025 + Math.random() * 0.00045,
+                    alpha: 0.055 + Math.random() * 0.075,
+                    grosor: 1 + Math.random() * 1.1
+                }));
+
+                let tiempo = 0;
+
+                function dibujarOndas() {
+                    tiempo += 1;
+                    ctx.clearRect(0, 0, ancho, alto);
+
+                    const pasoX = ancho < 640 ? 18 : 12;
+
+                    ondas.forEach(onda => {
+                        onda.fase1 += onda.velocidad * 16;
+                        onda.fase2 -= onda.velocidad * 10;
+                        onda.derivaAmpFase += onda.derivaAmpVel * 16;
+
+                        const ampActual = onda.amplitud * (0.65 + 0.45 * Math.sin(onda.derivaAmpFase));
+                        const yBaseActual =
+                            (onda.baseYRatio + Math.sin(tiempo * onda.derivaYVel + onda.fase1 * 0.25) * 0.045) * alto;
+
+                        ctx.beginPath();
+                        for (let x = 0; x <= ancho + pasoX; x += pasoX) {
+                            const y =
+                                yBaseActual +
+                                Math.sin(x * onda.frecuencia1 + onda.fase1) * ampActual +
+                                Math.cos(x * onda.frecuencia2 + onda.fase2) * (ampActual * 0.42);
+
+                            if (x === 0) {
+                                ctx.moveTo(x, y);
+                            } else {
+                                ctx.lineTo(x, y);
+                            }
+                        }
+
+                        // Degradado horizontal para que nazca suave en los bordes y se integre al centro
+                        const gradiente = ctx.createLinearGradient(0, 0, ancho, 0);
+                        gradiente.addColorStop(0, `rgba(255, 255, 255, ${onda.alpha * 1.35})`);
+                        gradiente.addColorStop(0.25, `rgba(220, 225, 255, ${onda.alpha * 0.7})`);
+                        gradiente.addColorStop(0.5, `rgba(255, 255, 255, ${onda.alpha * 0.32})`);
+                        gradiente.addColorStop(0.75, `rgba(220, 225, 255, ${onda.alpha * 0.7})`);
+                        gradiente.addColorStop(1, `rgba(255, 255, 255, ${onda.alpha * 1.35})`);
+
+                        ctx.strokeStyle = gradiente;
+                        ctx.lineWidth = onda.grosor;
+                        ctx.stroke();
+                    });
+
+                    requestAnimationFrame(dibujarOndas);
+                }
+
+                requestAnimationFrame(dibujarOndas);
             }
         });
     </script>
