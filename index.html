@@ -1184,18 +1184,18 @@
             if (fraseHero) {
                 const tiemposHero = {
                     retrasoTrasVideoMs: 2500,     // Tiempo tras iniciar el video antes de mostrar la primera palabra
-                    entrePalabrasMs: 900,        // Pausa entre una palabra/frase y la siguiente
+                    entrePalabrasMs: 1500,        // Pausa entre una palabra/frase y la siguiente
                     transicionDesvanecerMs: 850, // Tiempo del fade out (coincide con transition de .hero-frase)
-                    pausaTrasMarcaMs: 3200       // Espera tras desaparecer la marca antes de reiniciar el ciclo
+                    pausaTrasMarcaMs: 3500       // Espera tras desaparecer la marca antes de reiniciar el ciclo
                 };
 
                 const secuenciaHero = [
-                    { tipo: "texto", valor: "MOVIMIENTO", visibleMs: 2200 },
-                    { tipo: "texto", valor: "PRECISIÓN", visibleMs: 2200 },
-                    { tipo: "texto", valor: "EXPERIENCIA", visibleMs: 2300 },
-                    { tipo: "texto", valor: "NO ES OTRA FORMA DE GRABAR", visibleMs: 3100 },
-                    { tipo: "texto", valor: "ES OTRA FORMA DE VER", visibleMs: 3100 },
-                    { tipo: "marca", principal: "B Ξ N Λ V", sub: "FPV", visibleMs: 5500 },
+                    { tipo: "texto", valor: "MOVIMIENTO", visibleMs: 3000 },
+                    { tipo: "texto", valor: "PRECISIÓN", visibleMs: 3000 },
+                    { tipo: "texto", valor: "EXPERIENCIA", visibleMs: 3000 },
+                    { tipo: "texto", valor: "NO ES OTRA FORMA DE GRABAR", visibleMs: 3500 },
+                    { tipo: "texto", valor: "ES OTRA FORMA DE VER", visibleMs: 3500 },
+                    { tipo: "marca", principal: "B Ξ N Λ V", sub: "FPV", visibleMs: 10000 },
                 ];
 
                 function renderizarItemHero(item) {
