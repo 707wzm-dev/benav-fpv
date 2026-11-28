@@ -54,6 +54,7 @@
             padding: 14px 20px;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 16px;
         }
 
@@ -61,6 +62,7 @@
             width: 42px;
             height: 42px;
             flex-shrink: 0;
+            margin-left: auto;
             background: rgba(18, 18, 22, 0.75);
             border: 1px solid var(--border-subtle);
             border-radius: 8px;
@@ -119,7 +121,7 @@
             display: none;
             position: absolute;
             top: calc(100% + 8px);
-            left: 20px;
+            right: 20px;
             width: 220px;
             background-color: rgba(18, 18, 24, 0.96);
             border: 1px solid rgba(255, 255, 255, 0.14);
@@ -815,12 +817,12 @@
 
     <header class="topbar">
         <div class="topbar-inner">
+            <a href="#inicio" class="marca" id="marcaAnimada" aria-label="B Ξ N Λ V · FPV"></a>
             <button class="menu-btn" id="btnMenu" aria-label="Abrir menú" aria-expanded="false">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
-            <a href="#inicio" class="marca" id="marcaAnimada" aria-label="B Ξ N Λ V · FPV"></a>
             <nav class="menu-desplegable" id="menuDesplegable" aria-label="Navegación principal">
                 <div class="menu-lista">
                     <a href="#inicio">Inicio</a>
@@ -1183,10 +1185,10 @@
 
             if (fraseHero) {
                 const tiemposHero = {
-                    retrasoTrasVideoMs: 2500,     // Tiempo tras iniciar el video antes de mostrar la primera palabra
-                    entrePalabrasMs: 900,        // Pausa entre una palabra/frase y la siguiente
-                    transicionDesvanecerMs: 850, // Tiempo del fade out (coincide con transition de .hero-frase)
-                    pausaTrasMarcaMs: 3200       // Espera tras desaparecer la marca antes de reiniciar el ciclo
+                    retrasoTrasVideoMs: 2500,
+                    entrePalabrasMs: 900,
+                    transicionDesvanecerMs: 850,
+                    pausaTrasMarcaMs: 3200
                 };
 
                 const secuenciaHero = [
