@@ -146,62 +146,69 @@
 
         .menu-lista a:hover { background-color: rgba(255, 255, 255, 0.08); transform: translateX(3px); }
 
-        .hero-gif { max-width: 1140px; margin: 0 auto; padding: 28px 20px 56px; scroll-margin-top: 76px; }
-
-        .gif-marco {
+        /* Hero portada full-bleed sin marco y bordes difuminados */
+        .hero-portada {
             position: relative;
-            z-index: 1;
             width: 100%;
-            max-height: 75vh;
-            border-radius: 16px;
-            background-color: rgba(18, 18, 22, 0.94);
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            box-shadow: 0 26px 65px rgba(0, 0, 0, 0.78);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            max-width: 100%;
+            margin: 0 auto 24px;
+            overflow: hidden;
+            scroll-margin-top: 70px;
         }
 
-        .gif-marco::before {
+        .hero-media-wrap {
+            position: relative;
+            width: 100%;
+            height: clamp(320px, 72vh, 680px);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-main);
+            -webkit-mask-image:
+                linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%),
+                linear-gradient(to bottom, transparent 0%, #000 10%, #000 82%, transparent 100%);
+            -webkit-mask-composite: source-in;
+            mask-image:
+                linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%),
+                linear-gradient(to bottom, transparent 0%, #000 10%, #000 82%, transparent 100%);
+            mask-composite: intersect;
+        }
+
+        .hero-media-wrap::after {
             content: "";
             position: absolute;
-            top: 12%;
-            bottom: 12%;
-            left: -28px;
-            right: -28px;
-            border-radius: 28px;
-            background:
-                radial-gradient(ellipse 14% 58% at 0% 50%, rgba(74, 222, 128, 0.24), transparent 72%),
-                radial-gradient(ellipse 14% 58% at 100% 50%, rgba(74, 222, 128, 0.24), transparent 72%);
-            filter: blur(18px);
+            inset: 0;
             pointer-events: none;
-            z-index: -1;
+            background:
+                linear-gradient(to bottom, rgba(9, 9, 11, 0.55) 0%, transparent 22%, transparent 72%, var(--bg-main) 100%),
+                linear-gradient(to right, var(--bg-main) 0%, transparent 10%, transparent 90%, var(--bg-main) 100%);
         }
 
-        .gif-marco img {
-            position: relative;
-            z-index: 2;
+        .hero-video {
             width: 100%;
             height: 100%;
-            max-height: 75vh;
             object-fit: cover;
-            border-radius: 16px;
             display: block;
+            pointer-events: none;
         }
 
-        .gif-placeholder {
+        .video-placeholder {
             position: relative;
             z-index: 2;
-            padding: 80px 24px;
+            padding: 40px 24px;
             text-align: center;
             color: var(--text-muted);
             font-size: 0.95rem;
         }
 
-        .gif-placeholder code { color: var(--text-main); background-color: #1a1a22; padding: 2px 6px; border-radius: 4px; }
+        .video-placeholder code { color: var(--text-main); background-color: #1a1a22; padding: 2px 6px; border-radius: 4px; }
 
         .lema-gif {
-            margin-top: 24px;
+            position: relative;
+            z-index: 3;
+            margin-top: -18px;
+            padding: 0 20px 28px;
             text-align: center;
             font-size: clamp(0.9rem, 2.2vw, 1.15rem);
             font-weight: 600;
@@ -736,8 +743,8 @@
         }
 
         @media (max-width: 600px) {
-            .lema-gif { letter-spacing: 0.12em; line-height: 1.8; }
-            .gif-marco::before { left: -14px; right: -14px; filter: blur(14px); }
+            .hero-media-wrap { height: clamp(260px, 56vh, 460px); }
+            .lema-gif { letter-spacing: 0.12em; line-height: 1.8; margin-top: -12px; }
             .servicio-card { flex: 0 0 320px; min-height: 260px; padding: 28px 24px 22px; }
             .servicio-card h3 { font-size: 1.24rem; }
             .servicio-card p { font-size: 1rem; }
@@ -781,15 +788,1536 @@
     </header>
 
     <main class="contenido-principal">
-        <section class="hero-gif" id="inicio">
-            <div class="gif-marco" id="marcoGif">
-                <img
-                    src="dron-360.gif"
-                    alt="Dron girando 360 grados"
-                    onerror="this.style.display='none'; document.getElementById('avisoGif').style.display='block';"
-                >
-                <div class="gif-placeholder" id="avisoGif" style="display: none;">
-                    Sube tu archivo <code>dron-360.gif</code> a la raíz del repositorio (o cambia el nombre en <code>src="dron-360.gif"</code>).
+        <section class="hero-portada" id="inicio">
+            <div class="hero-media-wrap">
+                <video
+                    class="hero-video"
+                    src="hero-vuelo.mp4"
+                    autoplay
+                    loop
+                    muted
+                    playsinline
+                    disablePictureInPicture
+                    controlsList="nodownload noplaybackrate"
+                    aria-label="Tomas de vuelo FPV en interiores"
+                    onerror="this.style.display='none'; document.getElementById('avisoVideoHero').style.display='block';"
+                ></video>
+                <div class="video-placeholder" id="avisoVideoHero" style="display: none;">
+                    Sube tu video corto en bucle como <code>hero-vuelo.mp4</code> a la raíz del repositorio (o cambia el nombre en <code>src="hero-vuelo.mp4"</code>).
+                </div>
+            </div>
+            <p class="lema-gif" aria-label="Movimiento, precisión y experiencia">
+                MOVIMIENTO <span class="separador">·</span> PRECISIÓN <span class="separador">·</span> EXPERIENCIA
+            </p>
+        </section>
+
+        <section class="segmento" id="servicios">
+            <div class="encabezado-seccion">
+                <span class="etiqueta">Lo que hacemos</span>
+                <div class="encabezado-titulo-fila">
+                    <h2>Servicios</h2>
+                    <span class="linea-acento" aria-hidden="true"></span>
+                </div>
+            </div>
+
+            <div class="servicios-anillo-wrap" id="anilloServicios" aria-label="Anillo horizontal de servicios con bucle infinito">
+                <div class="servicios-pista" id="pistaServicios">
+                    <article class="servicio-card" data-slot="0">
+                        <div class="servicio-top">
+                            <div class="servicio-icono" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><rect x="3" y="6" width="14" height="12" rx="2" /><path d="M17 10l4-2v8l-4-2v-4z" /></svg>
+                            </div>
+                            <span class="servicio-num">01</span>
+                        </div>
+                        <h3>Grabación FPV en interiores</h3>
+                        <p>Recorridos inmersivos en una sola toma dentro de tu local, con equipo compacto y protegido para volar cerca de personas, vitrinas y maquinaria sin riesgos.</p>
+                        <div class="servicio-pills" aria-hidden="true">
+                            <span class="pill-tag">Una sola toma</span>
+                            <span class="pill-tag">Hélices protegidas</span>
+                        </div>
+                        <div class="servicio-barra-wrap" aria-hidden="true"><div class="servicio-barra-track"><div class="servicio-barra-relleno"></div></div></div>
+                    </article>
+
+                    <article class="servicio-card" data-slot="1">
+                        <div class="servicio-top">
+                            <div class="servicio-icono" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><path d="M4 16c3-7 6-7 8 0s5 7 8 0" /><circle cx="20" cy="16" r="1.5" /></svg>
+                            </div>
+                            <span class="servicio-num">02</span>
+                        </div>
+                        <h3>Edición, ritmo y sonido</h3>
+                        <p>Estabilización profesional, corrección de color, diseño sonoro y sincronización musical para transformar la toma bruta en una pieza dinámica y atractiva.</p>
+                        <div class="servicio-pills" aria-hidden="true">
+                            <span class="pill-tag">Estabilización</span>
+                            <span class="pill-tag">Ritmo y audio</span>
+                        </div>
+                        <div class="servicio-barra-wrap" aria-hidden="true"><div class="servicio-barra-track"><div class="servicio-barra-relleno"></div></div></div>
+                    </article>
+
+                    <article class="servicio-card" data-slot="2">
+                        <div class="servicio-top">
+                            <div class="servicio-icono" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" /><polygon points="10 9 15 12 10 15 10 9" /></svg>
+                            </div>
+                            <span class="servicio-num">03</span>
+                        </div>
+                        <h3>Entrega lista para publicar</h3>
+                        <p>Recibes el video final optimizado en formato vertical (Reels, TikTok, Shorts) u horizontal, listo para publicar en tus redes, web o pantallas del local.</p>
+                        <div class="servicio-pills" aria-hidden="true">
+                            <span class="pill-tag">Reels · TikTok · Shorts</span>
+                            <span class="pill-tag">Web y pantallas</span>
+                        </div>
+                        <div class="servicio-barra-wrap" aria-hidden="true"><div class="servicio-barra-track"><div class="servicio-barra-relleno"></div></div></div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="segmento" id="portafolio">
+            <div class="encabezado-seccion">
+                <span class="etiqueta">Muestras</span>
+                <div class="encabezado-titulo-fila">
+                    <h2>Portafolio</h2>
+                    <span class="linea-acento" aria-hidden="true"></span>
+                </div>
+            </div>
+
+            <div class="portafolio-grid">
+                <article class="video-card">
+                    <div class="video-marco">
+                        <iframe
+                            src="https://www.youtube.com/embed/TU_ID_DE_VIDEO_1"
+                            title="Vuelo FPV en interiores - Muestra 01"
+                            loading="lazy"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen
+                        ></iframe>
+                    </div>
+                    <div class="video-meta">
+                        <span class="video-rubro">Espacio comercial</span>
+                    </div>
+                    <h3>Recorrido FPV en interiores</h3>
+                    <p>Enfoque en continuidad de plano, lectura del espacio y ritmo visual sin cortes bruscos.</p>
+                </article>
+
+                <article class="video-card">
+                    <div class="video-marco">
+                        <iframe
+                            src="https://www.youtube.com/embed/TU_ID_DE_VIDEO_2"
+                            title="Vuelo FPV en interiores - Muestra 02"
+                            loading="lazy"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen
+                        ></iframe>
+                    </div>
+                    <div class="video-meta">
+                        <span class="video-rubro">Precisión indoor</span>
+                    </div>
+                    <h3>Control en zonas estrechas</h3>
+                    <p>Enfoque en manejo suave, cambios de iluminación interior y estabilidad en pasillos o vitrinas.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="segmento" id="pilares">
+            <div class="encabezado-seccion">
+                <span class="etiqueta">Estándar de vuelo</span>
+                <div class="encabezado-titulo-fila">
+                    <h2>Enfoque indoor</h2>
+                    <span class="linea-acento" aria-hidden="true"></span>
+                </div>
+            </div>
+
+            <div class="pilares-grid">
+                <article class="pilar-card">
+                    <span class="pilar-idx">01</span>
+                    <h3>Seguridad en interiores</h3>
+                    <p>Equipo cinewhoop compacto con protectores perimetrales para operar con control cerca de mobiliario, decoración y zonas de trabajo.</p>
+                </article>
+
+                <article class="pilar-card">
+                    <span class="pilar-idx">02</span>
+                    <h3>Planificación previa</h3>
+                    <p>Revisamos recorridos, alturas, luces y horarios de menor flujo para lograr tomas limpias sin entorpecer la operación del local.</p>
+                </article>
+
+                <article class="pilar-card">
+                    <span class="pilar-idx">03</span>
+                    <h3>Impacto en redes y web</h3>
+                    <p>Piezas pensadas para retener la atención en los primeros segundos y mostrar el ambiente real de tu negocio de forma memorable.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="segmento" id="faq">
+            <div class="encabezado-seccion">
+                <span class="etiqueta">Dudas frecuentes</span>
+                <div class="encabezado-titulo-fila">
+                    <h2>Preguntas</h2>
+                    <span class="linea-acento" aria-hidden="true"></span>
+                </div>
+            </div>
+
+            <div class="faq-lista">
+                <details class="faq-item">
+                    <summary>¿Es seguro volar un dron FPV dentro de un local o negocio?</summary>
+                    <div class="faq-respuesta">
+                        Sí, se trabaja con equipo ligero y compacto con protectores de hélices, planificando la ruta previamente y coordinando el horario para minimizar riesgos y molestias.
+                    </div>
+                </details>
+
+                <details class="faq-item">
+                    <summary>¿En qué formatos se entregan los videos finales?</summary>
+                    <div class="faq-respuesta">
+                        Se entregan listos para publicar en formato vertical (9:16 para Reels, TikTok y YouTube Shorts) y/o horizontal (16:9 para web o pantallas), según lo que necesite tu campaña.
+                    </div>
+                </details>
+
+                <details class="faq-item">
+                    <summary>¿Qué necesito enviarte para pedir una cotización?</summary>
+                    <div class="faq-respuesta">
+                        Solo cuéntame qué tipo de espacio es, en qué comuna o ciudad está, qué puntos quieres destacar y una fecha tentativa para grabar.
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <section class="segmento" id="contacto">
+            <div class="encabezado-seccion">
+                <span class="etiqueta">Hablemos</span>
+                <div class="encabezado-titulo-fila">
+                    <h2>Contacto</h2>
+                    <span class="linea-acento" aria-hidden="true"></span>
+                </div>
+            </div>
+            <div class="caja-sobria">
+                <p>Escríbeme directamente para revisar tu espacio, resolver dudas y armar una propuesta a medida.</p>
+                <p><strong>Para cotizar más rápido:</strong> indica el tipo de lugar, comuna o ciudad, qué buscas mostrar y una fecha aproximada.</p>
+                <p><strong>Cobertura y coordinación:</strong> vuelos indoor planificados según el espacio y la disponibilidad del recinto.</p>
+                <div class="contacto-acciones">
+                    <a href="https://wa.me/56971209736?text=Hola%2C%20quiero%20cotizar%20un%20recorrido%20FPV%20indoor." target="_blank" rel="noopener noreferrer" class="btn-contacto principal">Escribir por WhatsApp</a>
+                    <a href="mailto:benavfpv@gmail.com?subject=Cotizaci%C3%B3n%20FPV%20indoor" class="btn-contacto secundario">Enviar correo</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="pie-pagina" id="pie">
+        <div class="pie-redes" aria-label="Redes sociales">
+            <a href="https://www.youtube.com/@benavfpv" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.4 31.4 0 0 0 0 12a31.4 31.4 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.4 31.4 0 0 0 24 12a31.4 31.4 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z" />
+                </svg>
+            </a>
+
+            <a href="https://www.instagram.com/benavfpv/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6zm9.65 1.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
+                </svg>
+            </a>
+
+            <a href="https://tiktok.com/@benav.fpv" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+                </svg>
+            </a>
+        </div>
+
+        <div class="pie-base">
+            <span class="pie-marca">B Ξ N Λ V · FPV</span>
+            <span>© 2026 Todos los derechos reservados.</span>
+        </div>
+    </footer>
+
+    <button type="button" class="btn-subir" id="btnSubir" aria-label="Volver al inicio" aria-hidden="true" tabindex="-1">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 19V5" />
+            <path d="M5 12l7-7 7 7" />
+        </svg>
+    </button>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const btnMenu = document.querySelector("#btnMenu");
+            const menuDesplegable = document.querySelector("#menuDesplegable");
+            const enlacesMenu = menuDesplegable ? menuDesplegable.querySelectorAll("a") : [];
+
+            function cerrarMenu() {
+                if (!menuDesplegable || !btnMenu) return;
+                menuDesplegable.classList.remove("activo");
+                btnMenu.classList.remove("abierto");
+                btnMenu.setAttribute("aria-expanded", "false");
+            }
+
+            if (btnMenu && menuDesplegable) {
+                btnMenu.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    const estaAbierto = menuDesplegable.classList.toggle("activo");
+                    btnMenu.classList.toggle("abierto", estaAbierto);
+                    btnMenu.setAttribute("aria-expanded", String(estaAbierto));
+                });
+
+                enlacesMenu.forEach(enlace => enlace.addEventListener("click", cerrarMenu));
+
+                document.addEventListener("click", (e) => {
+                    if (!menuDesplegable.contains(e.target) && !btnMenu.contains(e.target)) {
+                        cerrarMenu();
+                    }
+                });
+
+                document.addEventListener("keydown", (e) => {
+                    if (e.key === "Escape") cerrarMenu();
+                });
+            }
+
+            const btnSubir = document.querySelector("#btnSubir");
+            if (btnSubir) {
+                const margenInferiorPx = 280;
+
+                function actualizarVisibilidadSubir() {
+                    const alturaDocumento = document.documentElement.scrollHeight;
+                    const parteInferiorVisible = window.scrollY + window.innerHeight;
+                    const cercaDelFinal = parteInferiorVisible >= alturaDocumento - margenInferiorPx;
+
+                    btnSubir.classList.toggle("visible", cercaDelFinal);
+                    btnSubir.setAttribute("aria-hidden", String(!cercaDelFinal));
+                    btnSubir.tabIndex = cercaDelFinal ? 0 : -1;
+                }
+
+                btnSubir.addEventListener("click", () => {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                });
+
+                window.addEventListener("scroll", actualizarVisibilidadSubir, { passive: true });
+                window.addEventListener("resize", actualizarVisibilidadSubir, { passive: true });
+                actualizarVisibilidadSubir();
+            }
+
+            const marca = document.querySelector("#marcaAnimada");
+            const textoMarca = "B Ξ N Λ V · FPV";
+            const esperar = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+            if (marca) {
+                const letras = textoMarca.split("").map(caracter => {
+                    const span = document.createElement("span");
+                    span.className = "letra";
+                    span.textContent = caracter === " " ? "\u00A0" : caracter;
+                    marca.appendChild(span);
+                    return span;
+                });
+
+                const pasoLetraMs = 77;
+                const pausaVisibleMs = 10000;
+                const pausaOcultoMs = 3500;
+
+                async function cicloMarca() {
+                    await esperar(300);
+                    while (true) {
+                        for (let i = 0; i < letras.length; i++) {
+                            letras[i].classList.add("visible");
+                            await esperar(pasoLetraMs);
+                        }
+                        await esperar(pausaVisibleMs);
+
+                        const inversas = [...letras].reverse();
+                        for (let i = 0; i < inversas.length; i++) {
+                            inversas[i].classList.remove("visible");
+                            await esperar(pasoLetraMs);
+                        }
+                        await esperar(pausaOcultoMs);
+                    }
+                }
+
+                cicloMarca();
+            }
+
+            const wrapServicios = document.querySelector("#anilloServicios");
+            const pistaServicios = document.querySelector("#pistaServicios");
+            const prefiereMenosMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+            if (wrapServicios && pistaServicios && !prefiereMenosMovimiento) {
+                const originales = Array.from(pistaServicios.querySelectorAll(".servicio-card"));
+                const totalUnicos = originales.length;
+
+                if (totalUnicos > 0) {
+                    const fragmentoAntes = document.createDocumentFragment();
+                    const fragmentoDespues = document.createDocumentFragment();
+
+                    originales.forEach(card => {
+                        const clonAntes = card.cloneNode(true);
+                        clonAntes.setAttribute("aria-hidden", "true");
+                        fragmentoAntes.appendChild(clonAntes);
+
+                        const clonDespues = card.cloneNode(true);
+                        clonDespues.setAttribute("aria-hidden", "true");
+                        fragmentoDespues.appendChild(clonDespues);
+                    });
+
+                    pistaServicios.insertBefore(fragmentoAntes, pistaServicios.firstChild);
+                    pistaServicios.appendChild(fragmentoDespues);
+                }
+
+                const tarjetas = Array.from(pistaServicios.querySelectorAll(".servicio-card"));
+                const bloqueCentralInicio = totalUnicos;
+                const bloqueCentralFin = totalUnicos * 2 - 1;
+                const duracionPausaMs = 4200;
+
+                let indiceObjetivo = bloqueCentralInicio + 1;
+                let posicionX = 0;
+                let posicionDeseadaX = 0;
+                let anchoBloqueUnico = 1;
+                let anchoTarjetaActual = 415;
+                let gapActual = 28;
+                let ultimoTiempo = null;
+                let tiempoEnCentroMs = 0;
+                let enPosicionCentral = false;
+                let punteroEnCentral = false;
+                let arrastrando = false;
+                let inicioPunteroX = 0;
+                let inicioPosicionX = 0;
+                let distanciaArrastrePx = 0;
+                let tarjetaTocadaEnInicio = null;
+                let tipoPunteroActivo = null;
+
+                const barrasRelleno = tarjetas.map(card => card.querySelector(".servicio-barra-relleno"));
+
+                function modPositivo(valor, divisor) {
+                    if (!divisor) return 0;
+                    return ((valor % divisor) + divisor) % divisor;
+                }
+
+                function calcularAnchoBloqueUnico() {
+                    if (tarjetas.length >= totalUnicos * 2) {
+                        const dx = tarjetas[totalUnicos].offsetLeft - tarjetas[0].offsetLeft;
+                        anchoBloqueUnico = dx > 1 ? dx : Math.max(1, pistaServicios.scrollWidth / 3);
+                    } else {
+                        anchoBloqueUnico = Math.max(1, pistaServicios.scrollWidth / 3);
+                    }
+                    if (tarjetas[0]) {
+                        anchoTarjetaActual = tarjetas[0].offsetWidth || 415;
+                    }
+                    const estiloPista = getComputedStyle(pistaServicios);
+                    const gapParseado = parseFloat(estiloPista.columnGap || estiloPista.gap);
+                    gapActual = Number.isFinite(gapParseado) ? gapParseado : 28;
+                }
+
+                function calcularPosicionParaIndice(idx) {
+                    const tarjetaRef = tarjetas[idx];
+                    if (!tarjetaRef) return posicionX;
+                    return (wrapServicios.clientWidth / 2) - (tarjetaRef.offsetLeft + tarjetaRef.offsetWidth / 2);
+                }
+
+                function llevarIndiceABloqueCentral(idx) {
+                    let normalizado = idx;
+                    while (normalizado < bloqueCentralInicio) normalizado += totalUnicos;
+                    while (normalizado > bloqueCentralFin) normalizado -= totalUnicos;
+                    return normalizado;
+                }
+
+                function sincronizarAlBloqueCentralSinSalto() {
+                    calcularAnchoBloqueUnico();
+                    const idxCentral = llevarIndiceABloqueCentral(indiceObjetivo);
+                    if (idxCentral !== indiceObjetivo) {
+                        const deltaXActual = posicionX - posicionDeseadaX;
+                        indiceObjetivo = idxCentral;
+                        posicionDeseadaX = calcularPosicionParaIndice(indiceObjetivo);
+                        posicionX = posicionDeseadaX + deltaXActual;
+                        pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
+                    }
+                }
+
+                function recalcularMedidas(inmediato = false) {
+                    calcularAnchoBloqueUnico();
+                    indiceObjetivo = llevarIndiceABloqueCentral(indiceObjetivo);
+                    posicionDeseadaX = calcularPosicionParaIndice(indiceObjetivo);
+                    if (inmediato) {
+                        posicionX = posicionDeseadaX;
+                        pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
+                    }
+                }
+
+                function seleccionarIndice(nuevoIdx, reiniciarTiempo = true) {
+                    calcularAnchoBloqueUnico();
+                    const candidatos = [nuevoIdx - totalUnicos, nuevoIdx, nuevoIdx + totalUnicos]
+                        .filter(c => c >= 0 && c < tarjetas.length);
+
+                    let mejorCandidato = nuevoIdx;
+                    let menorDiff = Infinity;
+                    for (const c of candidatos) {
+                        const diff = Math.abs(calcularPosicionParaIndice(c) - posicionX);
+                        if (diff < menorDiff) {
+                            menorDiff = diff;
+                            mejorCandidato = c;
+                        }
+                    }
+
+                    indiceObjetivo = mejorCandidato;
+                    posicionDeseadaX = calcularPosicionParaIndice(indiceObjetivo);
+                    if (reiniciarTiempo) tiempoEnCentroMs = 0;
+                    enPosicionCentral = false;
+                }
+
+                function irASiguienteTarjeta() {
+                    sincronizarAlBloqueCentralSinSalto();
+                    seleccionarIndice(indiceObjetivo + 1, true);
+                }
+
+                function encontrarTarjetaMasCercanaAlCentro() {
+                    const anchoWrap = wrapServicios.clientWidth;
+                    const centroWrap = anchoWrap / 2;
+                    const paso = anchoTarjetaActual + gapActual;
+                    let mejorIdx = llevarIndiceABloqueCentral(indiceObjetivo);
+                    let menorDistancia = Infinity;
+
+                    for (let idx = 0; idx < tarjetas.length; idx++) {
+                        const centroCard = posicionX + idx * paso + anchoTarjetaActual / 2;
+                        const dist = Math.abs(centroCard - centroWrap);
+                        if (dist < menorDistancia) {
+                            menorDistancia = dist;
+                            mejorIdx = idx;
+                        }
+                    }
+
+                    return mejorIdx;
+                }
+
+                function actualizarAnilloYEnfoque(progresoActual) {
+                    const anchoWrap = wrapServicios.clientWidth;
+                    const centroWrap = anchoWrap / 2;
+                    const radioArco = Math.max(anchoWrap * 0.48, 260);
+                    const paso = anchoTarjetaActual + gapActual;
+
+                    for (let idx = 0; idx < tarjetas.length; idx++) {
+                        const tarjeta = tarjetas[idx];
+                        const centroCard = posicionX + idx * paso + anchoTarjetaActual / 2;
+                        const deltaNorm = Math.max(-1.35, Math.min(1.35, (centroCard - centroWrap) / radioArco));
+                        const absDelta = Math.min(1, Math.abs(deltaNorm));
+                        const nitidez = 1 - absDelta;
+
+                        const anguloY = (-deltaNorm * 34).toFixed(2);
+                        const profundidadZ = (-Math.pow(absDelta, 1.35) * 140).toFixed(1);
+                        const arcoY = (Math.pow(absDelta, 1.5) * 12).toFixed(1);
+                        const escala = (0.9 + nitidez * 0.1).toFixed(3);
+                        const desenfoquePx = (Math.pow(absDelta, 1.15) * 4.5).toFixed(2);
+                        const opacidad = (0.24 + nitidez * 0.76).toFixed(3);
+
+                        tarjeta.style.transform =
+                            `translate3d(0, ${arcoY}px, ${profundidadZ}px) rotateY(${anguloY}deg) scale(${escala})`;
+                        tarjeta.style.filter = `blur(${desenfoquePx}px)`;
+                        tarjeta.style.opacity = opacidad;
+
+                        const estaEnFoco = absDelta < 0.22 || (idx === indiceObjetivo && enPosicionCentral);
+                        tarjeta.classList.toggle("en-foco", estaEnFoco);
+
+                        const barra = barrasRelleno[idx];
+                        if (barra) {
+                            barra.style.transform = (idx === indiceObjetivo && enPosicionCentral)
+                                ? `scaleX(${Math.max(0, Math.min(1, progresoActual)).toFixed(4)})`
+                                : "scaleX(0)";
+                        }
+                    }
+                }
+
+                tarjetas.forEach(tarjeta => {
+                    tarjeta.addEventListener("pointerenter", (e) => {
+                        if (e.pointerType !== "touch" && tarjeta.classList.contains("en-foco")) punteroEnCentral = true;
+                    });
+                    tarjeta.addEventListener("pointermove", (e) => {
+                        if (e.pointerType !== "touch" && !arrastrando) punteroEnCentral = tarjeta.classList.contains("en-foco");
+                    });
+                    tarjeta.addEventListener("pointerleave", (e) => {
+                        if (e.pointerType !== "touch") punteroEnCentral = false;
+                    });
+                });
+
+                wrapServicios.addEventListener("pointerdown", (e) => {
+                    if (e.pointerType === "mouse" && e.button !== 0) return;
+                    sincronizarAlBloqueCentralSinSalto();
+                    arrastrando = true;
+                    tipoPunteroActivo = e.pointerType;
+                    inicioPunteroX = e.clientX;
+                    inicioPosicionX = posicionX;
+                    distanciaArrastrePx = 0;
+
+                    const cardClick = e.target.closest(".servicio-card");
+                    tarjetaTocadaEnInicio = cardClick ? tarjetas.indexOf(cardClick) : null;
+
+                    wrapServicios.classList.add("arrastrando");
+                    wrapServicios.setPointerCapture(e.pointerId);
+                });
+
+                wrapServicios.addEventListener("pointermove", (e) => {
+                    if (!arrastrando) return;
+                    const deltaX = e.clientX - inicioPunteroX;
+                    distanciaArrastrePx = Math.max(distanciaArrastrePx, Math.abs(deltaX));
+
+                    const posBase = calcularPosicionParaIndice(bloqueCentralInicio + 1);
+                    const offsetRelativo = modPositivo(inicioPosicionX + deltaX - posBase, anchoBloqueUnico);
+                    const offsetCentrado = offsetRelativo > anchoBloqueUnico * 0.5
+                        ? offsetRelativo - anchoBloqueUnico
+                        : offsetRelativo;
+
+                    posicionX = posBase + offsetCentrado;
+                    pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
+                    enPosicionCentral = false;
+                });
+
+                function finalizarArrastre(e) {
+                    if (!arrastrando) return;
+                    arrastrando = false;
+                    wrapServicios.classList.remove("arrastrando");
+
+                    if (wrapServicios.hasPointerCapture(e.pointerId)) {
+                        wrapServicios.releasePointerCapture(e.pointerId);
+                    }
+
+                    const idxCercano = encontrarTarjetaMasCercanaAlCentro();
+
+                    if (distanciaArrastrePx < 8 && tarjetaTocadaEnInicio !== null) {
+                        if (tarjetaTocadaEnInicio !== indiceObjetivo) {
+                            seleccionarIndice(tarjetaTocadaEnInicio, true);
+                        } else {
+                            seleccionarIndice(idxCercano + 1, true);
+                        }
+                    } else {
+                        seleccionarIndice(idxCercano, true);
+                    }
+
+                    if (tipoPunteroActivo === "touch") {
+                        const tarjetaDestino = tarjetas[indiceObjetivo];
+                        punteroEnCentral = Boolean(tarjetaDestino && tarjetaDestino.classList.contains("en-foco"));
+                    }
+
+                    tarjetaTocadaEnInicio = null;
+                    tipoPunteroActivo = null;
+                }
+
+                wrapServicios.addEventListener("pointerup", finalizarArrastre);
+                wrapServicios.addEventListener("pointercancel", (e) => {
+                    if (tipoPunteroActivo === "touch") punteroEnCentral = false;
+                    finalizarArrastre(e);
+                });
+
+                recalcularMedidas(true);
+                actualizarAnilloYEnfoque(0);
+
+                window.addEventListener("resize", () => {
+                    recalcularMedidas(true);
+                    actualizarAnilloYEnfoque(tiempoEnCentroMs / duracionPausaMs);
+                }, { passive: true });
+
+                function pasoAnillo(ahora) {
+                    if (ultimoTiempo === null) ultimoTiempo = ahora;
+                    const dtMs = Math.min(ahora - ultimoTiempo, 50);
+                    ultimoTiempo = ahora;
+
+                    if (!arrastrando && !document.hidden) {
+                        const distanciaRestante = posicionDeseadaX - posicionX;
+                        if (Math.abs(distanciaRestante) > 0.6) {
+                            posicionX += distanciaRestante * (1 - Math.exp(-dtMs * 0.0095));
+                            pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
+                            enPosicionCentral = false;
+                        } else {
+                            posicionX = posicionDeseadaX;
+                            pistaServicios.style.transform = `translate3d(${posicionX.toFixed(2)}px, 0, 0)`;
+                            enPosicionCentral = true;
+                            sincronizarAlBloqueCentralSinSalto();
+
+                            if (!punteroEnCentral) {
+                                tiempoEnCentroMs += dtMs;
+                                if (tiempoEnCentroMs >= duracionPausaMs) irASiguienteTarjeta();
+                            }
+                        }
+                    }
+
+                    actualizarAnilloYEnfoque(enPosicionCentral ? (tiempoEnCentroMs / duracionPausaMs) : 0);
+                    requestAnimationFrame(pasoAnillo);
+                }
+
+                requestAnimationFrame(pasoAnillo);
+            }
+
+            const canvas = document.querySelector("#particulasFondo");
+            if (canvas && !prefiereMenosMovimiento) {
+                const ctx = canvas.getContext("2d");
+                let ancho = 0, alto = 0, dpr = 1, particulas = [];
+
+                function crearParticula(aleatoriaEnPantalla = true) {
+                    const esAcentoVerde = Math.random() < 0.22;
+                    return {
+                        x: Math.random() * ancho,
+                        y: aleatoriaEnPantalla ? Math.random() * alto : alto + 12,
+                        radio: 0.8 + Math.random() * 1.9,
+                        vx: (Math.random() - 0.5) * 0.28,
+                        vy: -(0.14 + Math.random() * 0.36),
+                        fase: Math.random() * Math.PI * 2,
+                        velFase: 0.015 + Math.random() * 0.025,
+                        alfaBase: esAcentoVerde ? (0.16 + Math.random() * 0.18) : (0.12 + Math.random() * 0.24),
+                        esVerde: esAcentoVerde
+                    };
+                }
+
+                function redimensionarCanvas() {
+                    dpr = Math.min(window.devicePixelRatio || 1, 2);
+                    ancho = window.innerWidth;
+                    alto = window.innerHeight;
+                    canvas.width = Math.floor(ancho * dpr);
+                    canvas.height = Math.floor(alto * dpr);
+                    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+                    const cantidad = ancho < 640 ? 28 : 48;
+                    if (particulas.length === 0) particulas = Array.from({ length: cantidad }, () => crearParticula(true));
+                    else if (particulas.length > cantidad) particulas.length = cantidad;
+                    else while (particulas.length < cantidad) particulas.push(crearParticula(true));
+                }
+
+                redimensionarCanvas();
+                window.addEventListener("resize", redimensionarCanvas, { passive: true });
+
+                let ultimoTiempoParticulas = null;
+                function animarParticulas(ahora) {
+                    if (ultimoTiempoParticulas === null) ultimoTiempoParticulas = ahora;
+                    const dt = Math.min((ahora - ultimoTiempoParticulas) / (1000 / 60), 2.5);
+                    ultimoTiempoParticulas = ahora;
+
+                    if (!document.hidden) {
+                        ctx.clearRect(0, 0, ancho, alto);
+                        for (let i = 0; i < particulas.length; i++) {
+                            const p = particulas[i];
+                            p.fase += p.velFase * dt;
+                            p.x += (p.vx + Math.sin(p.fase) * 0.16) * dt;
+                            p.y += p.vy * dt;
+
+                            if (p.y < -16) { particulas[i] = crearParticula(false); continue; }
+                            if (p.x < -16) p.x = ancho + 16;
+                            if (p.x > ancho + 16) p.x = -16;
+
+                            const pulso = 0.65 + Math.sin(p.fase * 1.4) * 0.35;
+                            const alfa = p.alfaBase * pulso;
+
+                            ctx.beginPath();
+                            ctx.arc(p.x, p.y, p.radio, 0, Math.PI * 2);
+                            ctx.fillStyle = p.esVerde
+                                ? `rgba(74, 222, 128, ${alfa})`
+                                : `rgba(244, 244, 245, ${alfa})`;
+                            ctx.fill();
+                        }
+                    }
+
+                    requestAnimationFrame(animarParticulas);
+                }
+
+                requestAnimationFrame(animarParticulas);
+            }
+        });
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#09090b">
+    <meta name="description" content="B Ξ N Λ V · FPV — Grabación FPV en interiores, Edición, ritmo y sonido y Entrega lista para publicar con drones FPV.">
+    <title>B Ξ N Λ V · FPV</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2309090b'/%3E%3Cg stroke='%23f4f4f5' stroke-width='2' fill='none'%3E%3Ccircle cx='10' cy='10' r='5'/%3E%3Ccircle cx='22' cy='10' r='5'/%3E%3Ccircle cx='10' cy='22' r='5'/%3E%3Ccircle cx='22' cy='22' r='5'/%3E%3C/g%3E%3Crect x='13.5' y='8.5' width='5' height='15' rx='2.5' fill='%23121216' stroke='%23f4f4f5' stroke-width='1.5'/%3E%3Ccircle cx='16' cy='11' r='1.3' fill='%234ade80'/%3E%3C/svg%3E">
+    <style>
+        :root {
+            --bg-main: #09090b;
+            --bg-surface: #121216;
+            --bg-card-top: #16161d;
+            --border-subtle: #24242d;
+            --border-hover: #525266;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --accent: #ffffff;
+            --accent-green: #4ade80;
+            --accent-green-soft: rgba(74, 222, 128, 0.14);
+            --accent-green-glow: rgba(74, 222, 128, 0.12);
+            --accent-green-line: rgba(74, 222, 128, 0.45);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            position: relative;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.65;
+            overflow-x: hidden;
+        }
+
+        #particulasFondo { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+        .contenido-principal { position: relative; z-index: 2; }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: rgba(9, 9, 11, 0.86);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 6px 28px rgba(0, 0, 0, 0.45);
+        }
+
+        .topbar-inner {
+            position: relative;
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .menu-btn {
+            width: 42px;
+            height: 42px;
+            flex-shrink: 0;
+            background: rgba(18, 18, 22, 0.75);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .menu-btn:hover {
+            border-color: var(--accent);
+            background-color: var(--bg-surface);
+            box-shadow: 0 0 16px rgba(255, 255, 255, 0.16);
+        }
+
+        .menu-btn span {
+            display: block;
+            width: 18px;
+            height: 2px;
+            background-color: var(--accent);
+            border-radius: 2px;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+        }
+
+        .menu-btn.abierto span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .menu-btn.abierto span:nth-child(2) { opacity: 0; }
+        .menu-btn.abierto span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        .marca {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: 0.14em;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            overflow: hidden;
+            padding: 4px 2px;
+            text-shadow: 0 0 18px rgba(255, 255, 255, 0.22);
+        }
+
+        .marca .letra {
+            display: inline-block;
+            opacity: 0;
+            transform: translateX(32px);
+            transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+        }
+
+        .marca .letra.visible { opacity: 1; transform: translateX(0); }
+
+        .menu-desplegable {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 20px;
+            width: 220px;
+            background-color: rgba(18, 18, 24, 0.96);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.75), 0 0 24px rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(12px);
+            z-index: 120;
+        }
+
+        .menu-desplegable.activo { display: block; }
+        .menu-lista { display: flex; flex-direction: column; gap: 4px; }
+
+        .menu-lista a {
+            display: block;
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: background-color 0.2s ease, transform 0.15s ease;
+        }
+
+        .menu-lista a:hover { background-color: rgba(255, 255, 255, 0.08); transform: translateX(3px); }
+
+        /* Hero portada full-bleed sin marco y bordes difuminados */
+        .hero-portada {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto 24px;
+            overflow: hidden;
+            scroll-margin-top: 70px;
+        }
+
+        .hero-media-wrap {
+            position: relative;
+            width: 100%;
+            height: clamp(320px, 72vh, 680px);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-main);
+            -webkit-mask-image:
+                linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%),
+                linear-gradient(to bottom, transparent 0%, #000 10%, #000 82%, transparent 100%);
+            -webkit-mask-composite: source-in;
+            mask-image:
+                linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%),
+                linear-gradient(to bottom, transparent 0%, #000 10%, #000 82%, transparent 100%);
+            mask-composite: intersect;
+        }
+
+        .hero-media-wrap::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(to bottom, rgba(9, 9, 11, 0.55) 0%, transparent 22%, transparent 72%, var(--bg-main) 100%),
+                linear-gradient(to right, var(--bg-main) 0%, transparent 10%, transparent 90%, var(--bg-main) 100%);
+        }
+
+        .hero-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            pointer-events: none;
+        }
+
+        .video-placeholder {
+            position: relative;
+            z-index: 2;
+            padding: 40px 24px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .video-placeholder code { color: var(--text-main); background-color: #1a1a22; padding: 2px 6px; border-radius: 4px; }
+
+        .lema-gif {
+            position: relative;
+            z-index: 3;
+            margin-top: -18px;
+            padding: 0 20px 28px;
+            text-align: center;
+            font-size: clamp(0.9rem, 2.2vw, 1.15rem);
+            font-weight: 600;
+            letter-spacing: 0.22em;
+            color: var(--text-main);
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.18);
+        }
+
+        .lema-gif .separador { color: var(--text-muted); margin: 0 6px; }
+
+        .segmento {
+            position: relative;
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 80px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            scroll-margin-top: 76px;
+        }
+
+        .encabezado-seccion { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 6px; margin-bottom: 34px; }
+        .encabezado-seccion .etiqueta { font-size: 0.82rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); }
+        .encabezado-titulo-fila { display: flex; align-items: center; gap: 16px; }
+        .segmento h2 { font-size: clamp(1.65rem, 3vw, 2.15rem); font-weight: 700; letter-spacing: 0.02em; }
+        .linea-acento { height: 1px; flex: 1; max-width: 160px; background: linear-gradient(90deg, var(--accent-green-line), transparent); }
+
+        .servicios-anillo-wrap {
+            position: relative;
+            z-index: 2;
+            overflow: hidden;
+            border-radius: 18px;
+            padding: 22px 0 26px;
+            perspective: 1100px;
+            perspective-origin: 50% 50%;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            touch-action: pan-y;
+            cursor: grab;
+            mask-image: linear-gradient(90deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
+            -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
+        }
+
+        .servicios-anillo-wrap.arrastrando { cursor: grabbing; }
+
+        .servicios-pista {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            width: max-content;
+            transform-style: preserve-3d;
+            will-change: transform;
+        }
+
+        .servicio-card {
+            position: relative;
+            flex: 0 0 415px;
+            min-height: 280px;
+            max-width: calc(100vw - 48px);
+            background: linear-gradient(180deg, rgba(20, 25, 22, 0.98) 0%, rgba(13, 13, 17, 0.99) 62%);
+            border: 1px solid var(--border-subtle);
+            border-top: 1px solid var(--accent-green-line);
+            border-radius: 18px;
+            padding: 32px 28px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            will-change: transform, filter, opacity;
+            box-shadow:
+                0 24px 50px rgba(0, 0, 0, 0.78),
+                0 -5px 16px -4px var(--accent-green-glow);
+            transition: border-color 0.25s ease, box-shadow 0.28s ease;
+        }
+
+        .servicio-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 58px;
+            background: linear-gradient(180deg, var(--accent-green-soft) 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .servicio-card::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 16%;
+            right: 16%;
+            height: 1.5px;
+            background: linear-gradient(90deg, transparent, rgba(74, 222, 128, 0.65) 50%, transparent);
+            pointer-events: none;
+            transition: left 0.3s ease, right 0.3s ease;
+        }
+
+        .servicio-card.en-foco {
+            border-color: var(--border-hover);
+            border-top-color: rgba(74, 222, 128, 0.78);
+            box-shadow:
+                0 28px 58px rgba(0, 0, 0, 0.88),
+                0 -6px 22px -4px rgba(74, 222, 128, 0.22);
+        }
+
+        .servicio-card.en-foco::after { left: 8%; right: 8%; }
+        .servicio-top { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; }
+
+        .servicio-icono {
+            width: 42px;
+            height: 42px;
+            border-radius: 11px;
+            background-color: rgba(74, 222, 128, 0.08);
+            border: 1px solid rgba(74, 222, 128, 0.26);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-green);
+        }
+
+        .servicio-icono svg {
+            width: 21px;
+            height: 21px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .servicio-num { font-size: 0.92rem; letter-spacing: 0.2em; color: rgba(74, 222, 128, 0.8); font-weight: 700; }
+
+        .servicio-card h3 {
+            position: relative;
+            z-index: 1;
+            font-size: 1.34rem;
+            font-weight: 600;
+            color: var(--text-main);
+            letter-spacing: 0.01em;
+            line-height: 1.3;
+        }
+
+        .servicio-card p { position: relative; z-index: 1; color: var(--text-muted); font-size: 1.02rem; line-height: 1.65; }
+
+        .servicio-pills {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 2px;
+        }
+
+        .pill-tag {
+            font-size: 0.76rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            color: var(--accent-green);
+            background-color: rgba(74, 222, 128, 0.08);
+            border: 1px solid rgba(74, 222, 128, 0.24);
+            border-radius: 999px;
+            padding: 3px 10px;
+        }
+
+        .servicio-barra-wrap {
+            position: relative;
+            z-index: 1;
+            margin-top: auto;
+            padding-top: 6px;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(4px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            pointer-events: none;
+        }
+
+        .servicio-card.en-foco .servicio-barra-wrap { opacity: 1; transform: translateY(0); }
+
+        .servicio-barra-track {
+            width: 100%;
+            height: 3px;
+            border-radius: 999px;
+            background-color: rgba(255, 255, 255, 0.12);
+            overflow: hidden;
+        }
+
+        .servicio-barra-relleno {
+            width: 100%;
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(74, 222, 128, 0.65), var(--accent-green));
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.45);
+            transform: scaleX(0);
+            transform-origin: left center;
+            will-change: transform;
+        }
+
+        .portafolio-grid {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 24px;
+        }
+
+        .video-card {
+            background: linear-gradient(180deg, rgba(20, 25, 22, 0.96) 0%, rgba(13, 13, 17, 0.99) 70%);
+            border: 1px solid var(--border-subtle);
+            border-top: 1px solid var(--accent-green-line);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 20px 44px rgba(0, 0, 0, 0.72);
+        }
+
+        .video-marco {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #000;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .video-marco iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            display: block;
+        }
+
+        .video-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .video-rubro {
+            font-size: 0.76rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--accent-green);
+        }
+
+        .video-card h3 {
+            font-size: 1.14rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .video-card p {
+            font-size: 0.94rem;
+            color: var(--text-muted);
+        }
+
+        .pilares-grid {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .pilar-card {
+            background: linear-gradient(180deg, rgba(18, 22, 20, 0.96) 0%, rgba(13, 13, 17, 0.99) 75%);
+            border: 1px solid var(--border-subtle);
+            border-top: 1px solid rgba(74, 222, 128, 0.32);
+            border-radius: 14px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65);
+        }
+
+        .pilar-idx {
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            color: rgba(74, 222, 128, 0.78);
+        }
+
+        .pilar-card h3 {
+            font-size: 1.08rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .pilar-card p {
+            font-size: 0.93rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .faq-lista {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .faq-item {
+            background: linear-gradient(180deg, rgba(20, 20, 25, 0.95) 0%, rgba(13, 13, 17, 0.98) 80%);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            overflow: hidden;
+            transition: border-color 0.2s ease;
+        }
+
+        .faq-item[open] {
+            border-color: rgba(74, 222, 128, 0.42);
+        }
+
+        .faq-item summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 16px 20px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .faq-item summary::-webkit-details-marker { display: none; }
+
+        .faq-item summary::after {
+            content: "+";
+            color: var(--accent-green);
+            font-size: 1.25rem;
+            font-weight: 500;
+            line-height: 1;
+            transition: transform 0.2s ease;
+        }
+
+        .faq-item[open] summary::after {
+            transform: rotate(45deg);
+        }
+
+        .faq-respuesta {
+            padding: 0 20px 18px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.65;
+        }
+
+        .caja-sobria {
+            position: relative;
+            z-index: 2;
+            background: linear-gradient(180deg, rgba(20, 20, 25, 0.95) 0%, rgba(13, 13, 17, 0.98) 70%);
+            border: 1px solid var(--border-subtle);
+            border-top: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 16px;
+            padding: 24px;
+            color: var(--text-muted);
+            overflow: hidden;
+            box-shadow: 0 20px 44px rgba(0, 0, 0, 0.72);
+        }
+
+        .caja-sobria p { position: relative; z-index: 1; }
+        .caja-sobria p + p { margin-top: 12px; }
+        .caja-sobria strong { color: var(--text-main); font-weight: 600; }
+
+        .contacto-acciones {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .btn-contacto {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 0.94rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .btn-contacto.principal {
+            background-color: rgba(74, 222, 128, 0.14);
+            color: var(--accent-green);
+            border: 1px solid rgba(74, 222, 128, 0.45);
+        }
+
+        .btn-contacto.principal:hover {
+            background-color: rgba(74, 222, 128, 0.22);
+            border-color: var(--accent-green);
+            transform: translateY(-1px);
+        }
+
+        .btn-contacto.secundario {
+            background-color: rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .btn-contacto.secundario:hover {
+            border-color: var(--border-hover);
+            background-color: rgba(255, 255, 255, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .btn-subir {
+            position: fixed;
+            right: 24px;
+            bottom: 135px;
+            z-index: 95;
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            background: linear-gradient(180deg, rgba(20, 25, 22, 0.96) 0%, rgba(13, 13, 17, 0.98) 100%);
+            border: 1px solid rgba(74, 222, 128, 0.45);
+            color: var(--accent-green);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.72), 0 0 18px rgba(74, 222, 128, 0.14);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateY(14px);
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease, border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .btn-subir.visible {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .btn-subir:hover {
+            border-color: var(--accent-green);
+            background: linear-gradient(180deg, rgba(26, 36, 30, 0.98) 0%, rgba(16, 18, 17, 0.99) 100%);
+            transform: translateY(-2px);
+        }
+
+        .btn-subir svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .pie-pagina {
+            position: relative;
+            z-index: 2;
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 34px 20px 38px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background-color: transparent;
+            color: var(--text-muted);
+        }
+
+        .pie-redes {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 24px;
+            padding-bottom: 26px;
+        }
+
+        .pie-redes a {
+            width: 44px;
+            height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #d4d4d8;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: color 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .pie-redes a:hover {
+            color: var(--accent-green);
+            background-color: rgba(74, 222, 128, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .pie-redes svg {
+            width: 26px;
+            height: 26px;
+            fill: currentColor;
+        }
+
+        .pie-base {
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            font-size: 0.86rem;
+            color: var(--text-muted);
+        }
+
+        .pie-marca {
+            color: #d4d4d8;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+        }
+
+        @media (max-width: 820px) {
+            .pilares-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 760px) {
+            .portafolio-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 600px) {
+            .hero-media-wrap { height: clamp(260px, 56vh, 460px); }
+            .lema-gif { letter-spacing: 0.12em; line-height: 1.8; margin-top: -12px; }
+            .servicio-card { flex: 0 0 320px; min-height: 260px; padding: 28px 24px 22px; }
+            .servicio-card h3 { font-size: 1.24rem; }
+            .servicio-card p { font-size: 1rem; }
+            .btn-subir { right: 16px; bottom: 125px; width: 42px; height: 42px; }
+            .pie-redes { gap: 20px; }
+            .pie-base { flex-direction: column; align-items: center; text-align: center; gap: 8px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #particulasFondo { display: none; }
+            .servicios-anillo-wrap { perspective: none; cursor: auto; }
+            .servicios-pista { flex-wrap: wrap; width: 100%; transform: none !important; }
+            .servicio-card { flex: 1 1 300px; filter: none !important; opacity: 1 !important; transform: none !important; }
+            .servicio-barra-wrap { display: none; }
+            .btn-subir { transition: none; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="particulasFondo" aria-hidden="true"></canvas>
+
+    <header class="topbar">
+        <div class="topbar-inner">
+            <button class="menu-btn" id="btnMenu" aria-label="Abrir menú" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <a href="#inicio" class="marca" id="marcaAnimada" aria-label="B Ξ N Λ V · FPV"></a>
+            <nav class="menu-desplegable" id="menuDesplegable" aria-label="Navegación principal">
+                <div class="menu-lista">
+                    <a href="#inicio">Inicio</a>
+                    <a href="#servicios">Servicios</a>
+                    <a href="#portafolio">Portafolio</a>
+                    <a href="#pilares">Enfoque</a>
+                    <a href="#faq">Preguntas</a>
+                    <a href="#contacto">Contacto</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="contenido-principal">
+        <section class="hero-portada" id="inicio">
+            <div class="hero-media-wrap">
+                <video
+                    class="hero-video"
+                    src="hero-vuelo.mp4"
+                    autoplay
+                    loop
+                    muted
+                    playsinline
+                    disablePictureInPicture
+                    controlsList="nodownload noplaybackrate"
+                    aria-label="Tomas de vuelo FPV en interiores"
+                    onerror="this.style.display='none'; document.getElementById('avisoVideoHero').style.display='block';"
+                ></video>
+                <div class="video-placeholder" id="avisoVideoHero" style="display: none;">
+                    Sube tu video corto en bucle como <code>hero-vuelo.mp4</code> a la raíz del repositorio (o cambia el nombre en <code>src="hero-vuelo.mp4"</code>).
                 </div>
             </div>
             <p class="lema-gif" aria-label="Movimiento, precisión y experiencia">
