@@ -217,7 +217,17 @@
             pointer-events: none;
         }
 
-        .hero-frase {
+        #particulasHeroTexto {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            pointer-events: none;
+        }
+
+        .hero-frase-respaldo {
+            display: none;
             margin: 0;
             max-width: min(92vw, 960px);
             font-size: clamp(1.75rem, 5vw, 3.55rem);
@@ -227,13 +237,6 @@
             text-transform: uppercase;
             color: var(--text-main);
             text-shadow: 0 4px 28px rgba(0, 0, 0, 0.94), 0 0 32px rgba(0, 0, 0, 0.8);
-            opacity: 0;
-            transition: opacity 0.85s ease;
-            will-change: opacity;
-        }
-
-        .hero-frase.visible {
-            opacity: 1;
         }
 
         .hero-marca-bloque {
@@ -249,7 +252,6 @@
             letter-spacing: 0.2em;
             line-height: 1.1;
             color: var(--accent);
-            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.95), 0 0 28px rgba(74, 222, 128, 0.28);
         }
 
         .hero-marca-sub {
@@ -258,7 +260,6 @@
             letter-spacing: 0.34em;
             line-height: 1.2;
             color: var(--accent-green);
-            text-shadow: 0 3px 22px rgba(0, 0, 0, 0.95), 0 0 18px rgba(74, 222, 128, 0.3);
         }
 
         .segmento {
@@ -785,7 +786,7 @@
 
         @media (max-width: 600px) {
             .hero-media-wrap { height: clamp(260px, 56vh, 460px); }
-            .hero-frase { letter-spacing: 0.1em; }
+            .hero-frase-respaldo { letter-spacing: 0.1em; }
             .hero-marca-principal { letter-spacing: 0.14em; }
             .hero-marca-sub { letter-spacing: 0.24em; }
             .servicio-card { flex: 0 0 320px; min-height: 260px; padding: 28px 24px 22px; }
@@ -797,10 +798,11 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
-            #particulasFondo { display: none; }
-            .hero-frase {
-                opacity: 1 !important;
-                transition: none !important;
+            #particulasFondo,
+            #particulasHeroTexto { display: none; }
+            .hero-frase-respaldo {
+                display: block;
+                opacity: 1;
             }
             .servicios-anillo-wrap { perspective: none; cursor: auto; }
             .servicios-pista { flex-wrap: wrap; width: 100%; transform: none !important; }
@@ -853,7 +855,13 @@
                     Sube tus clips cortos a la raíz como <code>hero-vuelo1.mp4</code>, <code>hero-vuelo2.mp4</code>, etc.
                 </div>
                 <div class="hero-secuencia-centro" aria-live="polite">
-                    <div class="hero-frase" id="fraseHero">MOVIMIENTO</div>
+                    <canvas id="particulasHeroTexto" aria-hidden="true"></canvas>
+                    <div class="hero-frase-respaldo" id="fraseHero">
+                        <span class="hero-marca-bloque">
+                            <span class="hero-marca-principal">B Ξ N Λ V</span>
+                            <span class="hero-marca-sub">FPV</span>
+                        </span>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1178,15 +1186,21 @@
             }
 
             const prefiereMenosMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-            const fraseHero = document.querySelector("#fraseHero");
+            const canvasHeroTexto = document.querySelector("#particulasHeroTexto");
+            const fraseHeroRespaldo = document.querySelector("#fraseHero");
             const esperar = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-            if (fraseHero) {
+            if (canvasHeroTexto && !prefiereMenosMovimiento) {
+                const ctxHero = canvasHeroTexto.getContext("2d");
+                const canvasMuestra = document.createElement("canvas");
+                const ctxMuestra = canvasMuestra.getContext("2d", { willReadFrequently: true });
+
                 const tiemposHero = {
-                    retrasoTrasVideoMs: 2500,
-                    entrePalabrasMs: 900,
-                    transicionDesvanecerMs: 850,
-                    pausaTrasMarcaMs: 3200
+                    retrasoTrasVideoMs: 2500,     // Espera tras arrancar el video antes de iniciar el ciclo
+                    entradaParticulasMs: 950,     // Tiempo que tardan las partículas en formar cada palabra/marca
+                    entrePalabrasMs: 900,        // Pausa entre una palabra/frase y la siguiente
+                    transicionDesvanecerMs: 950, // Tiempo en que se dispersan y desvanecen las partículas
+                    pausaTrasMarcaMs: 3200       // Pausa tras dispersarse la marca antes de reiniciar el ciclo
                 };
 
                 const secuenciaHero = [
@@ -1198,25 +1212,200 @@
                     { tipo: "marca", principal: "B Ξ N Λ V", sub: "FPV", visibleMs: 5500 },
                 ];
 
-                function renderizarItemHero(item) {
-                    fraseHero.replaceChildren();
+                let anchoHero = 0;
+                let altoHero = 0;
+                let dprHero = 1;
+                let particulasTexto = [];
+                let faseTexto = "inactivo"; // "entrando" | "estable" | "saliendo" | "inactivo"
+                let tiempoFaseMs = 0;
+                let duracionFaseActualMs = 1;
+                let ultimoTiempoHeroTexto = null;
+
+                function redimensionarCanvasHeroTexto() {
+                    const rect = canvasHeroTexto.getBoundingClientRect();
+                    dprHero = Math.min(window.devicePixelRatio || 1, 2);
+                    anchoHero = Math.max(1, rect.width);
+                    altoHero = Math.max(1, rect.height);
+                    canvasHeroTexto.width = Math.floor(anchoHero * dprHero);
+                    canvasHeroTexto.height = Math.floor(altoHero * dprHero);
+                    ctxHero.setTransform(dprHero, 0, 0, dprHero, 0, 0);
+                }
+
+                function construirParticulasParaItem(item) {
+                    const w = Math.max(1, Math.floor(anchoHero));
+                    const h = Math.max(1, Math.floor(altoHero));
+                    canvasMuestra.width = w;
+                    canvasMuestra.height = h;
+                    ctxMuestra.clearRect(0, 0, w, h);
+
+                    const esMovil = w < 600;
+                    const maxAnchoTexto = Math.min(w * 0.9, 960);
+
                     if (item.tipo === "marca") {
-                        const bloque = document.createElement("span");
-                        bloque.className = "hero-marca-bloque";
+                        const tamPrincipal = Math.max(32, Math.min(h * 0.14, w * 0.082, 70));
+                        const tamSub = Math.max(16, Math.min(h * 0.055, w * 0.032, 26));
+                        const separacion = Math.max(10, tamSub * 0.45);
+                        const altoTotal = tamPrincipal + separacion + tamSub;
+                        const yPrincipal = (h - altoTotal) / 2 + tamPrincipal * 0.82;
+                        const ySub = yPrincipal + separacion + tamSub * 0.85;
 
-                        const principal = document.createElement("span");
-                        principal.className = "hero-marca-principal";
-                        principal.textContent = item.principal;
+                        ctxMuestra.save();
+                        ctxMuestra.textAlign = "center";
+                        ctxMuestra.textBaseline = "alphabetic";
+                        ctxMuestra.font = `700 ${Math.round(tamPrincipal)}px 'Segoe UI', system-ui, -apple-system, sans-serif`;
+                        ctxMuestra.fillStyle = "#ffffff";
+                        ctxMuestra.fillText(item.principal, w / 2, yPrincipal, maxAnchoTexto);
 
-                        const sub = document.createElement("span");
-                        sub.className = "hero-marca-sub";
-                        sub.textContent = item.sub;
-
-                        bloque.append(principal, sub);
-                        fraseHero.appendChild(bloque);
+                        ctxMuestra.font = `600 ${Math.round(tamSub)}px 'Segoe UI', system-ui, -apple-system, sans-serif`;
+                        ctxMuestra.fillStyle = "#4ade80";
+                        ctxMuestra.fillText(item.sub, w / 2, ySub, maxAnchoTexto);
+                        ctxMuestra.restore();
                     } else {
-                        fraseHero.textContent = item.valor;
+                        const tamTexto = Math.max(24, Math.min(h * 0.11, w * 0.062, 54));
+                        ctxMuestra.save();
+                        ctxMuestra.textAlign = "center";
+                        ctxMuestra.textBaseline = "middle";
+                        ctxMuestra.font = `700 ${Math.round(tamTexto)}px 'Segoe UI', system-ui, -apple-system, sans-serif`;
+                        ctxMuestra.fillStyle = "#ffffff";
+                        ctxMuestra.fillText(item.valor.toUpperCase(), w / 2, h / 2, maxAnchoTexto);
+                        ctxMuestra.restore();
                     }
+
+                    const datos = ctxMuestra.getImageData(0, 0, w, h).data;
+                    const paso = esMovil ? 5 : 4;
+                    const candidatos = [];
+
+                    for (let y = 0; y < h; y += paso) {
+                        for (let x = 0; x < w; x += paso) {
+                            const idx = (y * w + x) * 4;
+                            const alfa = datos[idx + 3];
+                            if (alfa > 110) {
+                                const r = datos[idx];
+                                const g = datos[idx + 1];
+                                const b = datos[idx + 2];
+                                const esVerde = g > r + 35 && g > b + 35;
+                                candidatos.push({
+                                    tx: x + (Math.random() - 0.5) * (paso * 0.45),
+                                    ty: y + (Math.random() - 0.5) * (paso * 0.45),
+                                    esVerde
+                                });
+                            }
+                        }
+                    }
+
+                    const limiteParticulas = esMovil ? 580 : 920;
+                    let seleccionados = candidatos;
+                    if (candidatos.length > limiteParticulas) {
+                        const intervalo = candidatos.length / limiteParticulas;
+                        seleccionados = [];
+                        for (let i = 0; i < limiteParticulas; i++) {
+                            seleccionados.push(candidatos[Math.floor(i * intervalo)]);
+                        }
+                    }
+
+                    const centroX = w / 2;
+                    const centroY = h / 2;
+
+                    return seleccionados.map((pt) => {
+                        const angulo = Math.random() * Math.PI * 2;
+                        const radioOrigen = Math.min(w, h) * (0.28 + Math.random() * 0.42);
+                        const ox = pt.tx + Math.cos(angulo) * radioOrigen * 0.45 + (pt.tx - centroX) * 0.35;
+                        const oy = pt.ty + Math.sin(angulo) * radioOrigen * 0.45 + (Math.random() - 0.5) * 45;
+
+                        const vxSalida = (pt.tx - centroX) * (0.018 + Math.random() * 0.025) + (Math.random() - 0.5) * 1.4;
+                        const vySalida = (pt.ty - centroY) * (0.014 + Math.random() * 0.02) - (0.3 + Math.random() * 1.1);
+
+                        return {
+                            tx: pt.tx,
+                            ty: pt.ty,
+                            ox,
+                            oy,
+                            x: ox,
+                            y: oy,
+                            salidaX: pt.tx,
+                            salidaY: pt.ty,
+                            vxSalida,
+                            vySalida,
+                            radio: esMovil ? (1.25 + Math.random() * 0.95) : (1.35 + Math.random() * 1.15),
+                            fase: Math.random() * Math.PI * 2,
+                            velFase: 0.03 + Math.random() * 0.04,
+                            esVerde: pt.esVerde
+                        };
+                    });
+                }
+
+                function easeOutCubic(t) {
+                    return 1 - Math.pow(1 - t, 3);
+                }
+
+                function easeInQuad(t) {
+                    return t * t;
+                }
+
+                function prepararSalidaParticulas() {
+                    const centroX = anchoHero / 2;
+                    const centroY = altoHero / 2;
+                    for (let i = 0; i < particulasTexto.length; i++) {
+                        const p = particulasTexto[i];
+                        p.salidaX = p.x;
+                        p.salidaY = p.y;
+                        const dx = p.x - centroX;
+                        const dy = p.y - centroY;
+                        p.vxSalida = dx * (0.35 + Math.random() * 0.45) + (Math.random() - 0.5) * 42;
+                        p.vySalida = dy * (0.25 + Math.random() * 0.35) - (12 + Math.random() * 28);
+                    }
+                }
+
+                function renderizarParticulasHero(ahora) {
+                    if (ultimoTiempoHeroTexto === null) ultimoTiempoHeroTexto = ahora;
+                    const dtMs = Math.min(ahora - ultimoTiempoHeroTexto, 50);
+                    const dtNorm = dtMs / (1000 / 60);
+                    ultimoTiempoHeroTexto = ahora;
+
+                    if (!document.hidden) {
+                        ctxHero.clearRect(0, 0, anchoHero, altoHero);
+
+                        if (faseTexto !== "inactivo" && particulasTexto.length > 0) {
+                            tiempoFaseMs += dtMs;
+                            const progreso = Math.min(1, tiempoFaseMs / Math.max(1, duracionFaseActualMs));
+
+                            for (let i = 0; i < particulasTexto.length; i++) {
+                                const p = particulasTexto[i];
+                                p.fase += p.velFase * dtNorm;
+
+                                let alfa = 0.92;
+                                const vibracionX = Math.cos(p.fase) * 0.45;
+                                const vibracionY = Math.sin(p.fase * 1.15) * 0.45;
+
+                                if (faseTexto === "entrando") {
+                                    const e = easeOutCubic(progreso);
+                                    p.x = p.ox + (p.tx - p.ox) * e + vibracionX * (1 - e * 0.65);
+                                    p.y = p.oy + (p.ty - p.oy) * e + vibracionY * (1 - e * 0.65);
+                                    alfa = Math.min(0.95, 0.1 + e * 0.85);
+                                } else if (faseTexto === "estable") {
+                                    p.x = p.tx + vibracionX;
+                                    p.y = p.ty + vibracionY;
+                                    alfa = 0.84 + Math.sin(p.fase * 1.5) * 0.12;
+                                } else if (faseTexto === "saliendo") {
+                                    const e = easeInQuad(progreso);
+                                    p.x = p.salidaX + p.vxSalida * e + Math.sin(p.fase) * 4 * e;
+                                    p.y = p.salidaY + p.vySalida * e;
+                                    alfa = Math.max(0, (1 - e) * 0.92);
+                                }
+
+                                if (alfa > 0.015) {
+                                    ctxHero.beginPath();
+                                    ctxHero.arc(p.x, p.y, p.radio, 0, Math.PI * 2);
+                                    ctxHero.fillStyle = p.esVerde
+                                        ? `rgba(74, 222, 128, ${alfa.toFixed(3)})`
+                                        : `rgba(244, 244, 245, ${alfa.toFixed(3)})`;
+                                    ctxHero.fill();
+                                }
+                            }
+                        }
+                    }
+
+                    requestAnimationFrame(renderizarParticulasHero);
                 }
 
                 function esperarArranqueVideoHero(videoEl, fallbackMs = 800) {
@@ -1250,45 +1439,55 @@
                     });
                 }
 
-                if (prefiereMenosMovimiento) {
-                    renderizarItemHero({ tipo: "marca", principal: "B Ξ N Λ V", sub: "FPV" });
-                    fraseHero.classList.add("visible");
-                } else {
-                    async function reproducirSecuenciaHero() {
-                        await esperarArranqueVideoHero(videoHero);
-                        await esperar(tiemposHero.retrasoTrasVideoMs);
+                redimensionarCanvasHeroTexto();
+                window.addEventListener("resize", redimensionarCanvasHeroTexto, { passive: true });
+                requestAnimationFrame(renderizarParticulasHero);
 
-                        let idx = 0;
+                async function reproducirSecuenciaHeroParticulas() {
+                    await esperarArranqueVideoHero(videoHero);
+                    await esperar(tiemposHero.retrasoTrasVideoMs);
 
-                        while (true) {
-                            const item = secuenciaHero[idx];
-                            const esUltimo = idx === secuenciaHero.length - 1;
+                    let idx = 0;
 
-                            fraseHero.classList.remove("visible");
-                            renderizarItemHero(item);
+                    while (true) {
+                        const item = secuenciaHero[idx];
+                        const esUltimo = idx === secuenciaHero.length - 1;
 
-                            void fraseHero.offsetWidth;
-                            requestAnimationFrame(() => {
-                                fraseHero.classList.add("visible");
-                            });
+                        redimensionarCanvasHeroTexto();
+                        particulasTexto = construirParticulasParaItem(item);
 
-                            await esperar(item.visibleMs);
+                        faseTexto = "entrando";
+                        tiempoFaseMs = 0;
+                        duracionFaseActualMs = tiemposHero.entradaParticulasMs;
+                        await esperar(tiemposHero.entradaParticulasMs);
 
-                            fraseHero.classList.remove("visible");
-                            await esperar(tiemposHero.transicionDesvanecerMs);
+                        faseTexto = "estable";
+                        tiempoFaseMs = 0;
+                        duracionFaseActualMs = Math.max(1, item.visibleMs);
+                        await esperar(item.visibleMs);
 
-                            if (esUltimo) {
-                                await esperar(tiemposHero.pausaTrasMarcaMs);
-                            } else {
-                                await esperar(tiemposHero.entrePalabrasMs);
-                            }
+                        prepararSalidaParticulas();
+                        faseTexto = "saliendo";
+                        tiempoFaseMs = 0;
+                        duracionFaseActualMs = tiemposHero.transicionDesvanecerMs;
+                        await esperar(tiemposHero.transicionDesvanecerMs);
 
-                            idx = (idx + 1) % secuenciaHero.length;
+                        faseTexto = "inactivo";
+                        particulasTexto = [];
+
+                        if (esUltimo) {
+                            await esperar(tiemposHero.pausaTrasMarcaMs);
+                        } else {
+                            await esperar(tiemposHero.entrePalabrasMs);
                         }
-                    }
 
-                    reproducirSecuenciaHero();
+                        idx = (idx + 1) % secuenciaHero.length;
+                    }
                 }
+
+                reproducirSecuenciaHeroParticulas();
+            } else if (fraseHeroRespaldo) {
+                fraseHeroRespaldo.style.display = "block";
             }
 
             const btnSubir = document.querySelector("#btnSubir");
