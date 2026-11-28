@@ -38,20 +38,21 @@
         .contenido-principal { position: relative; z-index: 2; }
 
         .topbar {
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             z-index: 100;
-            background-color: rgba(9, 9, 11, 0.86);
-            backdrop-filter: blur(14px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 6px 28px rgba(0, 0, 0, 0.45);
+            background: linear-gradient(180deg, rgba(9, 9, 11, 0.78) 0%, rgba(9, 9, 11, 0.35) 75%, transparent 100%);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         }
 
         .topbar-inner {
             position: relative;
-            max-width: 1140px;
+            max-width: 100%;
             margin: 0 auto;
-            padding: 14px 20px;
+            padding: 14px 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -154,13 +155,16 @@
             max-width: 100%;
             margin: 0 auto;
             overflow: hidden;
-            scroll-margin-top: 70px;
+            scroll-margin-top: 0;
         }
 
         .hero-media-wrap {
             position: relative;
             width: 100%;
-            height: clamp(320px, 74vh, 720px);
+            min-height: 100vh;
+            min-height: 100svh;
+            height: 100vh;
+            height: 100dvh;
             overflow: hidden;
             display: flex;
             align-items: center;
@@ -803,7 +807,6 @@
         }
 
         @media (max-width: 600px) {
-            .hero-media-wrap { height: clamp(260px, 56vh, 460px); }
             .hero-frase { letter-spacing: 0.1em; }
             .hero-marca-principal { letter-spacing: 0.14em; }
             .hero-marca-sub { letter-spacing: 0.24em; }
@@ -883,7 +886,7 @@
                     Sube tus clips cortos a la raíz como <code>hero-vuelo1.mp4</code>, <code>hero-vuelo2.mp4</code>, etc.
                 </div>
                 <div class="hero-secuencia-centro" aria-live="polite">
-                    <div class="hero-frase" id="fraseHero">MOVIMIENTO</div>
+                    <div class="hero-frase" id="fraseHero"></div>
                 </div>
             </div>
         </section>
