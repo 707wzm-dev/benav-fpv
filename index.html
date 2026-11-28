@@ -146,11 +146,12 @@
 
         .menu-lista a:hover { background-color: rgba(255, 255, 255, 0.08); transform: translateX(3px); }
 
+        /* Hero portada a ancho completo sin desenfoque y con lema sobre la parte baja */
         .hero-portada {
             position: relative;
             width: 100%;
             max-width: 100%;
-            margin: 0 auto 24px;
+            margin: 0 auto;
             overflow: hidden;
             scroll-margin-top: 70px;
         }
@@ -158,20 +159,12 @@
         .hero-media-wrap {
             position: relative;
             width: 100%;
-            height: clamp(320px, 72vh, 680px);
+            height: clamp(320px, 74vh, 720px);
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
             background-color: var(--bg-main);
-            -webkit-mask-image:
-                linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%),
-                linear-gradient(to bottom, transparent 0%, #000 10%, #000 82%, transparent 100%);
-            -webkit-mask-composite: source-in;
-            mask-image:
-                linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%),
-                linear-gradient(to bottom, transparent 0%, #000 10%, #000 82%, transparent 100%);
-            mask-composite: intersect;
         }
 
         .hero-media-wrap::after {
@@ -179,12 +172,19 @@
             position: absolute;
             inset: 0;
             pointer-events: none;
-            background:
-                linear-gradient(to bottom, rgba(9, 9, 11, 0.55) 0%, transparent 22%, transparent 72%, var(--bg-main) 100%),
-                linear-gradient(to right, var(--bg-main) 0%, transparent 10%, transparent 90%, var(--bg-main) 100%);
+            z-index: 2;
+            background: linear-gradient(
+                to bottom,
+                transparent 0%,
+                transparent 56%,
+                rgba(9, 9, 11, 0.45) 78%,
+                rgba(9, 9, 11, 0.86) 100%
+            );
         }
 
         .hero-video {
+            position: relative;
+            z-index: 1;
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -194,7 +194,7 @@
 
         .video-placeholder {
             position: relative;
-            z-index: 2;
+            z-index: 3;
             padding: 40px 24px;
             text-align: center;
             color: var(--text-muted);
@@ -204,17 +204,20 @@
         .video-placeholder code { color: var(--text-main); background-color: #1a1a22; padding: 2px 6px; border-radius: 4px; }
 
         .lema-gif {
-            position: relative;
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 24px;
             z-index: 3;
-            margin-top: -18px;
-            padding: 0 20px 28px;
+            padding: 0 20px;
             text-align: center;
             font-size: clamp(0.9rem, 2.2vw, 1.15rem);
             font-weight: 600;
             letter-spacing: 0.22em;
             color: var(--text-main);
             text-transform: uppercase;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.18);
+            text-shadow: 0 2px 18px rgba(0, 0, 0, 0.9), 0 0 22px rgba(255, 255, 255, 0.22);
+            pointer-events: none;
         }
 
         .lema-gif .separador { color: var(--text-muted); margin: 0 6px; }
@@ -743,7 +746,7 @@
 
         @media (max-width: 600px) {
             .hero-media-wrap { height: clamp(260px, 56vh, 460px); }
-            .lema-gif { letter-spacing: 0.12em; line-height: 1.8; margin-top: -12px; }
+            .lema-gif { letter-spacing: 0.12em; line-height: 1.8; bottom: 16px; }
             .servicio-card { flex: 0 0 320px; min-height: 260px; padding: 28px 24px 22px; }
             .servicio-card h3 { font-size: 1.24rem; }
             .servicio-card p { font-size: 1rem; }
@@ -804,10 +807,10 @@
                 <div class="video-placeholder" id="avisoVideoHero" style="display: none;">
                     Sube tu video corto en bucle como <code>hero-vuelo.mp4</code> a la raíz del repositorio (o cambia el nombre en <code>src="hero-vuelo.mp4"</code>).
                 </div>
+                <p class="lema-gif" aria-label="Movimiento, precisión y experiencia">
+                    MOVIMIENTO <span class="separador">·</span> PRECISIÓN <span class="separador">·</span> EXPERIENCIA
+                </p>
             </div>
-            <p class="lema-gif" aria-label="Movimiento, precisión y experiencia">
-                MOVIMIENTO <span class="separador">·</span> PRECISIÓN <span class="separador">·</span> EXPERIENCIA
-            </p>
         </section>
 
         <section class="segmento" id="servicios">
