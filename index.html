@@ -173,26 +173,12 @@
             transition: background-color 0.2s ease, color 0.2s ease, transform 0.18s ease;
         }
 
-        .menu-lista a::after {
-            content: "→";
-            color: var(--accent-green);
-            opacity: 0;
-            transform: translateX(-4px);
-            transition: opacity 0.18s ease, transform 0.18s ease;
-        }
-
         .menu-lista a:hover,
         .menu-lista a:focus-visible {
             background-color: rgba(74, 222, 128, 0.08);
             color: var(--accent-green);
             transform: translateX(3px);
             outline: none;
-        }
-
-        .menu-lista a:hover::after,
-        .menu-lista a:focus-visible::after {
-            opacity: 1;
-            transform: translateX(0);
         }
 
         .hero-portada {
@@ -864,7 +850,7 @@
 
         @media (prefers-reduced-motion: reduce) {
             #particulasFondo { display: none; }
-            .menu-desplegable, .menu-lista a, .menu-lista a::after { transition: none !important; }
+            .menu-desplegable, .menu-lista a { transition: none !important; }
             .hero-video { transition: none !important; }
             .hero-frase {
                 opacity: 1 !important;
