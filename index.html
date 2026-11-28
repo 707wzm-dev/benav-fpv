@@ -1194,13 +1194,15 @@
                 const ctxHero = canvasHeroTexto.getContext("2d");
                 const canvasMuestra = document.createElement("canvas");
                 const ctxMuestra = canvasMuestra.getContext("2d", { willReadFrequently: true });
+                const canvasSolido = document.createElement("canvas");
+                const ctxSolido = canvasSolido.getContext("2d");
 
                 const tiemposHero = {
-                    retrasoTrasVideoMs: 2500,     // Espera tras arrancar el video antes de iniciar el ciclo
-                    entradaParticulasMs: 950,     // Tiempo que tardan las partículas en formar cada palabra/marca
+                    retrasoTrasVideoMs: 2500,     // Espera tras iniciar el video antes del primer texto
+                    solidificarMs: 1150,          // Tiempo en que el polvo se asienta y solidifica la palabra/marca
                     entrePalabrasMs: 900,        // Pausa entre una palabra/frase y la siguiente
-                    transicionDesvanecerMs: 950, // Tiempo en que se dispersan y desvanecen las partículas
-                    pausaTrasMarcaMs: 3200       // Pausa tras dispersarse la marca antes de reiniciar el ciclo
+                    disolverPolvoMs: 1100,        // Tiempo en que la forma se vuelve polvo y se desvanece en su lugar
+                    pausaTrasMarcaMs: 3200        // Espera tras desaparecer la marca antes de reiniciar el ciclo
                 };
 
                 const secuenciaHero = [
@@ -1215,11 +1217,45 @@
                 let anchoHero = 0;
                 let altoHero = 0;
                 let dprHero = 1;
-                let particulasTexto = [];
-                let faseTexto = "inactivo"; // "entrando" | "estable" | "saliendo" | "inactivo"
+                let granosPolvo = [];
+                let faseTexto = "inactivo"; // "solidificando" | "solido" | "disolviendo" | "inactivo"
                 let tiempoFaseMs = 0;
                 let duracionFaseActualMs = 1;
                 let ultimoTiempoHeroTexto = null;
+
+                function dibujarTipografiaEnContexto(ctx, item, w, h) {
+                    const maxAnchoTexto = Math.min(w * 0.9, 960);
+
+                    if (item.tipo === "marca") {
+                        const tamPrincipal = Math.max(32, Math.min(h * 0.14, w * 0.082, 70));
+                        const tamSub = Math.max(16, Math.min(h * 0.055, w * 0.032, 26));
+                        const separacion = Math.max(10, tamSub * 0.45);
+                        const altoTotal = tamPrincipal + separacion + tamSub;
+                        const yPrincipal = (h - altoTotal) / 2 + tamPrincipal * 0.82;
+                        const ySub = yPrincipal + separacion + tamSub * 0.85;
+
+                        ctx.save();
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "alphabetic";
+                        ctx.font = `700 ${Math.round(tamPrincipal)}px 'Segoe UI', system-ui, -apple-system, sans-serif`;
+                        ctx.fillStyle = "#ffffff";
+                        ctx.fillText(item.principal, w / 2, yPrincipal, maxAnchoTexto);
+
+                        ctx.font = `600 ${Math.round(tamSub)}px 'Segoe UI', system-ui, -apple-system, sans-serif`;
+                        ctx.fillStyle = "#4ade80";
+                        ctx.fillText(item.sub, w / 2, ySub, maxAnchoTexto);
+                        ctx.restore();
+                    } else {
+                        const tamTexto = Math.max(24, Math.min(h * 0.11, w * 0.062, 54));
+                        ctx.save();
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
+                        ctx.font = `700 ${Math.round(tamTexto)}px 'Segoe UI', system-ui, -apple-system, sans-serif`;
+                        ctx.fillStyle = "#ffffff";
+                        ctx.fillText(item.valor.toUpperCase(), w / 2, h / 2, maxAnchoTexto);
+                        ctx.restore();
+                    }
+                }
 
                 function redimensionarCanvasHeroTexto() {
                     const rect = canvasHeroTexto.getBoundingClientRect();
@@ -1231,45 +1267,21 @@
                     ctxHero.setTransform(dprHero, 0, 0, dprHero, 0, 0);
                 }
 
-                function construirParticulasParaItem(item) {
+                function prepararItemPolvo(item) {
                     const w = Math.max(1, Math.floor(anchoHero));
                     const h = Math.max(1, Math.floor(altoHero));
+                    const esMovil = w < 600;
+
+                    canvasSolido.width = Math.max(1, Math.floor(w * dprHero));
+                    canvasSolido.height = Math.max(1, Math.floor(h * dprHero));
+                    ctxSolido.setTransform(dprHero, 0, 0, dprHero, 0, 0);
+                    ctxSolido.clearRect(0, 0, w, h);
+                    dibujarTipografiaEnContexto(ctxSolido, item, w, h);
+
                     canvasMuestra.width = w;
                     canvasMuestra.height = h;
                     ctxMuestra.clearRect(0, 0, w, h);
-
-                    const esMovil = w < 600;
-                    const maxAnchoTexto = Math.min(w * 0.9, 960);
-
-                    if (item.tipo === "marca") {
-                        const tamPrincipal = Math.max(32, Math.min(h * 0.14, w * 0.082, 70));
-                        const tamSub = Math.max(16, Math.min(h * 0.055, w * 0.032, 26));
-                        const separacion = Math.max(10, tamSub * 0.45);
-                        const altoTotal = tamPrincipal + separacion + tamSub;
-                        const yPrincipal = (h - altoTotal) / 2 + tamPrincipal * 0.82;
-                        const ySub = yPrincipal + separacion + tamSub * 0.85;
-
-                        ctxMuestra.save();
-                        ctxMuestra.textAlign = "center";
-                        ctxMuestra.textBaseline = "alphabetic";
-                        ctxMuestra.font = `700 ${Math.round(tamPrincipal)}px 'Segoe UI', system-ui, -apple-system, sans-serif`;
-                        ctxMuestra.fillStyle = "#ffffff";
-                        ctxMuestra.fillText(item.principal, w / 2, yPrincipal, maxAnchoTexto);
-
-                        ctxMuestra.font = `600 ${Math.round(tamSub)}px 'Segoe UI', system-ui, -apple-system, sans-serif`;
-                        ctxMuestra.fillStyle = "#4ade80";
-                        ctxMuestra.fillText(item.sub, w / 2, ySub, maxAnchoTexto);
-                        ctxMuestra.restore();
-                    } else {
-                        const tamTexto = Math.max(24, Math.min(h * 0.11, w * 0.062, 54));
-                        ctxMuestra.save();
-                        ctxMuestra.textAlign = "center";
-                        ctxMuestra.textBaseline = "middle";
-                        ctxMuestra.font = `700 ${Math.round(tamTexto)}px 'Segoe UI', system-ui, -apple-system, sans-serif`;
-                        ctxMuestra.fillStyle = "#ffffff";
-                        ctxMuestra.fillText(item.valor.toUpperCase(), w / 2, h / 2, maxAnchoTexto);
-                        ctxMuestra.restore();
-                    }
+                    dibujarTipografiaEnContexto(ctxMuestra, item, w, h);
 
                     const datos = ctxMuestra.getImageData(0, 0, w, h).data;
                     const paso = esMovil ? 5 : 4;
@@ -1279,41 +1291,38 @@
                         for (let x = 0; x < w; x += paso) {
                             const idx = (y * w + x) * 4;
                             const alfa = datos[idx + 3];
-                            if (alfa > 110) {
+                            if (alfa > 90) {
                                 const r = datos[idx];
                                 const g = datos[idx + 1];
                                 const b = datos[idx + 2];
                                 const esVerde = g > r + 35 && g > b + 35;
                                 candidatos.push({
-                                    tx: x + (Math.random() - 0.5) * (paso * 0.45),
-                                    ty: y + (Math.random() - 0.5) * (paso * 0.45),
+                                    tx: x + (Math.random() - 0.5) * (paso * 0.5),
+                                    ty: y + (Math.random() - 0.5) * (paso * 0.5),
                                     esVerde
                                 });
                             }
                         }
                     }
 
-                    const limiteParticulas = esMovil ? 580 : 920;
-                    let seleccionados = candidatos;
-                    if (candidatos.length > limiteParticulas) {
-                        const intervalo = candidatos.length / limiteParticulas;
-                        seleccionados = [];
-                        for (let i = 0; i < limiteParticulas; i++) {
-                            seleccionados.push(candidatos[Math.floor(i * intervalo)]);
+                    const limiteGranos = esMovil ? 520 : 820;
+                    let elegidos = candidatos;
+                    if (candidatos.length > limiteGranos) {
+                        const intervalo = candidatos.length / limiteGranos;
+                        elegidos = [];
+                        for (let i = 0; i < limiteGranos; i++) {
+                            elegidos.push(candidatos[Math.floor(i * intervalo)]);
                         }
                     }
 
-                    const centroX = w / 2;
-                    const centroY = h / 2;
+                    // El polvo permanece en la vecindad inmediata de su posición final (sin venir de afuera)
+                    const radioLocal = esMovil ? 13 : 18;
 
-                    return seleccionados.map((pt) => {
+                    return elegidos.map((pt) => {
                         const angulo = Math.random() * Math.PI * 2;
-                        const radioOrigen = Math.min(w, h) * (0.28 + Math.random() * 0.42);
-                        const ox = pt.tx + Math.cos(angulo) * radioOrigen * 0.45 + (pt.tx - centroX) * 0.35;
-                        const oy = pt.ty + Math.sin(angulo) * radioOrigen * 0.45 + (Math.random() - 0.5) * 45;
-
-                        const vxSalida = (pt.tx - centroX) * (0.018 + Math.random() * 0.025) + (Math.random() - 0.5) * 1.4;
-                        const vySalida = (pt.ty - centroY) * (0.014 + Math.random() * 0.02) - (0.3 + Math.random() * 1.1);
+                        const distLocal = (0.25 + Math.random() * 0.75) * radioLocal;
+                        const ox = pt.tx + Math.cos(angulo) * distLocal;
+                        const oy = pt.ty + Math.sin(angulo) * distLocal;
 
                         return {
                             tx: pt.tx,
@@ -1324,39 +1333,29 @@
                             y: oy,
                             salidaX: pt.tx,
                             salidaY: pt.ty,
-                            vxSalida,
-                            vySalida,
-                            radio: esMovil ? (1.25 + Math.random() * 0.95) : (1.35 + Math.random() * 1.15),
+                            derivaX: (Math.random() - 0.5) * (esMovil ? 16 : 24),
+                            derivaY: -(4 + Math.random() * (esMovil ? 14 : 22)),
+                            radio: esMovil ? (1.1 + Math.random() * 1.0) : (1.2 + Math.random() * 1.2),
                             fase: Math.random() * Math.PI * 2,
-                            velFase: 0.03 + Math.random() * 0.04,
+                            velFase: 0.04 + Math.random() * 0.05,
                             esVerde: pt.esVerde
                         };
                     });
                 }
 
-                function easeOutCubic(t) {
-                    return 1 - Math.pow(1 - t, 3);
+                function suavizar(t) {
+                    return t * t * (3 - 2 * t);
                 }
 
-                function easeInQuad(t) {
-                    return t * t;
-                }
-
-                function prepararSalidaParticulas() {
-                    const centroX = anchoHero / 2;
-                    const centroY = altoHero / 2;
-                    for (let i = 0; i < particulasTexto.length; i++) {
-                        const p = particulasTexto[i];
-                        p.salidaX = p.x;
-                        p.salidaY = p.y;
-                        const dx = p.x - centroX;
-                        const dy = p.y - centroY;
-                        p.vxSalida = dx * (0.35 + Math.random() * 0.45) + (Math.random() - 0.5) * 42;
-                        p.vySalida = dy * (0.25 + Math.random() * 0.35) - (12 + Math.random() * 28);
+                function capturarEstadoParaDisolver() {
+                    for (let i = 0; i < granosPolvo.length; i++) {
+                        const g = granosPolvo[i];
+                        g.salidaX = g.x;
+                        g.salidaY = g.y;
                     }
                 }
 
-                function renderizarParticulasHero(ahora) {
+                function renderizarPolvoHero(ahora) {
                     if (ultimoTiempoHeroTexto === null) ultimoTiempoHeroTexto = ahora;
                     const dtMs = Math.min(ahora - ultimoTiempoHeroTexto, 50);
                     const dtNorm = dtMs / (1000 / 60);
@@ -1365,47 +1364,86 @@
                     if (!document.hidden) {
                         ctxHero.clearRect(0, 0, anchoHero, altoHero);
 
-                        if (faseTexto !== "inactivo" && particulasTexto.length > 0) {
+                        if (faseTexto !== "inactivo") {
                             tiempoFaseMs += dtMs;
                             const progreso = Math.min(1, tiempoFaseMs / Math.max(1, duracionFaseActualMs));
 
-                            for (let i = 0; i < particulasTexto.length; i++) {
-                                const p = particulasTexto[i];
-                                p.fase += p.velFase * dtNorm;
+                            let alfaSolido = 0;
+                            let alfaPolvo = 0;
 
-                                let alfa = 0.92;
-                                const vibracionX = Math.cos(p.fase) * 0.45;
-                                const vibracionY = Math.sin(p.fase * 1.15) * 0.45;
+                            if (faseTexto === "solidificando") {
+                                // Primero aparece polvo en el sitio y al final solidifica por completo
+                                const tSolido = Math.max(0, (progreso - 0.28) / 0.72);
+                                alfaSolido = suavizar(tSolido);
+                                alfaPolvo = progreso < 0.85
+                                    ? Math.sin(Math.min(1, progreso / 0.65) * Math.PI * 0.85) * (1 - tSolido * 0.75)
+                                    : (1 - progreso) * 0.8;
+                            } else if (faseTexto === "solido") {
+                                alfaSolido = 1;
+                                alfaPolvo = 0.08 + Math.sin(ahora * 0.004) * 0.04;
+                            } else if (faseTexto === "disolviendo") {
+                                // La forma sólida se va convirtiendo en polvo en el mismo lugar y se disuelve
+                                alfaSolido = Math.max(0, 1 - suavizar(Math.min(1, progreso / 0.65)));
+                                alfaPolvo = progreso < 0.75
+                                    ? Math.sin(Math.min(1, progreso / 0.35) * Math.PI * 0.5) * 0.92
+                                    : Math.max(0, (1 - (progreso - 0.75) / 0.25) * 0.92);
+                            }
 
-                                if (faseTexto === "entrando") {
-                                    const e = easeOutCubic(progreso);
-                                    p.x = p.ox + (p.tx - p.ox) * e + vibracionX * (1 - e * 0.65);
-                                    p.y = p.oy + (p.ty - p.oy) * e + vibracionY * (1 - e * 0.65);
-                                    alfa = Math.min(0.95, 0.1 + e * 0.85);
-                                } else if (faseTexto === "estable") {
-                                    p.x = p.tx + vibracionX;
-                                    p.y = p.ty + vibracionY;
-                                    alfa = 0.84 + Math.sin(p.fase * 1.5) * 0.12;
-                                } else if (faseTexto === "saliendo") {
-                                    const e = easeInQuad(progreso);
-                                    p.x = p.salidaX + p.vxSalida * e + Math.sin(p.fase) * 4 * e;
-                                    p.y = p.salidaY + p.vySalida * e;
-                                    alfa = Math.max(0, (1 - e) * 0.92);
-                                }
+                            if (alfaSolido > 0.005 && canvasSolido.width > 0 && canvasSolido.height > 0) {
+                                ctxHero.save();
+                                ctxHero.setTransform(1, 0, 0, 1, 0, 0);
+                                ctxHero.globalAlpha = alfaSolido;
+                                ctxHero.shadowColor = "rgba(0, 0, 0, 0.85)";
+                                ctxHero.shadowBlur = 16 * dprHero;
+                                ctxHero.drawImage(canvasSolido, 0, 0);
+                                ctxHero.restore();
+                            }
 
-                                if (alfa > 0.015) {
-                                    ctxHero.beginPath();
-                                    ctxHero.arc(p.x, p.y, p.radio, 0, Math.PI * 2);
-                                    ctxHero.fillStyle = p.esVerde
-                                        ? `rgba(74, 222, 128, ${alfa.toFixed(3)})`
-                                        : `rgba(244, 244, 245, ${alfa.toFixed(3)})`;
-                                    ctxHero.fill();
+                            if (alfaPolvo > 0.01 && granosPolvo.length > 0) {
+                                const asentamiento = faseTexto === "solidificando"
+                                    ? suavizar(Math.min(1, progreso / 0.9))
+                                    : (faseTexto === "solido" ? 1 : 0);
+
+                                for (let i = 0; i < granosPolvo.length; i++) {
+                                    const g = granosPolvo[i];
+                                    g.fase += g.velFase * dtNorm;
+
+                                    const jitterLocal = faseTexto === "solidificando"
+                                        ? (1 - asentamiento) * 1.4
+                                        : (faseTexto === "disolviendo" ? 0.6 + progreso * 1.6 : 0.35);
+
+                                    const jx = Math.cos(g.fase) * jitterLocal;
+                                    const jy = Math.sin(g.fase * 1.2) * jitterLocal;
+
+                                    if (faseTexto === "solidificando") {
+                                        g.x = g.ox + (g.tx - g.ox) * asentamiento + jx;
+                                        g.y = g.oy + (g.ty - g.oy) * asentamiento + jy;
+                                    } else if (faseTexto === "solido") {
+                                        g.x = g.tx + jx;
+                                        g.y = g.ty + jy;
+                                    } else if (faseTexto === "disolviendo") {
+                                        const e = suavizar(progreso);
+                                        g.x = g.salidaX + g.derivaX * e + jx;
+                                        g.y = g.salidaY + g.derivaY * e + jy;
+                                    }
+
+                                    const parpadeo = 0.72 + Math.sin(g.fase * 1.3) * 0.28;
+                                    const alfaFinal = Math.max(0, Math.min(1, alfaPolvo * parpadeo));
+
+                                    if (alfaFinal > 0.015) {
+                                        ctxHero.beginPath();
+                                        ctxHero.arc(g.x, g.y, g.radio, 0, Math.PI * 2);
+                                        ctxHero.fillStyle = g.esVerde
+                                            ? `rgba(74, 222, 128, ${alfaFinal.toFixed(3)})`
+                                            : `rgba(244, 244, 245, ${alfaFinal.toFixed(3)})`;
+                                        ctxHero.fill();
+                                    }
                                 }
                             }
                         }
                     }
 
-                    requestAnimationFrame(renderizarParticulasHero);
+                    requestAnimationFrame(renderizarPolvoHero);
                 }
 
                 function esperarArranqueVideoHero(videoEl, fallbackMs = 800) {
@@ -1441,9 +1479,9 @@
 
                 redimensionarCanvasHeroTexto();
                 window.addEventListener("resize", redimensionarCanvasHeroTexto, { passive: true });
-                requestAnimationFrame(renderizarParticulasHero);
+                requestAnimationFrame(renderizarPolvoHero);
 
-                async function reproducirSecuenciaHeroParticulas() {
+                async function reproducirSecuenciaHeroPolvo() {
                     await esperarArranqueVideoHero(videoHero);
                     await esperar(tiemposHero.retrasoTrasVideoMs);
 
@@ -1454,26 +1492,26 @@
                         const esUltimo = idx === secuenciaHero.length - 1;
 
                         redimensionarCanvasHeroTexto();
-                        particulasTexto = construirParticulasParaItem(item);
+                        granosPolvo = prepararItemPolvo(item);
 
-                        faseTexto = "entrando";
+                        faseTexto = "solidificando";
                         tiempoFaseMs = 0;
-                        duracionFaseActualMs = tiemposHero.entradaParticulasMs;
-                        await esperar(tiemposHero.entradaParticulasMs);
+                        duracionFaseActualMs = tiemposHero.solidificarMs;
+                        await esperar(tiemposHero.solidificarMs);
 
-                        faseTexto = "estable";
+                        faseTexto = "solido";
                         tiempoFaseMs = 0;
                         duracionFaseActualMs = Math.max(1, item.visibleMs);
                         await esperar(item.visibleMs);
 
-                        prepararSalidaParticulas();
-                        faseTexto = "saliendo";
+                        capturarEstadoParaDisolver();
+                        faseTexto = "disolviendo";
                         tiempoFaseMs = 0;
-                        duracionFaseActualMs = tiemposHero.transicionDesvanecerMs;
-                        await esperar(tiemposHero.transicionDesvanecerMs);
+                        duracionFaseActualMs = tiemposHero.disolverPolvoMs;
+                        await esperar(tiemposHero.disolverPolvoMs);
 
                         faseTexto = "inactivo";
-                        particulasTexto = [];
+                        granosPolvo = [];
 
                         if (esUltimo) {
                             await esperar(tiemposHero.pausaTrasMarcaMs);
@@ -1485,7 +1523,7 @@
                     }
                 }
 
-                reproducirSecuenciaHeroParticulas();
+                reproducirSecuenciaHeroPolvo();
             } else if (fraseHeroRespaldo) {
                 fraseHeroRespaldo.style.display = "block";
             }
