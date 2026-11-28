@@ -173,7 +173,7 @@
             position: absolute;
             inset: 0;
             pointer-events: none;
-            z-index: 2;
+            z-index: 4;
             background:
                 radial-gradient(circle at 50% 50%, rgba(9, 9, 11, 0.45) 0%, rgba(9, 9, 11, 0.14) 58%, transparent 80%),
                 linear-gradient(
@@ -186,19 +186,36 @@
         }
 
         .hero-video {
-            position: relative;
-            z-index: 1;
+            position: absolute;
+            inset: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
             pointer-events: none;
-            transition: opacity 0.22s ease;
+            opacity: 0;
+            z-index: 1;
+            transition: opacity 0.35s ease;
+            will-change: opacity;
+        }
+
+        .hero-video.activo {
+            opacity: 1;
+            z-index: 2;
+        }
+
+        .hero-video.entrante {
+            opacity: 0;
+            z-index: 3;
+        }
+
+        .hero-video.entrante.visible {
+            opacity: 1;
         }
 
         .video-placeholder {
             position: relative;
-            z-index: 3;
+            z-index: 5;
             padding: 40px 24px;
             text-align: center;
             color: var(--text-muted);
@@ -210,7 +227,7 @@
         .hero-secuencia-centro {
             position: absolute;
             inset: 0;
-            z-index: 3;
+            z-index: 5;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -800,6 +817,7 @@
 
         @media (prefers-reduced-motion: reduce) {
             #particulasFondo { display: none; }
+            .hero-video { transition: none !important; }
             .hero-frase {
                 opacity: 1 !important;
                 transition: none !important;
@@ -838,18 +856,28 @@
 
     <main class="contenido-principal">
         <section class="hero-portada" id="inicio">
-            <div class="hero-media-wrap">
+            <div class="hero-media-wrap" id="heroMediaWrap">
                 <video
-                    id="videoHero"
-                    class="hero-video"
+                    id="videoHeroA"
+                    class="hero-video activo"
                     src="hero-vuelo1.mp4"
                     autoplay
                     muted
                     playsinline
+                    preload="auto"
                     disablePictureInPicture
                     controlsList="nodownload noplaybackrate"
                     aria-label="Tomas de vuelo FPV en interiores"
-                    onerror="this.style.display='none'; document.getElementById('avisoVideoHero').style.display='block';"
+                ></video>
+                <video
+                    id="videoHeroB"
+                    class="hero-video"
+                    muted
+                    playsinline
+                    preload="auto"
+                    disablePictureInPicture
+                    controlsList="nodownload noplaybackrate"
+                    aria-hidden="true"
                 ></video>
                 <div class="video-placeholder" id="avisoVideoHero" style="display: none;">
                     Sube tus clips cortos a la raíz como <code>hero-vuelo1.mp4</code>, <code>hero-vuelo2.mp4</code>, etc.
@@ -1119,64 +1147,175 @@
                 });
             }
 
-            const videoHero = document.querySelector("#videoHero");
-            if (videoHero) {
-                const listaVideosHero = [
-                    "hero-vuelo1.mp4",
-                    "hero-vuelo2.mp4",
-                ];
-                let indiceVideo = 0;
-                let temporizadorRespaldo = null;
+            const videoA = document.querySelector("#videoHeroA");
+            const videoB = document.querySelector("#videoHeroB");
+            const avisoVideoHero = document.querySelector("#avisoVideoHero");
+            const listaVideosHero = [
+                "hero-vuelo1.mp4",
+                "hero-vuelo2.mp4",
+            ];
 
-                const precarga = document.createElement("video");
-                precarga.muted = true;
-                precarga.playsInline = true;
-                precarga.preload = "auto";
+            let videoActivo = videoA;
+            let videoEnEspera = videoB;
+            let indiceActual = 0;
+            let indiceSiguientePreparado = -1;
+            let transiciónEnCurso = false;
+            let temporizadorRespaldo = null;
+            let temporizadorCruce = null;
+            let clipsConError = 0;
 
-                function prepararSiguientePrecarga() {
-                    if (listaVideosHero.length <= 1) return;
-                    const siguienteIdx = (indiceVideo + 1) % listaVideosHero.length;
-                    precarga.src = listaVideosHero[siguienteIdx];
-                    precarga.load();
+            function obtenerVideoHeroActivo() {
+                return videoActivo;
+            }
+
+            function prepararClipEnEspera(idx) {
+                if (!videoEnEspera || listaVideosHero.length === 0) return;
+                const srcDestino = listaVideosHero[idx];
+                if (indiceSiguientePreparado === idx && videoEnEspera.getAttribute("data-src") === srcDestino && videoEnEspera.readyState >= 2) {
+                    return;
+                }
+                indiceSiguientePreparado = idx;
+                videoEnEspera.setAttribute("data-src", srcDestino);
+                videoEnEspera.classList.remove("activo", "entrante", "visible");
+                videoEnEspera.pause();
+                videoEnEspera.src = srcDestino;
+                videoEnEspera.load();
+            }
+
+            function programarRespaldoClip(videoEl) {
+                clearTimeout(temporizadorRespaldo);
+                if (!videoEl || listaVideosHero.length <= 1) return;
+                const duracionSeg = Number.isFinite(videoEl.duration) && videoEl.duration > 0
+                    ? videoEl.duration
+                    : 4.5;
+                const ms = Math.max(1200, Math.round(duracionSeg * 1000) + 350);
+                temporizadorRespaldo = setTimeout(() => {
+                    solicitarCambioDeVideo();
+                }, ms);
+            }
+
+            function ejecutarCruceSuave(siguienteIdx) {
+                if (!videoActivo || !videoEnEspera || transiciónEnCurso) return;
+                transiciónEnCurso = true;
+                clearTimeout(temporizadorRespaldo);
+                clearTimeout(temporizadorCruce);
+
+                const saliente = videoActivo;
+                const entrante = videoEnEspera;
+
+                entrante.classList.remove("activo");
+                entrante.classList.add("entrante");
+
+                const promesaPlay = entrante.play();
+                if (promesaPlay && typeof promesaPlay.catch === "function") {
+                    promesaPlay.catch(() => {});
                 }
 
-                function programarRespaldo() {
-                    clearTimeout(temporizadorRespaldo);
-                    if (listaVideosHero.length <= 1) return;
-                    const duracionSeg = Number.isFinite(videoHero.duration) && videoHero.duration > 0
-                        ? videoHero.duration
-                        : 4.5;
-                    temporizadorRespaldo = setTimeout(() => {
-                        cambiarAlSiguienteVideo();
-                    }, Math.round(duracionSeg * 1000) + 500);
-                }
-
-                function cambiarAlSiguienteVideo() {
-                    clearTimeout(temporizadorRespaldo);
-                    if (listaVideosHero.length === 0) return;
-
-                    indiceVideo = (indiceVideo + 1) % listaVideosHero.length;
-                    videoHero.style.opacity = "0.25";
-                    videoHero.src = listaVideosHero[indiceVideo];
-                    videoHero.load();
-
-                    const promesaPlay = videoHero.play();
-                    if (promesaPlay && typeof promesaPlay.catch === "function") {
-                        promesaPlay.catch(() => {});
-                    }
-
+                requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
-                        videoHero.style.opacity = "1";
+                        entrante.classList.add("visible");
                     });
+                });
 
-                    prepararSiguientePrecarga();
-                    programarRespaldo();
+                temporizadorCruce = setTimeout(() => {
+                    saliente.classList.remove("activo", "entrante", "visible");
+                    saliente.pause();
+
+                    entrante.classList.remove("entrante", "visible");
+                    entrante.classList.add("activo");
+                    entrante.setAttribute("aria-label", "Tomas de vuelo FPV en interiores");
+                    entrante.removeAttribute("aria-hidden");
+
+                    saliente.setAttribute("aria-hidden", "true");
+                    saliente.removeAttribute("aria-label");
+
+                    videoActivo = entrante;
+                    videoEnEspera = saliente;
+                    indiceActual = siguienteIdx;
+                    indiceSiguientePreparado = -1;
+                    transiciónEnCurso = false;
+
+                    const idxProximo = (indiceActual + 1) % listaVideosHero.length;
+                    prepararClipEnEspera(idxProximo);
+                    programarRespaldoClip(videoActivo);
+                }, 370);
+            }
+
+            function solicitarCambioDeVideo() {
+                if (listaVideosHero.length <= 1 || transiciónEnCurso || !videoEnEspera) return;
+                const siguienteIdx = (indiceActual + 1) % listaVideosHero.length;
+                prepararClipEnEspera(siguienteIdx);
+
+                const avanzarCuandoListo = () => {
+                    videoEnEspera.removeEventListener("canplay", avanzarCuandoListo);
+                    videoEnEspera.removeEventListener("loadeddata", avanzarCuandoListo);
+                    videoEnEspera.removeEventListener("error", manejarErrorEspera);
+                    clearTimeout(esperaDecodificacion);
+                    ejecutarCruceSuave(siguienteIdx);
+                };
+
+                const manejarErrorEspera = () => {
+                    videoEnEspera.removeEventListener("canplay", avanzarCuandoListo);
+                    videoEnEspera.removeEventListener("loadeddata", avanzarCuandoListo);
+                    videoEnEspera.removeEventListener("error", manejarErrorEspera);
+                    clearTimeout(esperaDecodificacion);
+                    indiceActual = siguienteIdx;
+                    indiceSiguientePreparado = -1;
+                    programarRespaldoClip(videoActivo);
+                };
+
+                const esperaDecodificacion = setTimeout(() => {
+                    if (videoEnEspera.readyState >= 2) {
+                        avanzarCuandoListo();
+                    } else {
+                        manejarErrorEspera();
+                    }
+                }, 1800);
+
+                if (videoEnEspera.readyState >= 3) {
+                    avanzarCuandoListo();
+                } else {
+                    videoEnEspera.addEventListener("canplay", avanzarCuandoListo, { once: true });
+                    videoEnEspera.addEventListener("loadeddata", avanzarCuandoListo, { once: true });
+                    videoEnEspera.addEventListener("error", manejarErrorEspera, { once: true });
+                }
+            }
+
+            if (videoA && videoB && listaVideosHero.length > 0) {
+                videoA.setAttribute("data-src", listaVideosHero[0]);
+                const playInicial = videoA.play();
+                if (playInicial && typeof playInicial.catch === "function") {
+                    playInicial.catch(() => {});
                 }
 
-                videoHero.addEventListener("ended", cambiarAlSiguienteVideo);
-                videoHero.addEventListener("loadedmetadata", programarRespaldo);
-                prepararSiguientePrecarga();
-                programarRespaldo();
+                if (listaVideosHero.length > 1) {
+                    prepararClipEnEspera(1);
+                }
+
+                videoA.addEventListener("ended", () => {
+                    if (videoActivo === videoA) solicitarCambioDeVideo();
+                });
+                videoB.addEventListener("ended", () => {
+                    if (videoActivo === videoB) solicitarCambioDeVideo();
+                });
+
+                videoA.addEventListener("loadedmetadata", () => {
+                    if (videoActivo === videoA) programarRespaldoClip(videoA);
+                });
+                videoB.addEventListener("loadedmetadata", () => {
+                    if (videoActivo === videoB) programarRespaldoClip(videoB);
+                });
+
+                videoA.addEventListener("error", () => {
+                    clipsConError += 1;
+                    if (clipsConError >= listaVideosHero.length && avisoVideoHero) {
+                        videoA.style.display = "none";
+                        videoB.style.display = "none";
+                        avisoVideoHero.style.display = "block";
+                    }
+                });
+
+                programarRespaldoClip(videoA);
             }
 
             const prefiereMenosMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1221,7 +1360,8 @@
                     }
                 }
 
-                function esperarArranqueVideoHero(videoEl, fallbackMs = 800) {
+                function esperarArranqueVideoHero(fallbackMs = 800) {
+                    const videoEl = obtenerVideoHeroActivo();
                     return new Promise((resolve) => {
                         if (!videoEl) {
                             setTimeout(resolve, fallbackMs);
@@ -1257,7 +1397,7 @@
                     fraseHero.classList.add("visible");
                 } else {
                     async function reproducirSecuenciaHero() {
-                        await esperarArranqueVideoHero(videoHero);
+                        await esperarArranqueVideoHero();
                         await esperar(tiemposHero.retrasoTrasVideoMs);
 
                         let idx = 0;
