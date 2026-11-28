@@ -1183,19 +1183,19 @@
 
             if (fraseHero) {
                 const tiemposHero = {
-                    retrasoTrasVideoMs: 2500,     // Tiempo tras iniciar el video antes de mostrar la primera palabra
-                    entrePalabrasMs: 1500,        // Pausa entre una palabra/frase y la siguiente
-                    transicionDesvanecerMs: 850, // Tiempo del fade out (coincide con transition de .hero-frase)
-                    pausaTrasMarcaMs: 3500       // Espera tras desaparecer la marca antes de reiniciar el ciclo
+                    retrasoTrasVideoMs: 2500,
+                    entrePalabrasMs: 900,
+                    transicionDesvanecerMs: 850,
+                    pausaTrasMarcaMs: 3200
                 };
 
                 const secuenciaHero = [
-                    { tipo: "texto", valor: "MOVIMIENTO", visibleMs: 3000 },
-                    { tipo: "texto", valor: "PRECISIÓN", visibleMs: 3000 },
-                    { tipo: "texto", valor: "EXPERIENCIA", visibleMs: 3000 },
-                    { tipo: "texto", valor: "NO ES OTRA FORMA DE GRABAR", visibleMs: 3500 },
-                    { tipo: "texto", valor: "ES OTRA FORMA DE VER", visibleMs: 3500 },
-                    { tipo: "marca", principal: "B Ξ N Λ V", sub: "FPV", visibleMs: 10000 },
+                    { tipo: "texto", valor: "MOVIMIENTO", visibleMs: 2200 },
+                    { tipo: "texto", valor: "PRECISIÓN", visibleMs: 2200 },
+                    { tipo: "texto", valor: "EXPERIENCIA", visibleMs: 2300 },
+                    { tipo: "texto", valor: "NO ES OTRA FORMA DE GRABAR", visibleMs: 3100 },
+                    { tipo: "texto", valor: "ES OTRA FORMA DE VER", visibleMs: 3100 },
+                    { tipo: "marca", principal: "B Ξ N Λ V", sub: "FPV", visibleMs: 5500 },
                 ];
 
                 function renderizarItemHero(item) {
@@ -1393,6 +1393,8 @@
                 let punteroEnCentral = false;
                 let arrastrando = false;
                 let inicioPunteroX = 0;
+                let ultimoPunteroX = 0;
+                let tiempoInicioPuntero = 0;
                 let inicioPosicionX = 0;
                 let distanciaArrastrePx = 0;
                 let tarjetaTocadaEnInicio = null;
@@ -1555,6 +1557,8 @@
                     arrastrando = true;
                     tipoPunteroActivo = e.pointerType;
                     inicioPunteroX = e.clientX;
+                    ultimoPunteroX = e.clientX;
+                    tiempoInicioPuntero = performance.now();
                     inicioPosicionX = posicionX;
                     distanciaArrastrePx = 0;
 
@@ -1567,8 +1571,10 @@
 
                 wrapServicios.addEventListener("pointermove", (e) => {
                     if (!arrastrando) return;
-                    const deltaX = e.clientX - inicioPunteroX;
-                    distanciaArrastrePx = Math.max(distanciaArrastrePx, Math.abs(deltaX));
+                    ultimoPunteroX = e.clientX;
+                    const factorSensibilidad = e.pointerType === "touch" ? 1.18 : 1;
+                    const deltaX = (e.clientX - inicioPunteroX) * factorSensibilidad;
+                    distanciaArrastrePx = Math.max(distanciaArrastrePx, Math.abs(e.clientX - inicioPunteroX));
 
                     const posBase = calcularPosicionParaIndice(bloqueCentralInicio + 1);
                     const offsetRelativo = modPositivo(inicioPosicionX + deltaX - posBase, anchoBloqueUnico);
@@ -1590,16 +1596,28 @@
                         wrapServicios.releasePointerCapture(e.pointerId);
                     }
 
-                    const idxCercano = encontrarTarjetaMasCercanaAlCentro();
+                    const idxActual = llevarIndiceABloqueCentral(indiceObjetivo);
+                    const deltaTotalX = ultimoPunteroX - inicioPunteroX;
+                    const tiempoMs = Math.max(1, performance.now() - tiempoInicioPuntero);
+                    const velocidadPxMs = Math.abs(deltaTotalX) / tiempoMs;
+
+                    const umbralDistanciaPx = tipoPunteroActivo === "touch" ? 42 : 55;
+                    const umbralVelocidad = tipoPunteroActivo === "touch" ? 0.32 : 0.45;
+                    const esDeslizadoIntencional =
+                        Math.abs(deltaTotalX) >= umbralDistanciaPx ||
+                        (Math.abs(deltaTotalX) >= 18 && velocidadPxMs >= umbralVelocidad);
 
                     if (distanciaArrastrePx < 8 && tarjetaTocadaEnInicio !== null) {
                         if (tarjetaTocadaEnInicio !== indiceObjetivo) {
                             seleccionarIndice(tarjetaTocadaEnInicio, true);
                         } else {
-                            seleccionarIndice(idxCercano + 1, true);
+                            seleccionarIndice(idxActual + 1, true);
                         }
+                    } else if (esDeslizadoIntencional) {
+                        const direccion = deltaTotalX < 0 ? 1 : -1;
+                        seleccionarIndice(idxActual + direccion, true);
                     } else {
-                        seleccionarIndice(idxCercano, true);
+                        seleccionarIndice(encontrarTarjetaMasCercanaAlCentro(), true);
                     }
 
                     if (tipoPunteroActivo === "touch") {
