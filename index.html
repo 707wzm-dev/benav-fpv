@@ -182,21 +182,26 @@
         }
 
         .hero-video {
-            position: absolute;
-            inset: 0;
+            position: relative;
             z-index: 1;
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
             pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.35s ease;
+            transition: opacity 0.22s ease;
         }
 
-        .hero-video.activo {
-            opacity: 1;
+        .video-placeholder {
+            position: relative;
+            z-index: 3;
+            padding: 40px 24px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.95rem;
         }
+
+        .video-placeholder code { color: var(--text-main); background-color: #1a1a22; padding: 2px 6px; border-radius: 4px; }
 
         .lema-gif {
             position: absolute;
@@ -788,27 +793,20 @@
         <section class="hero-portada" id="inicio">
             <div class="hero-media-wrap">
                 <video
-                    id="videoHeroA"
+                    id="videoHero"
                     class="hero-video"
                     src="hero-vuelo1.mp4"
                     autoplay
                     muted
                     playsinline
-                    preload="auto"
                     disablePictureInPicture
                     controlsList="nodownload noplaybackrate"
                     aria-label="Tomas de vuelo FPV en interiores"
+                    onerror="this.style.display='none'; document.getElementById('avisoVideoHero').style.display='block';"
                 ></video>
-                <video
-                    id="videoHeroB"
-                    class="hero-video"
-                    muted
-                    playsinline
-                    preload="auto"
-                    disablePictureInPicture
-                    controlsList="nodownload noplaybackrate"
-                    aria-hidden="true"
-                ></video>
+                <div class="video-placeholder" id="avisoVideoHero" style="display: none;">
+                    Sube tus clips cortos a la raíz como <code>hero-vuelo1.mp4</code>, <code>hero-vuelo2.mp4</code>, etc.
+                </div>
                 <p class="lema-gif" aria-label="Movimiento, precisión y experiencia">
                     MOVIMIENTO <span class="separador">·</span> PRECISIÓN <span class="separador">·</span> EXPERIENCIA
                 </p>
@@ -1074,98 +1072,64 @@
                 });
             }
 
-            const videoA = document.querySelector("#videoHeroA");
-            const videoB = document.querySelector("#videoHeroB");
-
-            if (videoA && videoB) {
+            const videoHero = document.querySelector("#videoHero");
+            if (videoHero) {
                 const listaVideosHero = [
-                    "hero-vuelo1.mp4"
-                    "hero-vuelo2.mp4"
+                    "hero-vuelo1.mp4",
+                    "hero-vuelo2.mp4",
                 ];
-                let indiceActual = 0;
-                let activo = videoA;
-                let espera = videoB;
+                let indiceVideo = 0;
                 let temporizadorRespaldo = null;
-                let cambiando = false;
 
-                activo.classList.add("activo");
-                espera.classList.remove("activo");
+                const precarga = document.createElement("video");
+                precarga.muted = true;
+                precarga.playsInline = true;
+                precarga.preload = "auto";
 
-                if (listaVideosHero.length === 1) {
-                    activo.loop = true;
+                function prepararSiguientePrecarga() {
+                    if (listaVideosHero.length <= 1) return;
+                    const siguienteIdx = (indiceVideo + 1) % listaVideosHero.length;
+                    precarga.src = listaVideosHero[siguienteIdx];
+                    precarga.load();
                 }
 
-                function cargarEnEspera(idx) {
-                    if (!listaVideosHero.length) return;
-                    espera.src = listaVideosHero[idx];
-                    espera.load();
-                }
-
-                function programarRespaldo(videoRef) {
+                function programarRespaldo() {
                     clearTimeout(temporizadorRespaldo);
                     if (listaVideosHero.length <= 1) return;
-                    const durSeg = Number.isFinite(videoRef.duration) && videoRef.duration > 0
-                        ? videoRef.duration
-                        : 4.0;
+                    const duracionSeg = Number.isFinite(videoHero.duration) && videoHero.duration > 0
+                        ? videoHero.duration
+                        : 4.5;
                     temporizadorRespaldo = setTimeout(() => {
-                        avanzarClip();
-                    }, Math.round(durSeg * 1000) + 250);
+                        cambiarAlSiguienteVideo();
+                    }, Math.round(duracionSeg * 1000) + 500);
                 }
 
-                function avanzarClip() {
-                    if (cambiando || listaVideosHero.length <= 1) return;
-                    cambiando = true;
+                function cambiarAlSiguienteVideo() {
                     clearTimeout(temporizadorRespaldo);
+                    if (listaVideosHero.length === 0) return;
 
-                    const siguienteIdx = (indiceActual + 1) % listaVideosHero.length;
-                    if (!espera.src || !espera.src.endsWith(listaVideosHero[siguienteIdx])) {
-                        cargarEnEspera(siguienteIdx);
-                    }
+                    indiceVideo = (indiceVideo + 1) % listaVideosHero.length;
+                    videoHero.style.opacity = "0.25";
+                    videoHero.src = listaVideosHero[indiceVideo];
+                    videoHero.load();
 
-                    const promesaPlay = espera.play();
+                    const promesaPlay = videoHero.play();
                     if (promesaPlay && typeof promesaPlay.catch === "function") {
                         promesaPlay.catch(() => {});
                     }
 
                     requestAnimationFrame(() => {
-                        espera.classList.add("activo");
-                        activo.classList.remove("activo");
+                        videoHero.style.opacity = "1";
                     });
 
-                    const videoSaliente = activo;
-                    const videoEntrante = espera;
-
-                    setTimeout(() => {
-                        videoSaliente.pause();
-                        indiceActual = siguienteIdx;
-                        activo = videoEntrante;
-                        espera = videoSaliente;
-
-                        const idxFuturo = (indiceActual + 1) % listaVideosHero.length;
-                        cargarEnEspera(idxFuturo);
-                        programarRespaldo(activo);
-                        cambiando = false;
-                    }, 380);
+                    prepararSiguientePrecarga();
+                    programarRespaldo();
                 }
 
-                [videoA, videoB].forEach(vid => {
-                    vid.addEventListener("ended", () => {
-                        if (vid === activo) avanzarClip();
-                    });
-                    vid.addEventListener("loadedmetadata", () => {
-                        if (vid === activo) programarRespaldo(activo);
-                    });
-                });
-
-                const playInicial = activo.play();
-                if (playInicial && typeof playInicial.catch === "function") {
-                    playInicial.catch(() => {});
-                }
-
-                if (listaVideosHero.length > 1) {
-                    cargarEnEspera((indiceActual + 1) % listaVideosHero.length);
-                    programarRespaldo(activo);
-                }
+                videoHero.addEventListener("ended", cambiarAlSiguienteVideo);
+                videoHero.addEventListener("loadedmetadata", programarRespaldo);
+                prepararSiguientePrecarga();
+                programarRespaldo();
             }
 
             const btnSubir = document.querySelector("#btnSubir");
