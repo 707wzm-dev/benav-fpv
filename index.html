@@ -173,7 +173,7 @@
             pointer-events: none;
             z-index: 2;
             background:
-                radial-gradient(circle at 50% 50%, rgba(9, 9, 11, 0.42) 0%, rgba(9, 9, 11, 0.12) 55%, transparent 78%),
+                radial-gradient(circle at 50% 50%, rgba(9, 9, 11, 0.45) 0%, rgba(9, 9, 11, 0.14) 58%, transparent 80%),
                 linear-gradient(
                     to bottom,
                     transparent 0%,
@@ -219,14 +219,14 @@
 
         .hero-frase {
             margin: 0;
-            max-width: min(90vw, 860px);
-            font-size: clamp(1.25rem, 3.2vw, 2.15rem);
+            max-width: min(92vw, 960px);
+            font-size: clamp(1.75rem, 5vw, 3.55rem);
             font-weight: 700;
             letter-spacing: 0.14em;
-            line-height: 1.35;
+            line-height: 1.25;
             text-transform: uppercase;
             color: var(--text-main);
-            text-shadow: 0 4px 26px rgba(0, 0, 0, 0.92), 0 0 28px rgba(0, 0, 0, 0.75);
+            text-shadow: 0 4px 28px rgba(0, 0, 0, 0.94), 0 0 32px rgba(0, 0, 0, 0.8);
             opacity: 0;
             transition: opacity 0.85s ease;
             will-change: opacity;
@@ -236,9 +236,29 @@
             opacity: 1;
         }
 
-        .hero-frase--marca {
+        .hero-marca-bloque {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hero-marca-principal {
+            font-size: clamp(2.2rem, 6.2vw, 4.4rem);
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            line-height: 1.1;
             color: var(--accent);
-            text-shadow: 0 4px 28px rgba(0, 0, 0, 0.95), 0 0 26px rgba(74, 222, 128, 0.28);
+            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.95), 0 0 28px rgba(74, 222, 128, 0.28);
+        }
+
+        .hero-marca-sub {
+            font-size: clamp(1.05rem, 2.4vw, 1.6rem);
+            font-weight: 600;
+            letter-spacing: 0.34em;
+            line-height: 1.2;
+            color: var(--accent-green);
+            text-shadow: 0 3px 22px rgba(0, 0, 0, 0.95), 0 0 18px rgba(74, 222, 128, 0.3);
         }
 
         .segmento {
@@ -766,6 +786,8 @@
         @media (max-width: 600px) {
             .hero-media-wrap { height: clamp(260px, 56vh, 460px); }
             .hero-frase { letter-spacing: 0.1em; }
+            .hero-marca-principal { letter-spacing: 0.14em; }
+            .hero-marca-sub { letter-spacing: 0.24em; }
             .servicio-card { flex: 0 0 320px; min-height: 260px; padding: 28px 24px 22px; }
             .servicio-card h3 { font-size: 1.24rem; }
             .servicio-card p { font-size: 1rem; }
@@ -831,7 +853,7 @@
                     Sube tus clips cortos a la raíz como <code>hero-vuelo1.mp4</code>, <code>hero-vuelo2.mp4</code>, etc.
                 </div>
                 <div class="hero-secuencia-centro" aria-live="polite">
-                    <p class="hero-frase" id="fraseHero">MOVIMIENTO</p>
+                    <div class="hero-frase" id="fraseHero">MOVIMIENTO</div>
                 </div>
             </div>
         </section>
@@ -1161,16 +1183,37 @@
 
             if (fraseHero) {
                 const secuenciaHero = [
-                    { texto: "MOVIMIENTO", esMarca: false, visibleMs: 2200 },
-                    { texto: "PRECISIÓN", esMarca: false, visibleMs: 2200 },
-                    { texto: "EXPERIENCIA", esMarca: false, visibleMs: 2300 },
-                    { texto: "NO ES OTRA FORMA DE GRABAR", esMarca: false, visibleMs: 3100 },
-                    { texto: "ES OTRA FORMA DE VER", esMarca: false, visibleMs: 3100 },
-                    { texto: "B Ξ N Λ V · FPV", esMarca: true, visibleMs: 2800 },
+                    { tipo: "texto", valor: "MOVIMIENTO", visibleMs: 2200 },
+                    { tipo: "texto", valor: "PRECISIÓN", visibleMs: 2200 },
+                    { tipo: "texto", valor: "EXPERIENCIA", visibleMs: 2300 },
+                    { tipo: "texto", valor: "NO ES OTRA FORMA DE GRABAR", visibleMs: 3100 },
+                    { tipo: "texto", valor: "ES OTRA FORMA DE VER", visibleMs: 3100 },
+                    { tipo: "marca", principal: "B Ξ N Λ V", sub: "FPV", visibleMs: 3000 },
                 ];
 
+                function renderizarItemHero(item) {
+                    fraseHero.replaceChildren();
+                    if (item.tipo === "marca") {
+                        const bloque = document.createElement("span");
+                        bloque.className = "hero-marca-bloque";
+
+                        const principal = document.createElement("span");
+                        principal.className = "hero-marca-principal";
+                        principal.textContent = item.principal;
+
+                        const sub = document.createElement("span");
+                        sub.className = "hero-marca-sub";
+                        sub.textContent = item.sub;
+
+                        bloque.append(principal, sub);
+                        fraseHero.appendChild(bloque);
+                    } else {
+                        fraseHero.textContent = item.valor;
+                    }
+                }
+
                 if (prefiereMenosMovimiento) {
-                    fraseHero.textContent = "MOVIMIENTO · PRECISIÓN · EXPERIENCIA · B Ξ N Λ V · FPV";
+                    renderizarItemHero({ tipo: "marca", principal: "B Ξ N Λ V", sub: "FPV" });
                     fraseHero.classList.add("visible");
                 } else {
                     const transicionMs = 850;
@@ -1183,8 +1226,7 @@
                         while (true) {
                             const item = secuenciaHero[idx];
                             fraseHero.classList.remove("visible");
-                            fraseHero.textContent = item.texto;
-                            fraseHero.classList.toggle("hero-frase--marca", item.esMarca);
+                            renderizarItemHero(item);
 
                             void fraseHero.offsetWidth;
                             requestAnimationFrame(() => {
