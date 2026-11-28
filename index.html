@@ -671,6 +671,49 @@
             box-shadow: 0 20px 44px rgba(0, 0, 0, 0.72);
         }
 
+        .contacto-perfil {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding-bottom: 18px;
+            margin-bottom: 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .contacto-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 1.5px solid rgba(74, 222, 128, 0.5);
+            background-color: var(--bg-surface);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
+        }
+
+        .contacto-identidad {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .contacto-nombre {
+            color: var(--text-main);
+            font-size: 1.12rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+        }
+
+        .contacto-rol {
+            color: var(--accent-green);
+            font-size: 0.88rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
         .caja-sobria p { position: relative; z-index: 1; }
         .caja-sobria p + p { margin-top: 12px; }
         .caja-sobria strong { color: var(--text-main); font-weight: 600; }
@@ -843,6 +886,9 @@
             .servicio-card { flex: 0 0 320px; min-height: 260px; padding: 28px 24px 22px; }
             .servicio-card h3 { font-size: 1.24rem; }
             .servicio-card p { font-size: 1rem; }
+            .contacto-perfil { flex-direction: column; text-align: center; gap: 12px; }
+            .contacto-identidad { align-items: center; }
+            .contacto-avatar { width: 68px; height: 68px; }
             .btn-subir { right: 16px; bottom: 125px; width: 42px; height: 42px; }
             .pie-redes { gap: 20px; }
             .pie-base { flex-direction: column; align-items: center; text-align: center; gap: 8px; }
@@ -1102,6 +1148,18 @@
                 </div>
             </div>
             <div class="caja-sobria">
+                <div class="contacto-perfil">
+                    <img
+                        src="foto-perfil.jpg"
+                        alt="B Ξ N Λ V · Piloto FPV"
+                        class="contacto-avatar"
+                        loading="lazy"
+                    >
+                    <div class="contacto-identidad">
+                        <span class="contacto-nombre">B Ξ N Λ V</span>
+                        <span class="contacto-rol">Piloto FPV</span>
+                    </div>
+                </div>
                 <p>Escríbeme directamente para revisar tu espacio, resolver dudas y armar una propuesta a medida.</p>
                 <p><strong>Para cotizar más rápido:</strong> indica el tipo de lugar, comuna o ciudad, qué buscas mostrar y una fecha aproximada.</p>
                 <p><strong>Cobertura y coordinación:</strong> vuelos indoor planificados según el espacio y la disponibilidad del recinto.</p>
