@@ -1158,28 +1158,35 @@
             let videoActivo = videoA;
             let videoEnEspera = videoB;
             let indiceActual = 0;
-            let indiceSiguientePreparado = -1;
-            let transiciónEnCurso = false;
+            let transicionEnCurso = false;
             let temporizadorRespaldo = null;
             let temporizadorCruce = null;
+            let temporizadorEspera = null;
             let clipsConError = 0;
 
             function obtenerVideoHeroActivo() {
                 return videoActivo;
             }
 
+            function cargarClipEnElemento(videoEl, srcDestino, reiniciarInicio = true) {
+                if (!videoEl || !srcDestino) return;
+                if (videoEl.getAttribute("data-src") !== srcDestino || videoEl.getAttribute("src") !== srcDestino) {
+                    videoEl.setAttribute("data-src", srcDestino);
+                    videoEl.src = srcDestino;
+                    videoEl.load();
+                } else if (reiniciarInicio) {
+                    try {
+                        videoEl.currentTime = 0;
+                    } catch (_) {}
+                }
+            }
+
             function prepararClipEnEspera(idx) {
                 if (!videoEnEspera || listaVideosHero.length === 0) return;
                 const srcDestino = listaVideosHero[idx];
-                if (indiceSiguientePreparado === idx && videoEnEspera.getAttribute("data-src") === srcDestino && videoEnEspera.readyState >= 2) {
-                    return;
-                }
-                indiceSiguientePreparado = idx;
-                videoEnEspera.setAttribute("data-src", srcDestino);
                 videoEnEspera.classList.remove("activo", "entrante", "visible");
                 videoEnEspera.pause();
-                videoEnEspera.src = srcDestino;
-                videoEnEspera.load();
+                cargarClipEnElemento(videoEnEspera, srcDestino, true);
             }
 
             function programarRespaldoClip(videoEl) {
@@ -1195,13 +1202,17 @@
             }
 
             function ejecutarCruceSuave(siguienteIdx) {
-                if (!videoActivo || !videoEnEspera || transiciónEnCurso) return;
-                transiciónEnCurso = true;
+                if (!videoActivo || !videoEnEspera) return;
                 clearTimeout(temporizadorRespaldo);
                 clearTimeout(temporizadorCruce);
+                clearTimeout(temporizadorEspera);
 
                 const saliente = videoActivo;
                 const entrante = videoEnEspera;
+
+                try {
+                    entrante.currentTime = 0;
+                } catch (_) {}
 
                 entrante.classList.remove("activo");
                 entrante.classList.add("entrante");
@@ -1232,8 +1243,7 @@
                     videoActivo = entrante;
                     videoEnEspera = saliente;
                     indiceActual = siguienteIdx;
-                    indiceSiguientePreparado = -1;
-                    transiciónEnCurso = false;
+                    transicionEnCurso = false;
 
                     const idxProximo = (indiceActual + 1) % listaVideosHero.length;
                     prepararClipEnEspera(idxProximo);
@@ -1242,29 +1252,40 @@
             }
 
             function solicitarCambioDeVideo() {
-                if (listaVideosHero.length <= 1 || transiciónEnCurso || !videoEnEspera) return;
-                const siguienteIdx = (indiceActual + 1) % listaVideosHero.length;
-                prepararClipEnEspera(siguienteIdx);
+                if (listaVideosHero.length <= 1 || transicionEnCurso || !videoEnEspera) return;
+                transicionEnCurso = true;
+                clearTimeout(temporizadorEspera);
 
+                const siguienteIdx = (indiceActual + 1) % listaVideosHero.length;
+                const srcDestino = listaVideosHero[siguienteIdx];
+                const yaTeniaMismoSrc = videoEnEspera.getAttribute("data-src") === srcDestino && videoEnEspera.readyState >= 2;
+
+                cargarClipEnElemento(videoEnEspera, srcDestino, true);
+
+                let disparado = false;
                 const avanzarCuandoListo = () => {
+                    if (disparado) return;
+                    disparado = true;
                     videoEnEspera.removeEventListener("canplay", avanzarCuandoListo);
                     videoEnEspera.removeEventListener("loadeddata", avanzarCuandoListo);
                     videoEnEspera.removeEventListener("error", manejarErrorEspera);
-                    clearTimeout(esperaDecodificacion);
+                    clearTimeout(temporizadorEspera);
                     ejecutarCruceSuave(siguienteIdx);
                 };
 
                 const manejarErrorEspera = () => {
+                    if (disparado) return;
+                    disparado = true;
                     videoEnEspera.removeEventListener("canplay", avanzarCuandoListo);
                     videoEnEspera.removeEventListener("loadeddata", avanzarCuandoListo);
                     videoEnEspera.removeEventListener("error", manejarErrorEspera);
-                    clearTimeout(esperaDecodificacion);
+                    clearTimeout(temporizadorEspera);
+                    transicionEnCurso = false;
                     indiceActual = siguienteIdx;
-                    indiceSiguientePreparado = -1;
                     programarRespaldoClip(videoActivo);
                 };
 
-                const esperaDecodificacion = setTimeout(() => {
+                temporizadorEspera = setTimeout(() => {
                     if (videoEnEspera.readyState >= 2) {
                         avanzarCuandoListo();
                     } else {
@@ -1272,7 +1293,9 @@
                     }
                 }, 1800);
 
-                if (videoEnEspera.readyState >= 3) {
+                if (yaTeniaMismoSrc) {
+                    avanzarCuandoListo();
+                } else if (videoEnEspera.readyState >= 3) {
                     avanzarCuandoListo();
                 } else {
                     videoEnEspera.addEventListener("canplay", avanzarCuandoListo, { once: true });
