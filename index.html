@@ -1182,13 +1182,20 @@
             const esperar = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
             if (fraseHero) {
+                const tiemposHero = {
+                    retrasoTrasVideoMs: 2500,     // Tiempo tras iniciar el video antes de mostrar la primera palabra
+                    entrePalabrasMs: 900,        // Pausa entre una palabra/frase y la siguiente
+                    transicionDesvanecerMs: 850, // Tiempo del fade out (coincide con transition de .hero-frase)
+                    pausaTrasMarcaMs: 3200       // Espera tras desaparecer la marca antes de reiniciar el ciclo
+                };
+
                 const secuenciaHero = [
-                    { tipo: "texto", valor: "MOVIMIENTO", visibleMs: 3000 },
-                    { tipo: "texto", valor: "PRECISIÓN", visibleMs: 3000 },
-                    { tipo: "texto", valor: "EXPERIENCIA", visibleMs: 3000 },
-                    { tipo: "texto", valor: "NO ES OTRA FORMA DE GRABAR", visibleMs: 3500 },
-                    { tipo: "texto", valor: "ES OTRA FORMA DE VER", visibleMs: 3500 },
-                    { tipo: "marca", principal: "B Ξ N Λ V", sub: "FPV", visibleMs: 10000 },
+                    { tipo: "texto", valor: "MOVIMIENTO", visibleMs: 2200 },
+                    { tipo: "texto", valor: "PRECISIÓN", visibleMs: 2200 },
+                    { tipo: "texto", valor: "EXPERIENCIA", visibleMs: 2300 },
+                    { tipo: "texto", valor: "NO ES OTRA FORMA DE GRABAR", visibleMs: 3100 },
+                    { tipo: "texto", valor: "ES OTRA FORMA DE VER", visibleMs: 3100 },
+                    { tipo: "marca", principal: "B Ξ N Λ V", sub: "FPV", visibleMs: 5500 },
                 ];
 
                 function renderizarItemHero(item) {
@@ -1212,19 +1219,51 @@
                     }
                 }
 
+                function esperarArranqueVideoHero(videoEl, fallbackMs = 800) {
+                    return new Promise((resolve) => {
+                        if (!videoEl) {
+                            setTimeout(resolve, fallbackMs);
+                            return;
+                        }
+
+                        let resuelto = false;
+                        const finalizar = () => {
+                            if (resuelto) return;
+                            resuelto = true;
+                            videoEl.removeEventListener("playing", finalizar);
+                            videoEl.removeEventListener("canplay", finalizar);
+                            videoEl.removeEventListener("error", finalizar);
+                            clearTimeout(respaldo);
+                            resolve();
+                        };
+
+                        const respaldo = setTimeout(finalizar, fallbackMs);
+
+                        if (videoEl.currentTime > 0 && !videoEl.paused && !videoEl.ended) {
+                            finalizar();
+                            return;
+                        }
+
+                        videoEl.addEventListener("playing", finalizar, { once: true });
+                        videoEl.addEventListener("canplay", finalizar, { once: true });
+                        videoEl.addEventListener("error", finalizar, { once: true });
+                    });
+                }
+
                 if (prefiereMenosMovimiento) {
                     renderizarItemHero({ tipo: "marca", principal: "B Ξ N Λ V", sub: "FPV" });
                     fraseHero.classList.add("visible");
                 } else {
-                    const transicionMs = 850;
-                    const pausaEntreFrasesMs = 550;
-
                     async function reproducirSecuenciaHero() {
-                        await esperar(400);
+                        await esperarArranqueVideoHero(videoHero);
+                        await esperar(tiemposHero.retrasoTrasVideoMs);
+
                         let idx = 0;
 
                         while (true) {
                             const item = secuenciaHero[idx];
+                            const esUltimo = idx === secuenciaHero.length - 1;
+
                             fraseHero.classList.remove("visible");
                             renderizarItemHero(item);
 
@@ -1236,8 +1275,13 @@
                             await esperar(item.visibleMs);
 
                             fraseHero.classList.remove("visible");
-                            await esperar(transicionMs);
-                            await esperar(pausaEntreFrasesMs);
+                            await esperar(tiemposHero.transicionDesvanecerMs);
+
+                            if (esUltimo) {
+                                await esperar(tiemposHero.pausaTrasMarcaMs);
+                            } else {
+                                await esperar(tiemposHero.entrePalabrasMs);
+                            }
 
                             idx = (idx + 1) % secuenciaHero.length;
                         }
