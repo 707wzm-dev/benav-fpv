@@ -146,7 +146,6 @@
 
         .menu-lista a:hover { background-color: rgba(255, 255, 255, 0.08); transform: translateX(3px); }
 
-        /* Hero portada a ancho completo sin desenfoque y con lema sobre la parte baja */
         .hero-portada {
             position: relative;
             width: 100%;
@@ -190,6 +189,7 @@
             object-fit: cover;
             display: block;
             pointer-events: none;
+            transition: opacity 0.22s ease;
         }
 
         .video-placeholder {
@@ -793,10 +793,10 @@
         <section class="hero-portada" id="inicio">
             <div class="hero-media-wrap">
                 <video
+                    id="videoHero"
                     class="hero-video"
-                    src="hero-vuelo.mp4"
+                    src="hero-vuelo1.mp4"
                     autoplay
-                    loop
                     muted
                     playsinline
                     disablePictureInPicture
@@ -805,7 +805,7 @@
                     onerror="this.style.display='none'; document.getElementById('avisoVideoHero').style.display='block';"
                 ></video>
                 <div class="video-placeholder" id="avisoVideoHero" style="display: none;">
-                    Sube tu video corto en bucle como <code>hero-vuelo.mp4</code> a la raíz del repositorio (o cambia el nombre en <code>src="hero-vuelo.mp4"</code>).
+                    Sube tus clips cortos a la raíz como <code>hero-vuelo1.mp4</code>, <code>hero-vuelo2.mp4</code>, etc.
                 </div>
                 <p class="lema-gif" aria-label="Movimiento, precisión y experiencia">
                     MOVIMIENTO <span class="separador">·</span> PRECISIÓN <span class="separador">·</span> EXPERIENCIA
@@ -1070,6 +1070,67 @@
                 document.addEventListener("keydown", (e) => {
                     if (e.key === "Escape") cerrarMenu();
                 });
+            }
+
+            const videoHero = document.querySelector("#videoHero");
+            if (videoHero) {
+                const listaVideosHero = [
+                    "hero-vuelo1.mp4",
+                    "hero-vuelo2.mp4",
+                    "hero-vuelo3.mp4"
+                ];
+                let indiceVideo = 0;
+                let temporizadorRespaldo = null;
+
+                const precarga = document.createElement("video");
+                precarga.muted = true;
+                precarga.playsInline = true;
+                precarga.preload = "auto";
+
+                function prepararSiguientePrecarga() {
+                    if (listaVideosHero.length <= 1) return;
+                    const siguienteIdx = (indiceVideo + 1) % listaVideosHero.length;
+                    precarga.src = listaVideosHero[siguienteIdx];
+                    precarga.load();
+                }
+
+                function programarRespaldo() {
+                    clearTimeout(temporizadorRespaldo);
+                    if (listaVideosHero.length <= 1) return;
+                    const duracionSeg = Number.isFinite(videoHero.duration) && videoHero.duration > 0
+                        ? videoHero.duration
+                        : 4.5;
+                    temporizadorRespaldo = setTimeout(() => {
+                        cambiarAlSiguienteVideo();
+                    }, Math.round(duracionSeg * 1000) + 500);
+                }
+
+                function cambiarAlSiguienteVideo() {
+                    clearTimeout(temporizadorRespaldo);
+                    if (listaVideosHero.length === 0) return;
+
+                    indiceVideo = (indiceVideo + 1) % listaVideosHero.length;
+                    videoHero.style.opacity = "0.25";
+                    videoHero.src = listaVideosHero[indiceVideo];
+                    videoHero.load();
+
+                    const promesaPlay = videoHero.play();
+                    if (promesaPlay && typeof promesaPlay.catch === "function") {
+                        promesaPlay.catch(() => {});
+                    }
+
+                    requestAnimationFrame(() => {
+                        videoHero.style.opacity = "1";
+                    });
+
+                    prepararSiguientePrecarga();
+                    programarRespaldo();
+                }
+
+                videoHero.addEventListener("ended", cambiarAlSiguienteVideo);
+                videoHero.addEventListener("loadedmetadata", programarRespaldo);
+                prepararSiguientePrecarga();
+                programarRespaldo();
             }
 
             const btnSubir = document.querySelector("#btnSubir");
